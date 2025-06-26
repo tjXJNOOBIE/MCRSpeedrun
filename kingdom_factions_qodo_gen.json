@@ -1,0 +1,168 @@
+{
+  "project": "Project Novus - KingdomFactions",
+  "core_infrastructure": {
+    "cache_layers": [
+      "RAM",
+      "Redis",
+      "MySQL",
+      "SQLite",
+      "Logs",
+      "S3"
+    ],
+    "resource_pack": {
+      "fixed_pack_folder": true,
+      "photo_hash_integration": true,
+      "custom_asset_tags": [
+        "CASTLE_SKIN",
+        "COMPANION_SKIN",
+        "GUILD_LOGO",
+        "GAMEPLAY"
+      ]
+    },
+    "currency": {
+      "main": "Gold",
+      "troop_obtainable": ["Resource_A_Token", "Resource_B_Token", "Resource_C_Token"],
+      "early_dust": "Mystic Dust",
+      "companion_upgrade": "Companion Shard"
+    },
+    "region_system": {
+      "manager": "RegionManager",
+      "functions": ["radius(Location origin, double x, y, z)", "claimChunk()"],
+      "flags": ["noCastlePlacements", "pvpZone", "pveZone"]
+    },
+    "wireframe_manager": {
+      "default_shape": "RECTANGLE",
+      "snap_to_ground": true,
+      "packet_visuals_only": true,
+      "custom_blocks_or_images": true,
+      "supports": ["shape_variants", "animations", "castle_skins", "region_previews"]
+    }
+  },
+  "castles": {
+    "placement_rules": {
+      "ground_only": true,
+      "no_spawn_or_building_radius": true,
+      "biome_blacklist": true,
+      "unique_per_kingdom": true,
+      "kingdom_switching": "server border triggers teleport",
+      "collision_with_players": true,
+      "exceptions": ["CastleTooHigh", "InvalidCastleBiome", "CastleStillHere"]
+    },
+    "interior_instance": true,
+    "vault": {
+      "cap_limit_handling": "spill to vault",
+      "pvp_enabled_during_siege": true,
+      "siege_duration": "5 minutes",
+      "exit_timer": "5-7 seconds",
+      "combat_tag": "1 minute",
+      "combat_tag_penalty": "drop inventory and 20% loot to defender"
+    },
+    "movement": {
+      "tokens_required": true,
+      "enemy_tp_warning": true,
+      "trusted_player_access": true,
+      "privacy_modes": ["Trusted", "Friends", "Public"]
+    },
+    "hud": {
+      "shift_hold_open_time": "2 seconds",
+      "info_displayed": ["Might", "Troops Killed", "Guild", "Attack/Invite/Kick Buttons"]
+    }
+  },
+  "companions": {
+    "max_level": 70,
+    "types": ["Healer", "Brawler", "Brute", "Magic"],
+    "base_attributes": ["INTEL", "STRENGTH", "AGILITY"],
+    "battle_stats": ["HP", "EARTH_ATK", "MAGIC_DEF", "MAGIC_CRIT", "MORALE"],
+    "behavior_states": ["IDLE", "FOLLOWING", "AGGRESSIVE", "FLEEING", "DUELING"],
+    "skill_system": {
+      "level_unlocks": true,
+      "elemental_requirements": {
+        "EARTH": ["BRUTE", "BRAWLER"],
+        "MAGIC": ["MAGIC", "HEALER"]
+      },
+      "upgrade_via": "Wisdom Well",
+      "skill_tagging": true
+    },
+    "morale_logic": {
+      "tiers": ["High", "Medium", "Low", "Poor"],
+      "feeding_required": true,
+      "low_morale_behavior": ["Refuse Battle", "Initiate Duels"]
+    },
+    "defense_roles": ["Siege Defense", "PvP Engagement"]
+  },
+  "troops": {
+    "types": ["RANGED", "INFANTRY", "CAVALRY", "SIEGE"],
+    "tiers": ["TIER_I", "TIER_II", "TIER_III", "TIER_IV", "TIER_V", "TIER_VI", "TIER_VII", "TIER_VIII", "TIER_IX", "TIER_X"],
+    "stats": [
+      "RNG_HP", "RNG_ATK", "RNG_DEF",
+      "INF_HP", "INF_ATK", "INF_DEF",
+      "CAL_HP", "CAL_ATK", "CAL_DEF",
+      "SIEGE_HP", "SIEGE_ATK", "SIEGE_DEF",
+      "SPEED", "STEALTH", "RESOURCE_CAPACITY",
+      "ALLIED_SUPPLY", "ALLIED_ARMY_HP", "ALLIED_ATK", "ALLIED_DEF", "MORALE"
+    ],
+    "status_flags": [
+      "ARMY_APPROACHING_ENEMY", "HIDDEN_ENEMY_ARMY_APPROACHING", "SCOUT_APPROACHING_ENEMY_MAINBASE", "ARMY_APPROACHING_RESOURCE_TRADE",
+      "...and more detailed states"
+    ],
+    "movement_logic": {
+      "speed_based_on_blocks": true,
+      "visual_pathing": true,
+      "command_api": "travelTroops(TroopType, TroopStatus, Location, travelTime)"
+    },
+    "engagement_logic": {
+      "type_countering": true,
+      "stat-based_combat": true,
+      "companion_influence": true
+    }
+  },
+  "buildings": {
+    "max_level": 50,
+    "types": {
+      "Troop Camps": ["Ranged", "Infantry", "Cavalry", "Siege"],
+      "Farm Buildings": ["Gold Farm", "Resource A", "B", "C"],
+      "Hospital": "HEALING",
+      "Department of War": "TRAINING",
+      "School of Empires": "RESEARCH",
+      "Companion Camp": "TRAINING",
+      "Wisdom Well": "ABILITY_UPGRADES",
+      "War Room": "ARMY",
+      "Barracks": "ARMY"
+    }
+  },
+  "systems": {
+    "TokenManager": true,
+    "BuildingManager": true,
+    "CurrencyManager": true,
+    "InventoryManager": "animated slots, rarity tags",
+    "AuditLog": true,
+    "NPCManager": true,
+    "CompanionBehaviorEngine": true,
+    "BattleReplayManager": true,
+    "BattleManager": true,
+    "GuildCrownManager": true
+  },
+  "misc": {
+    "CommandMode": true,
+    "custom_aliases_for_donors": true,
+    "PvE_map_progression": "1-1 World Format",
+    "PvP_raid_conditions": "Siege logic, tele-entry, vault looting rules, combat tag drop logic",
+    "PlayerProfile": "KingdomProfile -> Redis layer",
+    "Guilds": "Visual Logos, Guild Stats, Invite Permissions, Perks",
+    "Food": "Lowers morale if upkeep isn't met",
+    "SpeedUps": "Diminishing returns over multiple uses",
+    "AntiDupe": "ItemOrigin tracking system",
+    "AdminStatsMenu": "Live kingdom and PvE instance dashboard",
+    "ReplayStorage": "MySQL only, no sync required",
+    "InventoryBags": ["PvE Tokens", "Speed Ups (PAID/FREE)", "Transfer Tokens", "Instant Items", "Name Change Items"]
+  },
+  "dev_notes": {
+    "no_rng": true,
+    "no_packet_libs": true,
+    "built_on_velocity_and_paperweight": true,
+    "use_json_for_nested": true,
+    "use_field_storage_for_scalability": true,
+    "CI/CD": "None yet",
+    "PreAlphaToRelease": "Reasonable timeline TBD"
+  }
+}

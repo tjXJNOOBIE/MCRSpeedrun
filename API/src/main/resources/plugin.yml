@@ -1,0 +1,18 @@
+name: ProjectX
+main: com.tjxjnoobie.speed.Main
+version: 1.0
+load: POSTWORLD
+api-version: 1.21
+softdepend: [ProtocolLib]
+commands:
+  debug:
+  createworld:
+  changeworld:
+  world:
+  loadseed:
+  addplayer:
+  setspawn:
+  spawndragon:
+  debugger:
+  vote:
+  v:
