@@ -1,4 +1,4 @@
-package com.tjxjnoobie.events;
+package com.tjxjnoobie.events.internal;
 
 import com.tjxjnoobie.abstracts.AbstractEvent;
 import com.tjxjnoobie.annotations.ModuleScope;

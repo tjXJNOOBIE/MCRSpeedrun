@@ -1,9 +1,9 @@
 package com.tjxjnoobie.abstracts;
 
 import com.tjxjnoobie.enums.*;
-import com.tjxjnoobie.events.EventBus;
-import com.tjxjnoobie.events.EventContext;
-import com.tjxjnoobie.events.EventSerializer;
+import com.tjxjnoobie.events.internal.EventBus;
+import com.tjxjnoobie.events.internal.EventContext;
+import com.tjxjnoobie.events.internal.EventSerializer;
 
 import java.util.EnumSet;
 import java.util.List;

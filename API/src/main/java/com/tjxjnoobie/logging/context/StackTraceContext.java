@@ -1,13 +1,13 @@
-package com.tjxjnoobie.logging;
+package com.tjxjnoobie.logging.context;
 
-public record StackTraceInfo (
+public record StackTraceContext(
 
     String className,
     String methodName,
     String fileName,
     int lineNumber
 ) {
-    public StackTraceInfo(StackTraceElement element) {
+    public StackTraceContext(StackTraceElement element) {
             this(
                     element.getClassName(),
                     element.getMethodName(),

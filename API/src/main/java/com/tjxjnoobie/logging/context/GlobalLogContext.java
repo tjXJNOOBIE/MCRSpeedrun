@@ -1,4 +1,4 @@
-package com.tjxjnoobie.logging;
+package com.tjxjnoobie.logging.context;
 
 import java.util.Map;
 

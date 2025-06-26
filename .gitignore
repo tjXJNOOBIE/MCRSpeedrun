@@ -16,7 +16,6 @@ out/
 *.log
 *.MD
 *.md
-ABSTRACTION_IMPROVEMENTS.md
 
 # BlueJ files
 *.ctxt
