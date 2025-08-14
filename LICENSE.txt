@@ -1,0 +1,69 @@
+Copyright (c) 2025 TJ Valentine
+
+All rights reserved.
+
+1. DEFINITIONS
+
+a. "Project" refers to all source code, binaries, assets, documentation, and related materials authored by the project founder.
+
+b. "Public Files" means any files, source code, binaries, assets, documentation, or other materials
+    that are explicitly made available to the public via publicly accessible repositories,
+    including but not limited to the project’s official GitHub repository (https://github.com/tjxjnoobie/yourrepo),
+    official project website, or any other public distribution channels explicitly authorized by the project founder.
+
+    Public Files are those that the project founder has deliberately published or shared publicly.
+    Any files not in these locations or explicitly designated otherwise are considered Private Files.
+
+c. "Private Files" means any files not designated as Public Files, including but not limited to internal code,
+    configuration, build scripts, or any materials not explicitly authorized for public use.
+
+d. "Use" includes, but is not limited to, copying, modifying, distributing, publicly displaying, performing,
+    executing, or otherwise exploiting the Project.
+
+e. "Consent" refers strictly to explicit, written, verifiable authorization granted solely by the project founder or their legal designee.
+
+2. LICENSE GRANT
+
+No license or rights, express or implied, are granted to the public or any third party for any use of the Project except as explicitly provided herein.
+
+3. ACCESS AND USE RESTRICTIONS
+
+a. Public Files may be used for closed development, testing, or internal evaluation only, subject to applicable rate limits and other constraints.
+
+b. Private Files obtained without explicit Consent are strictly prohibited from being copied, modified, used, run, executed, displayed, distributed, transferred, or otherwise exploited in any manner whatsoever.
+
+c. Any unauthorized Use of Private Files constitutes a material breach of this License and may result in legal action.
+
+4. API USAGE
+
+a. Access to any public API provided by the Project is subject to rate limiting and usage policies set by the project founder.
+
+b. Any use exceeding the granted limits or monetization of the API without explicit Consent is strictly forbidden.
+
+5. TESTING
+
+Any permitted testing of the Project or its components may not exercise, trigger, or utilize any monetization or revenue-generating features without prior written Consent.
+
+6. INTELLECTUAL PROPERTY RIGHTS
+
+All intellectual property rights, including copyrights, patents, trademarks, and trade secrets, in the Project remain solely with the project founder.
+
+7. TERMINATION
+
+Any breach of this License will result in immediate termination of all rights granted herein and may lead to legal action.
+
+8. NO WARRANTY
+
+The Project is provided "AS IS," without warranty of any kind, express or implied.
+
+9. GOVERNING LAW
+
+This License shall be governed by and construed in accordance with the laws of the jurisdiction of the project founder.
+
+10. CONTACT
+
+For permissions, inquiries, or disputes, contact: tjxjnoobie@gmail.com Discord: dynamic#0001
+
+---
+
+END OF LICENSE

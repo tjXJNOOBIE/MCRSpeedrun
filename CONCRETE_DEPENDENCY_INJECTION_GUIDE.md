@@ -15,7 +15,7 @@ The system now provides both interface-based and concrete class-based dependency
 ### 1. Concrete Context Classes
 
 #### ConcreteGlobalContext
-- Located: `com.tjxjnoobie.API.managers.ConcreteGlobalContext`
+- Located: `com.tjxjnoobie.api.managers.ConcreteGlobalContext`
 - Purpose: Global dependency injection for API-level components
 - Features:
   - Implements `IGlobalContext` for interface compatibility
@@ -34,7 +34,7 @@ The system now provides both interface-based and concrete class-based dependency
 ### 2. Factory Classes
 
 #### DependencyFactory
-- Located: `com.tjxjnoobie.API.factories.DependencyFactory`
+- Located: `com.tjxjnoobie.api.factories.DependencyFactory`
 - Purpose: Creates and configures ConcreteGlobalContext instances
 - Methods:
   - `createGlobalContext()`: Full context with all dependencies

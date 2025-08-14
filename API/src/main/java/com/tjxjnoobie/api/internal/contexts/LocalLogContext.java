@@ -1,0 +1,10 @@
+package com.tjxjnoobie.api.internal.contexts;
+
+import java.util.Map;
+
+public record LocalLogContext(
+        String serverId,
+        String gameType,
+        Map<String, Object> extraMetadata
+) {
+}
