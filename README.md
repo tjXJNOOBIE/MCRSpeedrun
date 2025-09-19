@@ -5,7 +5,7 @@ In development **solo** project with ambitious goals.
 Current buiit/in-progress systems: 
 - **_GlickoV2 Chess ELO_** – Unlimited **_match_** and **_player simulations_** for skill-based rating calculations.
   <details>
-    <summary> **_Click to Show Rating Simulation GIF_** </summary>
+    <summary>Click to Show Rating Simulation GIF</summary>
 
     ![Ratings GIF](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/ratings.gif)
 
