@@ -6,13 +6,47 @@ Current buiit/in-progress systems:
 - **_GlickoV2 Chess ELO_** – Unlimited **_match_** and **_player simulations_** for skill-based rating calculations.
   <details>
     <summary>Click to Show Rating Simulation GIF & Log</summary>
-
+    <text>Fresh Player starts with default rating (1500) deviation (350) and volatility (0.06)</text>
+    <text>Player 1-3 has starts with random rating deviation and volatility </text>
+    
     ![Ratings GIF](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/ratings.gif)
     ![Simulation Log](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/rating_consol.png)
 
   </details>
+- **_Custom Retention Calculator_** – Generates **_Retention Ratings_** per player, including **_creator code  & purchase tracking_**.  
+  <details>
+    <summary>Click to Show Rentention Rating Tabke & Equation</summary>
+    <text>Mock data from simulation</text>
+    
+    ![MySQL retention data](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/retention.png)
+    <text> Retention Equation:
+           p = purchaseAmount (dollars in last 14 days)
+           t = timePlayed (hours in last 30 days)
+           r = returnJoins (joins in last 30 days)
+           n = numberOfPurchases (count in last 14 days)</text>
+    
+    ![Retention Calculator](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/retention_calc.png)
+
+  </details>
+  
+- **_MySQL-Based World Manager_** – Centralized storage and retrieval of world data with transactional safety.
+  <details>
+    <summary>Click to Show Rentention Rating Tabke & Equation</summary>
+    <text>World data from MySQL. XYZ+P+Y = Spawn Location</text>
+    
+    ![MySQL World Manager](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/world_mysql.png)
+    
+  </details>
+  
+- **_External Library Loaderr_** – Load libraries from a custom /libs folder in any environment.  
+  <details>
+    <summary>Click to Show Libraries Loading</summary>
+    <text>World data from MySQL. XYZ+P+Y = Spawn Location</text>
+    
+    ![Libraries Loading](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/library_loading.png)
+    
+  </details>
 - **_Live Multiplayer Speedrun_** – **_Game loop_**, **_per-player same-seed worlds_**, and **_event tracking_** for synchronized speedrun sessions.  
-- **_MySQL-Based World Manager_** – Centralized storage and retrieval of world data with transactional safety.  
 - **_Multi-Module Project_** – **_Paper_** and **_Velocity runtimes_** handled in a **_single JAR_** for unified deployment.  
 - **_Custom Dependency Injection_** – Uses custom **_`@Inject`_** and **_`@AutoInjectAll`_** annotations for modular wiring.  
 - **_Method Tagging via `@ModuleScope`_** – Tracks the **_domain_** where a method executes for improved debugging and analytics.  
@@ -32,7 +66,6 @@ Current buiit/in-progress systems:
   
 - **_Internal API_** – Unified **_API layer_** for inter-module communication and external integrations.  
 - **_Punishment System_** – Integrated with **_Redis_** and **_MySQL_** for real-time moderation.  
-- **_Custom Retention Calculator_** – Generates **_Retention Ratings_** per player, including **_creator code tracking_**.  
 - **_Robust InventoryManager_** – Built using **_Builder patterns_** for flexible and safe inventory handling.  
 
 
