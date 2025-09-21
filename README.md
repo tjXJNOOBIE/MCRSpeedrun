@@ -38,14 +38,45 @@ Current buiit/in-progress systems:
     
   </details>
   
-- **_External Library Loaderr_** – Load libraries from a custom /libs folder in any environment.  
+- **_External Library Loader_** – Load libraries from a custom /libs folder in any environment.  
   <details>
     <summary>Click to Show Libraries Loading</summary>
-    <text>World data from MySQL. XYZ+P+Y = Spawn Location</text>
+    <text>Future: Auto Library Updates and version verification to match project libraries</text>
     
     ![Libraries Loading](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/library_loading.png)
     
   </details>
+- **_Custom Ranks_** – String based permission with power-level rankings with **_MySQL support_** for persistent player data.  
+  <details>
+    <summary>Click to Show Libraries Loading</summary>
+    <text>In-Game commands with "Rank Not Found" edge case </text>
+    
+    ![In-Game Commands](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/rankcmd_usage.png)
+
+    <text>MySQL Storage /w String based permissions & power-level</text>
+    ![MySQL Ranks Table](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/ranks_mysql.png)
+
+  </details>
+- **_Strict Method Contracting_** - All relevant methods are contracted in interfaces, interfaces register themselves to themselves.
+  <details>
+    <summary>Click to Show Interface Registration</summary>
+    <text>Interface Registration</text>
+    
+    ![Interface Registration](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/class_register_from_context.png)
+    <text>Register Method Logic, uses Maps for Dependency Management</text>
+    ![Register Method Logic](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/registerMethod.png)
+  </details>
+- **_Runtime Flexibility__** - Implementations can be loaded, replaced, or removed without touching consumers
+  <details>
+    <summary>Click to Show DI Reload Method</summary>
+    <text>Interface Registration</text>
+    
+    ![DI Reload](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/depend_reload.png)
+  </details>
+  
+- **_Fully Decoupled_** - Interface/DI management allow for gurnarateed behavior, consumer interacts via interfaced method contracts, no concrete calls.
+- **_Default Method Usage_** - Usage of default methods to allow concrete classes to implement multiple interfaces
+- **_Type Safe & Abstract Flexibility_** - Type-Safe abstractions, reusable components and strict contracts with flexibility
 - **_Live Multiplayer Speedrun_** – **_Game loop_**, **_per-player same-seed worlds_**, and **_event tracking_** for synchronized speedrun sessions.  
 - **_Multi-Module Project_** – **_Paper_** and **_Velocity runtimes_** handled in a **_single JAR_** for unified deployment.  
 - **_Custom Dependency Injection_** – Uses custom **_`@Inject`_** and **_`@AutoInjectAll`_** annotations for modular wiring.  
@@ -62,7 +93,6 @@ Current buiit/in-progress systems:
 - **_Robust Event Tagging_** – Tracks **_source_**, **_status_**, **_domain_**, **_priority_**, and **_capability_** for every event.  
 - **_Custom Event System_** – Includes **_EventBus_** and **_event tags_** for modular communication.  
 - **_Internal and External Cache Pipelines_** – **_Internal (RAM) → Redis → MySQL_** for multi-layered caching.  
-- **_Custom Ranked System_** – Power-level rankings with **_MySQL support_** for persistent player data.  
   
 - **_Internal API_** – Unified **_API layer_** for inter-module communication and external integrations.  
 - **_Punishment System_** – Integrated with **_Redis_** and **_MySQL_** for real-time moderation.  
