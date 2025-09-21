@@ -5,9 +5,10 @@ In development **solo** project with ambitious goals.
 Current buiit/in-progress systems: 
 - **_GlickoV2 Chess ELO_** – Unlimited **_match_** and **_player simulations_** for skill-based rating calculations.
   <details>
-    <summary>Click to Show Rating Simulation GIF</summary>
+    <summary>Click to Show Rating Simulation GIF & Log</summary>
 
     ![Ratings GIF](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/ratings.gif)
+    ![Simulation Log](https://github.com/tjXJNOOBIE/PROJECT-NOVUS/blob/master/media/rating_consol.png)
 
   </details>
 - **_Live Multiplayer Speedrun_** – **_Game loop_**, **_per-player same-seed worlds_**, and **_event tracking_** for synchronized speedrun sessions.  
