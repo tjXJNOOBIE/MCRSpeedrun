@@ -94,37 +94,37 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
     // Fallback method for dependency injection
     protected void initializeDependencies() {
         // Register interface types for dependency injection
-        if (plugin != null) register(Plugin.class, plugin);
-        if (gameMode != null) register(IGameMode.class, gameMode);
-        if (gameState != null) register(IGameState.class, gameState);
-        if (utils != null) register(IUtils.class, utils);
-        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache);
-        if (gameManager != null) register(IGameManager.class, gameManager);
-        if (playerManager != null) register(IPlayerManager.class, playerManager);
-        if (mcUtils != null) register(IMCUtils.class, mcUtils);
-        if (worldManager != null) register(IWorldManager.class, worldManager);
-        if (locationCache != null) register(ILocationCache.class, locationCache);
-        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent);
-        if (quitEvent != null) register(IQuitEvent.class, quitEvent);
-        if (rankMC != null) register(IRankMC.class, rankMC);
-        if (ratingCache != null) register(IRatingCache.class, ratingCache);
-        if (rating != null) register(IRating.class, rating);
-        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI);
-        if (playerProfile != null) register(IPlayerProfile.class, playerProfile);
-        if (rank != null) register(IRank.class, rank);
-        if (debugger != null) register(IDebugger.class, debugger);
-        if (soundManager != null) register(ISoundManager.class, soundManager);
-        if (rankCache != null) register(IRankCache.class, rankCache);
-        if (retentionManager != null) register(IRetentionManager.class, retentionManager);
-        if (redis != null) register(IRedis.class, redis);
-        if (debug != null) register(IDebug.class, debug);
-        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager);
-        if (voting != null) register(IVoting.class, voting);
-        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager);
-        if (gameType != null) register(IGameType.class, gameType);
-        if (statsManager != null) register(IStatsManager.class, statsManager);
-        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache);
-        if (fairFight != null) register(IFairFight.class, fairFight);
+        if (plugin != null) register(Plugin.class, plugin, this::getPlugin);
+        if (gameMode != null) register(IGameMode.class, gameMode, this::getGameMode);
+        if (gameState != null) register(IGameState.class, gameState, this::getGameState);
+        if (utils != null) register(IUtils.class, utils, this::getUtils);
+        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache, this::getStatsCache);
+        if (gameManager != null) register(IGameManager.class, gameManager, this::getGameManager);
+        if (playerManager != null) register(IPlayerManager.class, playerManager, this::getPlayerManager);
+        if (mcUtils != null) register(IMCUtils.class, mcUtils, this::getMcUtils);
+        if (worldManager != null) register(IWorldManager.class, worldManager, this::getWorldManager);
+        if (locationCache != null) register(ILocationCache.class, locationCache, this::getLocationCache);
+        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent);
+        if (quitEvent != null) register(IQuitEvent.class, quitEvent, this::getQuitEvent);
+        if (rankMC != null) register(IRankMC.class, rankMC, this::getRankMC);
+        if (ratingCache != null) register(IRatingCache.class, ratingCache, this::getRatingCache);
+        if (rating != null) register(IRating.class, rating, this::getRating);
+        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI, this::getRatingAPI);
+        if (playerProfile != null) register(IPlayerProfile.class, playerProfile, this::getPlayerProfile);
+        if (rank != null) register(IRank.class, rank, this::getRank);
+        if (debugger != null) register(IDebugger.class, debugger, this::getDebugger);
+        if (soundManager != null) register(ISoundManager.class, soundManager, this::getSoundManager);
+        if (rankCache != null) register(IRankCache.class, rankCache, this::getRankCache);
+        if (retentionManager != null) register(IRetentionManager.class, retentionManager, this::getRetentionManager);
+        if (redis != null) register(IRedis.class, redis, this::getRedis);
+        if (debug != null) register(IDebug.class, debug, this::getDebug);
+        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager, this::getBossBarManager);
+        if (voting != null) register(IVoting.class, voting, this::getVoting);
+        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
+        if (gameType != null) register(IGameType.class, gameType, this::getGameType);
+        if (statsManager != null) register(IStatsManager.class, statsManager, this::getStatsManager);
+        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache);
+        if (fairFight != null) register(IFairFight.class, fairFight, this::getFairFight);
 
         // Register the context itself
         register(SpeedRunContext.class, this);
