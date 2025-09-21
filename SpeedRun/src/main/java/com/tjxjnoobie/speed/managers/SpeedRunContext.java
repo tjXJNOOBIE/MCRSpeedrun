@@ -629,6 +629,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
      * @return Summary string
      */
     public String getDependencySummary() {
+        // TODO: Update using dependencyMap and loop
         StringBuilder summary = new StringBuilder("SpeedRunContext Dependencies:\n");
 
         summary.append("- Plugin: ").append(plugin != null ? "✓" : "✗").append("\n");
