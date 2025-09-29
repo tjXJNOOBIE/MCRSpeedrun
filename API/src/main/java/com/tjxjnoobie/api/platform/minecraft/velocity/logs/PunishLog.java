@@ -22,6 +22,7 @@ public class PunishLog {
         this.reason = reason;
     }
 
+    
     public String getPunishment() {
         return punishment;
     }
