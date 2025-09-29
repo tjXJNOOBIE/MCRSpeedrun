@@ -21,7 +21,7 @@ public class VelocityLoginEvent {
         this.globalContext = globalContext;
     }
 
-    
+
     @Subscribe
     public void onLogin(LoginEvent e) throws SQLException {
         Player player = e.getPlayer();
