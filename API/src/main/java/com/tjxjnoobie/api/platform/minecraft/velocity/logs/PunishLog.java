@@ -38,7 +38,6 @@ public class PunishLog {
     public String getPunished() {
         return punished;
     }
-
     public String getReason() {
         return reason;
     }
