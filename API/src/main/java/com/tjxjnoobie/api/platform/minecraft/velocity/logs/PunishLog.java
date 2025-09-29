@@ -32,7 +32,6 @@ public class PunishLog {
     public Timestamp getEndDate() {
         return endDate;
     }
-
     public String getSender() {
         return sender;
     }
