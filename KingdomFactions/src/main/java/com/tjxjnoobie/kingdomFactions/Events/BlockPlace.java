@@ -28,6 +28,7 @@ public class BlockPlace implements Listener, BlockPlaceHandler {
     public BlockPlace(){
 
     }
+    
     public BlockPlace(Plugin plugin, MainInterFace mainInterFace) {
         this.plugin = plugin;
         this.mainInterFace = mainInterFace;
