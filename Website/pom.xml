@@ -10,6 +10,7 @@
     </parent>
     <artifactId>website</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
     <name>Website</name>
     <description>Website</description>
     <url/>
@@ -52,6 +53,10 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-rsocket</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.tjxjnoobie.api</groupId>
+            <artifactId>API</artifactId>
         </dependency>
 
         <!-- Dev + Test -->

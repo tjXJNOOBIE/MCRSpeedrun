@@ -1,7 +1,7 @@
 package com.tjxjnoobie.proxy.Events;
 
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.velocity.logs.PunishLog;
+import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;

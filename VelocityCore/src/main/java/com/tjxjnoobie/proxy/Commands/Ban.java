@@ -141,7 +141,7 @@ public class Ban implements SimpleCommand, IUtils {
      * @param durationStr The duration of the ban, or "Permanent" if indefinite.
      * @throws RuntimeException If an SQL exception occurs during the ban process.
      */
-    private void banPlayer(CommandSource source, UUID targetUUID, String targetName, String reason, String durationStr) {
+    private void banPlayer(CommandSource source, UUID targetUUID, String targetName, String reason, String durationStr) throws SQLException {
         final String PUNISHMENT_TYPE_BANS = "BANS";
         IPunishManager punishManager = globalContext.getPunishManager();
         IProxyUtils proxyUtils = globalContext.getProxyUtils();

@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.velocity.logs;
+package com.tjxjnoobie.api.platform.minecraft.velocity.logs;
 
 import java.sql.Timestamp;
 

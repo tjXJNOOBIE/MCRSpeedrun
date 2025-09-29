@@ -1,7 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.platform.velocity.logs.PunishLog;
+import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -10,179 +11,29 @@ import java.util.UUID;
  */
 public interface IPunishManager {
     
-    /**
-     * Bans a player
-     * @param playerId The player's UUID
-     * @param reason The ban reason
-     * @param duration Duration in milliseconds (0 for permanent)
-     * @param staffId The staff member's UUID who issued the ban
-     * @return The punishment ID
-     */
-    String banPlayer(UUID playerId, String reason, long duration, UUID staffId);
-    
-    /**
-     * Kicks a player
-     * @param playerId The player's UUID
-     * @param reason The kick reason
-     * @param staffId The staff member's UUID who issued the kick
-     * @return The punishment ID
-     */
-    String kickPlayer(UUID playerId, String reason, UUID staffId);
-    
-    /**
-     * Mutes a player
-     * @param playerId The player's UUID
-     * @param reason The mute reason
-     * @param duration Duration in milliseconds (0 for permanent)
-     * @param staffId The staff member's UUID who issued the mute
-     * @return The punishment ID
-     */
-    String mutePlayer(UUID playerId, String reason, long duration, UUID staffId);
-    
-    /**
-     * Warns a player
-     * @param playerId The player's UUID
-     * @param reason The warning reason
-     * @param staffId The staff member's UUID who issued the warning
-     * @return The punishment ID
-     */
-    String warnPlayer(UUID playerId, String reason, UUID staffId);
-    
-    /**
-     * Unbans a player
-     * @param playerId The player's UUID
-     * @param staffId The staff member's UUID who removed the ban
-     * @return true if unban was successful
-     */
-    boolean unbanPlayer(UUID playerId, UUID staffId);
-    
-    /**
-     * Unmutes a player
-     * @param playerId The player's UUID
-     * @param staffId The staff member's UUID who removed the mute
-     * @return true if unmute was successful
-     */
-    boolean unmutePlayer(UUID playerId, UUID staffId);
-    
-    /**
-     * Checks if a player is banned
-     * @param playerId The player's UUID
-     * @return true if player is banned
-     */
-    boolean isBanned(UUID playerId);
-    
-    /**
-     * Checks if a player is muted
-     * @param playerId The player's UUID
-     * @return true if player is muted
-     */
-    boolean isMuted(UUID playerId);
-    
-    /**
-     * Gets active ban information
-     * @param playerId The player's UUID
-     * @return Ban information object or null if not banned
-     */
-    Object getActiveBan(UUID playerId);
-    
-    /**
-     * Gets active mute information
-     * @param playerId The player's UUID
-     * @return Mute information object or null if not muted
-     */
-    Object getActiveMute(UUID playerId);
-    
-    /**
-     * Gets punishment history for a player
-     * @param playerId The player's UUID
-     * @param limit Maximum number of entries
-     * @return Array of punishment records
-     */
-    Object[] getPunishmentHistory(UUID playerId, int limit);
-    
-    /**
-     * Gets all active punishments
-     * @param punishmentType The punishment type filter (null for all)
-     * @return Array of active punishments
-     */
-    Object[] getActivePunishments(String punishmentType);
-    
-    /**
-     * Removes a punishment
-     * @param punishmentId The punishment ID
-     * @param staffId The staff member's UUID who removed it
-     * @return true if removal was successful
-     */
-    boolean removePunishment(String punishmentId, UUID staffId);
-    
-    /**
-     * Gets punishment by ID
-     * @param punishmentId The punishment ID
-     * @return Punishment object or null if not found
-     */
-    Object getPunishment(String punishmentId);
-    
-    /**
-     * Updates punishment reason
-     * @param punishmentId The punishment ID
-     * @param newReason The new reason
-     * @param staffId The staff member's UUID who updated it
-     * @return true if update was successful
-     */
-    boolean updatePunishmentReason(String punishmentId, String newReason, UUID staffId);
-    
-    /**
-     * Extends punishment duration
-     * @param punishmentId The punishment ID
-     * @param additionalTime Additional time in milliseconds
-     * @param staffId The staff member's UUID who extended it
-     * @return true if extension was successful
-     */
-    boolean extendPunishment(String punishmentId, long additionalTime, UUID staffId);
-    
-    /**
-     * Gets punishment statistics
-     * @return Punishment statistics object
-     */
-    Object getPunishmentStatistics();
-    
-    /**
-     * Gets staff punishment statistics
-     * @param staffId The staff member's UUID
-     * @return Staff punishment statistics
-     */
-    Object getStaffStatistics(UUID staffId);
-    
-    /**
-     * Checks if a punishment has expired
-     * @param punishmentId The punishment ID
-     * @return true if punishment has expired
-     */
-    boolean isPunishmentExpired(String punishmentId);
-    
-    /**
-     * Cleans up expired punishments
-     * @return Number of punishments cleaned up
-     */
-    int cleanupExpiredPunishments();
 
-    void setTimedPunishment(UUID targetUUID, String targetName, String punishmentTypeBans, Timestamp from, Timestamp timestamp, String s, String senderName, String number);
+    void setTimedPunishment(UUID targetUUID, String targetName, String punishmentTypeBans, Timestamp from, Timestamp timestamp, String s, String senderName, String number) throws SQLException;
 
-    void setPunishNumber(String punishmentTypeBans, int i, UUID targetUUID);
+    void logPunishment(UUID uuid, String punished, Timestamp startDate, Timestamp endDate, String punishment, String sender, String reason) throws SQLException;
+
+    void setPunishNumber(String punishmentTypeBans, int i, UUID targetUUID) throws SQLException;
 
     int getPunishmentNumber(String punishmentTypeBans, UUID targetUUID, String targetName);
 
-    void logPunishment(UUID targetUUID, String targetName, Timestamp kickTime, Object o, String kicks, String senderName, String s);
+    void cacheAllPunishments();
 
     boolean isPunished(UUID targetUUID, String targetName, String banned);
 
-    void logPunishmentByUsername(String targetName, Timestamp unbanTimeTS, Timestamp unbanTimeTS1, String unbans, String senderName, String s);
+    void logPunishmentByUsername(String targetName, Timestamp unbanTimeTS, Timestamp unbanTimeTS1, String unbans, String senderName, String s) throws SQLException;
 
-    void setPunishedByUsername(String targetName, String bans, int i);
+    void setPunishedByUsername(String targetName, String bans, int i) throws SQLException;
 
     void incrementPunishLogCount(String punishLog, UUID targetUUID, String punishmentTypeWarns);
 
-    PunishLog getActivePunishment(UUID uuid, String name, String bans);
+    int getPunishLogCount(UUID uuid, String punishment);
 
-    void setPunished(UUID uuid, String bans, int i);
+    PunishLog getActivePunishment(UUID uuid, String name, String bans) throws SQLException;
+
+    void setPunished(UUID uuid, String bans, int i) throws SQLException;
+
 }

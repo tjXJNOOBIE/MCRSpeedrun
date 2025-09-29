@@ -28,22 +28,56 @@ public abstract class AbstractContext<T extends AbstractContext<?>> implements I
         return context;
     }
 
+    /**
+     * Unified retrieval for dependencies:
+     * - First checks the static dependency map.
+     * - Then falls back to the factory map if no static instance exists.
+     *
+     * @param clazz The class of the dependency
+     * @param <U>   Type of the dependency
+     * @return The dependency instance
+     * @throws RuntimeException if neither a static instance nor a factory is bound
+     */
     @Override
     public <U> U get(Class<U> clazz) {
-        // First, try a direct lookup
+        // Check static dependencies
         Object dependency = dependencyMap.get(clazz);
         if (dependency != null) {
             return clazz.cast(dependency);
         }
-        
-        // Try to find an instance that is assignable
-        for (Object obj : dependencyMap.values()) {
-            if (clazz.isInstance(obj)) {
-                return clazz.cast(obj);
+
+        // Check factory-backed dependencies
+        Supplier<?> supplier = factoryMap.get(clazz);
+        if (supplier != null) {
+            Object instance = supplier.get();
+            if (instance == null) {
+                throw new IllegalStateException("Factory returned null for " + clazz.getName());
             }
+            return clazz.cast(instance);
         }
-        
-        throw new IllegalArgumentException("No dependency found for " + clazz.getName());
+
+        // Not found
+        throw new RuntimeException("No dependency or factory found for " + clazz.getName());
+    }
+
+    /**
+     * Explicit retrieval via factory only.
+     *
+     * @param clazz The class of the dependency
+     * @param <U>   Type of the dependency
+     * @return The dependency instance from the factory
+     * @throws RuntimeException if no factory is bound for the type
+     */
+    public <U> U getWithFactory(Class<U> clazz) {
+        Supplier<?> supplier = factoryMap.get(clazz);
+        if (supplier == null) {
+            throw new RuntimeException("No factory binding found for " + clazz.getName());
+        }
+        Object instance = supplier.get();
+        if (instance == null) {
+            throw new IllegalStateException("Factory returned null for " + clazz.getName());
+        }
+        return clazz.cast(instance);
     }
     @SuppressWarnings("unchecked")
     protected T self() {
@@ -56,15 +90,18 @@ public abstract class AbstractContext<T extends AbstractContext<?>> implements I
     }
 
     @Override
-    public <U> void register(Class<U> clazz, U instance) {
+    public <U> void register(Class<U> clazz, U instance, Supplier<U> factory) {
         if (clazz == null) {
             throw new IllegalArgumentException("Class cannot be null");
         }
         if (instance == null) {
             throw new IllegalArgumentException("Instance cannot be null");
         }
+        if(factory == null){
+            throw new IllegalArgumentException("Factory cannot be null");
+        }
         dependencyMap.put(clazz, instance);
-
+        factoryMap.put(clazz,factory);
 
     }
     public <U> void registerFactory(Class<U> clazz, Supplier<U> factory) {
@@ -77,21 +114,23 @@ public abstract class AbstractContext<T extends AbstractContext<?>> implements I
             return instance;
         });
     }
-    public <U> U createFromFactory(Class<U> clazz) {
-        Supplier<?> supplier = factoryMap.get(clazz);
-        if (supplier == null) {
-            throw new IllegalArgumentException("No factory registered for " + clazz.getName());
-        }
-        return clazz.cast(supplier.get());
+    public <U> void rebind(Class<U> clazz, U instance) {
+        dependencyMap.put(clazz, instance); // Replace static dependency
     }
-    public <U> U getOrCreate(Class<U> clazz) {
-        U instance = getOrNull(clazz);
-        if (instance != null) return instance;
+    public <U> void rebindFactory(Class<U> clazz, Supplier<U> factory) {
+        factoryMap.put(clazz, factory); // Replace dynamic supplier
+    }
+    public <U> void unbind(Class<U> clazz) {
+        dependencyMap.remove(clazz);
+        factoryMap.remove(clazz);
+    }
+    public <U> void reload(Class<U> clazz, Supplier<U> factory) {
+        unbind(clazz);              // remove old instance and factory
+        rebindFactory(clazz, factory);
+        U instance = factory.get(); // create new concrete instance
+        rebind(clazz, instance);    // put it in dependencyMap for get()
+    }
 
-        U created = createFromFactory(clazz);
-        register(clazz, created);
-        return created;
-    }
     public void injectFields(Object target) {
         if (target == null) return;
         Class<?> clazz = target.getClass();
@@ -190,15 +229,7 @@ public abstract class AbstractContext<T extends AbstractContext<?>> implements I
 
         }
     }
-    public <U> void reload(Class<U> clazz) {
-        Supplier<?> factory = factoryMap.get(clazz);
-        if (factory == null) {
-            throw new IllegalStateException("No factory registered for " + clazz.getName());
-        }
 
-        U newInstance = clazz.cast(factory.get());
-        register(clazz, newInstance);
-    }
     /**
      * Template method for subclasses to initialize their specific dependencies
      */

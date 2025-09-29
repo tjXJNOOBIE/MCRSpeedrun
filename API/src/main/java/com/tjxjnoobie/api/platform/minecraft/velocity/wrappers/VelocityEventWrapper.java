@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.velocity.wrappers;
+package com.tjxjnoobie.api.platform.minecraft.velocity.wrappers;
 
 import com.tjxjnoobie.api.abstracts.AbstractEvent;
 import com.tjxjnoobie.api.console.Log;

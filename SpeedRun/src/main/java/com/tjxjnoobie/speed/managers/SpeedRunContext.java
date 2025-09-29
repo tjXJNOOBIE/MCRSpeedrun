@@ -127,8 +127,8 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
         if (fairFight != null) register(IFairFight.class, fairFight, this::getFairFight);
 
         // Register the context itself
-        register(SpeedRunContext.class, this);
-        register(SpeedRunContext.class, this);
+        register(ISpeedRunContext.class, this, this::getContext);
+       // register(SpeedRunContext.class, this, this::getContext);
     }
 
     // Getters
@@ -308,7 +308,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setPlugin(Plugin plugin) {
         this.plugin = plugin;
-        if (plugin != null) register(Plugin.class, plugin);
+        if (plugin != null) register(Plugin.class, plugin, this::getPlugin);
         return this;
     }
 
@@ -316,7 +316,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameMode(IGameMode gameMode) {
         this.gameMode = gameMode;
-        if (gameMode != null) register(IGameMode.class, gameMode);
+        if (gameMode != null) register(IGameMode.class, gameMode, this::getGameMode);
         return this;
     }
 
@@ -324,7 +324,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameState(IGameState gameState) {
         this.gameState = gameState;
-        if (gameState != null) register(IGameState.class, gameState);
+        if (gameState != null) register(IGameState.class, gameState, this::getGameState);
         return this;
     }
 
@@ -332,7 +332,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setUtils(IUtils utils) {
         this.utils = utils;
-        if (utils != null) register(IUtils.class, utils);
+        if (utils != null) register(IUtils.class, utils, this::getUtils);
         return this;
     }
 
@@ -340,7 +340,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setStatsCache(ISpeedrunStatsCache statsCache) {
         this.statsCache = statsCache;
-        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache);
+        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache, this::getStatsCache);
         return this;
     }
 
@@ -348,7 +348,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameManager(IGameManager gameManager) {
         this.gameManager = gameManager;
-        if (gameManager != null) register(IGameManager.class, gameManager);
+        if (gameManager != null) register(IGameManager.class, gameManager, this::getGameManager);
         return this;
     }
 
@@ -356,7 +356,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setPlayerManager(IPlayerManager playerManager) {
         this.playerManager = playerManager;
-        if (playerManager != null) register(IPlayerManager.class, playerManager);
+        if (playerManager != null) register(IPlayerManager.class, playerManager, this::getPlayerManager);
         return this;
     }
 
@@ -364,7 +364,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setMcUtils(IMCUtils mcUtils) {
         this.mcUtils = mcUtils;
-        if (mcUtils != null) register(IMCUtils.class, mcUtils);
+        if (mcUtils != null) register(IMCUtils.class, mcUtils, this::getMcUtils);
         return this;
     }
 
@@ -372,7 +372,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setWorldManager(IWorldManager worldManager) {
         this.worldManager = worldManager;
-        if (worldManager != null) register(IWorldManager.class, worldManager);
+        if (worldManager != null) register(IWorldManager.class, worldManager, this::getWorldManager);
         return this;
     }
 
@@ -380,7 +380,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setLocationCache(ILocationCache locationCache) {
         this.locationCache = locationCache;
-        if (locationCache != null) register(ILocationCache.class, locationCache);
+        if (locationCache != null) register(ILocationCache.class, locationCache, this::getLocationCache);
         return this;
     }
 
@@ -388,7 +388,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setJoinEvent(ISpeedRunJoinEvent joinEvent) {
         this.joinEvent = joinEvent;
-        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent);
+        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent);
         return this;
     }
 
@@ -396,7 +396,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setQuitEvent(IQuitEvent quitEvent) {
         this.quitEvent = quitEvent;
-        if (quitEvent != null) register(IQuitEvent.class, quitEvent);
+        if (quitEvent != null) register(IQuitEvent.class, quitEvent, this::getQuitEvent);
         return this;
     }
 
@@ -404,7 +404,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRankMC(IRankMC rankMC) {
         this.rankMC = rankMC;
-        if (rankMC != null) register(IRankMC.class, rankMC);
+        if (rankMC != null) register(IRankMC.class, rankMC, this::getRankMC);
         return this;
     }
 
@@ -412,7 +412,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRatingCache(IRatingCache ratingCache) {
         this.ratingCache = ratingCache;
-        if (ratingCache != null) register(IRatingCache.class, ratingCache);
+        if (ratingCache != null) register(IRatingCache.class, ratingCache, this::getRatingCache);
         return this;
     }
 
@@ -420,7 +420,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRating(IRating rating) {
         this.rating = rating;
-        if (rating != null) register(IRating.class, rating);
+        if (rating != null) register(IRating.class, rating, this::getRating);
         return this;
     }
 
@@ -428,7 +428,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRatingAPI(IRatingAPI ratingAPI) {
         this.ratingAPI = ratingAPI;
-        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI);
+        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI, this::getRatingAPI);
         return this;
     }
 
@@ -436,7 +436,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setPlayerProfile(IPlayerProfile playerProfile) {
         this.playerProfile = playerProfile;
-        if (playerProfile != null) register(IPlayerProfile.class, playerProfile);
+        if (playerProfile != null) register(IPlayerProfile.class, playerProfile, this::getPlayerProfile);
         return this;
     }
 
@@ -444,7 +444,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRank(IRank rank) {
         this.rank = rank;
-        if (rank != null) register(IRank.class, rank);
+        if (rank != null) register(IRank.class, rank, this::getRank);
         return this;
     }
 
@@ -452,7 +452,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setDebugger(IDebugger debugger) {
         this.debugger = debugger;
-        if (debugger != null) register(IDebugger.class, debugger);
+        if (debugger != null) register(IDebugger.class, debugger, this::getDebugger);
         return this;
     }
 
@@ -460,7 +460,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setSoundManager(ISoundManager soundManager) {
         this.soundManager = soundManager;
-        if (soundManager != null) register(ISoundManager.class, soundManager);
+        if (soundManager != null) register(ISoundManager.class, soundManager, this::getSoundManager);
         return this;
     }
 
@@ -468,7 +468,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRankCache(IRankCache rankCache) {
         this.rankCache = rankCache;
-        if (rankCache != null) register(IRankCache.class, rankCache);
+        if (rankCache != null) register(IRankCache.class, rankCache, this::getRankCache);
         return this;
     }
 
@@ -476,7 +476,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRetentionManager(IRetentionManager retentionManager) {
         this.retentionManager = retentionManager;
-        if (retentionManager != null) register(IRetentionManager.class, retentionManager);
+        if (retentionManager != null) register(IRetentionManager.class, retentionManager, this::getRetentionManager);
         return this;
     }
 
@@ -484,7 +484,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRedis(IRedis redis) {
         this.redis = redis;
-        if (redis != null) register(IRedis.class, redis);
+        if (redis != null) register(IRedis.class, redis, this::getRedis);
         return this;
     }
 
@@ -492,7 +492,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setDebug(IDebug debug) {
         this.debug = debug;
-        if (debug != null) register(IDebug.class, debug);
+        if (debug != null) register(IDebug.class, debug, this::getDebug);
         return this;
     }
 
@@ -500,7 +500,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setBossBarManager(IBossBarManager bossBarManager) {
         this.bossBarManager = bossBarManager;
-        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager);
+        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager, this::getBossBarManager);
         return this;
     }
 
@@ -508,7 +508,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setVoting(IVoting voting) {
         this.voting = voting;
-        if (voting != null) register(IVoting.class, voting);
+        if (voting != null) register(IVoting.class, voting, this::getVoting);
         return this;
     }
 
@@ -516,7 +516,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setInventoryManager(IInventoryManager inventoryManager) {
         this.inventoryManager = inventoryManager;
-        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager);
+        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
         return this;
     }
 
@@ -524,7 +524,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameType(IGameType gameType) {
         this.gameType = gameType;
-        if (gameType != null) register(IGameType.class, gameType);
+        if (gameType != null) register(IGameType.class, gameType, this::getGameType);
         return this;
     }
 
@@ -532,7 +532,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setStatsManager(IStatsManager statsManager) {
         this.statsManager = statsManager;
-        if (statsManager != null) register(IStatsManager.class, statsManager);
+        if (statsManager != null) register(IStatsManager.class, statsManager, this::getStatsManager);
         return this;
     }
 
@@ -540,7 +540,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setSRStatsCache(ISpeedrunStatsCache speedrunStatsCache) {
         this.speedrunStatsCache = speedrunStatsCache;
-        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache);
+        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache);
         return this;
     }
 
@@ -548,7 +548,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setFairFight(IFairFight fairFight) {
         this.fairFight = fairFight;
-        if (fairFight != null) register(IFairFight.class, fairFight);
+        if (fairFight != null) register(IFairFight.class, fairFight, this::getFairFight);
         return this;
     }
 

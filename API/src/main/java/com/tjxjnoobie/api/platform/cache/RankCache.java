@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.platform.cache;
 
 import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.platform.velocity.Rank;
+import com.tjxjnoobie.api.platform.minecraft.velocity.Rank;
 
 import java.sql.SQLException;
 import java.util.*;

@@ -1,14 +1,11 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.API.cache.LobbyStatsCache;
-import com.tjxjnoobie.API.cache.RankCache;
-import com.tjxjnoobie.API.managers.GameType;
-import com.tjxjnoobie.API.GlobalContext;
-import com.tjxjnoobie.enums.GameTypeEnum;
-import com.tjxjnoobie.interfaces.ChatHandler;
-import com.tjxjnoobie.interfaces.IGameType;
-import com.tjxjnoobie.interfaces.ILobbyStatsCache;
-import com.tjxjnoobie.interfaces.IRankCache;
+import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.enums.GameTypeEnum;
+import com.tjxjnoobie.api.interfaces.ChatHandler;
+import com.tjxjnoobie.api.interfaces.IGameType;
+import com.tjxjnoobie.api.interfaces.ILobbyStatsCache;
+import com.tjxjnoobie.api.interfaces.IRankCache;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;

@@ -2,7 +2,7 @@ package com.tjxjnoobie.api.platform.minecraft;
 
 import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.platform.cache.RankCache;
-import com.tjxjnoobie.api.platform.velocity.Rank;
+import com.tjxjnoobie.api.platform.minecraft.velocity.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

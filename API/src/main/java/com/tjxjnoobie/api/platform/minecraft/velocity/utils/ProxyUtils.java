@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.velocity.utils;
+package com.tjxjnoobie.api.platform.minecraft.velocity.utils;
 
 import com.tjxjnoobie.api.interfaces.IProxyUtils;
 import com.velocitypowered.api.proxy.Player;

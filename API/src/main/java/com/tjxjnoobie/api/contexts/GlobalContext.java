@@ -127,8 +127,8 @@ public class GlobalContext extends AbstractContext<GlobalContext> implements IGl
         if (inventoryBuilder != null) register(IInventoryBuilder.class, inventoryBuilder, this::getInventoryBuilder);
         if (inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
         // Register the context itself
-        register(IGlobalContext.class, this);
-        register(GlobalContext.class, this);
+        register(IGlobalContext.class, this,this::getContext);
+        // register(GlobalContext.class, this, this::getContext);
     }
 
     @Override
@@ -298,195 +298,196 @@ public class GlobalContext extends AbstractContext<GlobalContext> implements IGl
     @Override
     public IGlobalContext setGameMode(IGameMode gameMode) {
         this.gameMode = gameMode;
-        if (gameMode != null) register(IGameMode.class, gameMode);
+        if (gameMode != null) register(IGameMode.class, gameMode, this::getGameMode);
         return this;
     }
 
     @Override
     public IGlobalContext setGameState(IGameState gameState) {
         this.gameState = gameState;
-        if (gameState != null) register(IGameState.class, gameState);
+        if (gameState != null) register(IGameState.class, gameState, this::getGameState);
         return this;
     }
 
     @Override
     public IGlobalContext setUtils(IUtils utils) {
         this.utils = utils;
-        if (utils != null) register(IUtils.class, utils);
+        if (utils != null) register(IUtils.class, utils, this::getUtils);
         return this;
     }
 
     @Override
     public IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache) {
         this.statsCache = statsCache;
-        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache);
+        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache, this::getSpeedrunStatsCache);
         return this;
     }
 
     @Override
     public IGlobalContext setMcUtils(IMCUtils mcUtils) {
         this.mcUtils = mcUtils;
-        if (mcUtils != null) register(IMCUtils.class, mcUtils);
+        if (mcUtils != null) register(IMCUtils.class, mcUtils, this::getMCUtils);
         return this;
     }
 
     @Override
     public IGlobalContext setWorldManager(IWorldManager worldManager) {
         this.worldManager = worldManager;
-        if (worldManager != null) register(IWorldManager.class, worldManager);
+        if (worldManager != null) register(IWorldManager.class, worldManager, this::getWorldManager);
         return this;
     }
 
     @Override
     public IGlobalContext setRankMC(IRankMC rankMC) {
         this.rankMC = rankMC;
-        if (rankMC != null) register(IRankMC.class, rankMC);
+        if (rankMC != null) register(IRankMC.class, rankMC, this::getRankMC);
         return this;
     }
 
     @Override
     public IGlobalContext setRatingCache(IRatingCache ratingCache) {
         this.ratingCache = ratingCache;
-        if (ratingCache != null) register(IRatingCache.class, ratingCache);
+        if (ratingCache != null) register(IRatingCache.class, ratingCache, this::getRatingCache);
         return this;
     }
 
     @Override
     public IGlobalContext setRating(IRating rating) {
         this.rating = rating;
-        if (rating != null) register(IRating.class, rating);
+        if (rating != null) register(IRating.class, rating, this::getRating);
         return this;
     }
 
     @Override
     public IGlobalContext setRatingAPI(IRatingAPI ratingAPI) {
         this.ratingAPI = ratingAPI;
-        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI);
+        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI, this::getRatingAPI);
         return this;
     }
 
     @Override
     public IGlobalContext setPlayerProfile(IPlayerProfile playerProfile) {
         this.playerProfile = playerProfile;
-        if (playerProfile != null) register(IPlayerProfile.class, playerProfile);
+        if (playerProfile != null) register(IPlayerProfile.class, playerProfile, this::getPlayerProfile);
         return this;
     }
 
     @Override
     public IGlobalContext setRank(IRank rank) {
         this.rank = rank;
-        if (rank != null) register(IRank.class, rank);
+        if (rank != null) register(IRank.class, rank, this::getRank);
         return this;
     }
 
     @Override
     public IGlobalContext setDebugger(IDebugger debugger) {
         this.debugger = debugger;
-        if (debugger != null) register(IDebugger.class, debugger);
+        if (debugger != null) register(IDebugger.class, debugger, this::getDebugger);
         return this;
     }
 
     @Override
     public IGlobalContext setSoundManager(ISoundManager soundManager) {
         this.soundManager = soundManager;
-        if (soundManager != null) register(ISoundManager.class, soundManager);
+        if (soundManager != null) register(ISoundManager.class, soundManager, this::getSoundManager);
         return this;
     }
 
     @Override
     public IGlobalContext setRankCache(IRankCache rankCache) {
         this.rankCache = rankCache;
-        if (rankCache != null) register(IRankCache.class, rankCache);
+        if (rankCache != null) register(IRankCache.class, rankCache, this::getRankCache);
         return this;
     }
 
     @Override
     public IGlobalContext setRetentionManager(IRetentionManager retentionManager) {
         this.retentionManager = retentionManager;
-        if (retentionManager != null) register(IRetentionManager.class, retentionManager);
+        if (retentionManager != null) register(IRetentionManager.class, retentionManager, this::getRetentionManager);
+        registerFactory(IRetentionManager.class, this::getRetentionManager);
         return this;
     }
 
     @Override
     public IGlobalContext setRedis(IRedis redis) {
         this.redis = redis;
-        if (redis != null) register(IRedis.class, redis);
+        if (redis != null) register(IRedis.class, redis, this::getRedis);
         return this;
     }
     @Override
     public IGlobalContext setPlugin(Plugin plugin) {
         this.plugin = plugin;
-        if (plugin != null) register(Plugin.class, plugin);
+        if (plugin != null) register(Plugin.class, plugin, this::getPlugin);
         return this;
     }
 
     @Override
     public IGlobalContext setGameType(IGameType gameType) {
         this.gameType = gameType;
-        if (gameType != null) register(IGameType.class, gameType);
+        if (gameType != null) register(IGameType.class, gameType, this::getGameType);
         return this;
     }
 
     @Override
     public IGlobalContext setProxyUtils(IProxyUtils proxyUtils) {
         this.proxyUtils = proxyUtils;
-        if (proxyUtils != null) register(IProxyUtils.class, proxyUtils);
+        if (proxyUtils != null) register(IProxyUtils.class, proxyUtils, this::getProxyUtils);
         return this;
     }
 
     @Override
     public IGlobalContext setStatsManager(IStatsManager statsManager) {
         this.statsManager = statsManager;
-        if (statsManager != null) register(IStatsManager.class, statsManager);
+        if (statsManager != null) register(IStatsManager.class, statsManager, this::getStatsManager);
         return this;
     }
 
     @Override
     public IGlobalContext setLobbyStatsCache(ILobbyStatsCache lobbyStatsCache) {
         this.lobbyStatsCache = lobbyStatsCache;
-        if (lobbyStatsCache != null) register(ILobbyStatsCache.class, lobbyStatsCache);
+        if (lobbyStatsCache != null) register(ILobbyStatsCache.class, lobbyStatsCache, this::getLobbyStatsCache);
         return this;
     }
 
     @Override
     public IGlobalContext setSpeedrunStatsCache(ISpeedrunStatsCache speedrunStatsCache) {
         this.speedrunStatsCache = speedrunStatsCache;
-        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache);
+        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache);
         return this;
     }
 
     @Override
     public IGlobalContext setPunishManager(IPunishManager punishManager) {
         this.punishManager = punishManager;
-        if (punishManager != null) register(IPunishManager.class, punishManager);
+        if (punishManager != null) register(IPunishManager.class, punishManager, this::getPunishManager);
         return this;
     }
 
     @Override
     public IGlobalContext setPunishLog(IPunishLog punishLog) {
         this.punishLog = punishLog;
-        if (punishLog != null) register(IPunishLog.class, punishLog);
+        if (punishLog != null) register(IPunishLog.class, punishLog, this::getPunishLog);
         return this;
     }
 
     @Override
     public IGlobalContext setInventoryManager(IInventoryManager inventoryManager) {
         this.inventoryManager = inventoryManager;
-        if(inventoryManager != null) register(IInventoryManager.class, inventoryManager);
+        if(inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
         return this;
     }
 
     @Override
     public IGlobalContext setVoting(IVoting voting) {
         this.voting = voting;
-        if(voting != null) register(IVoting.class, voting);
+        if(voting != null) register(IVoting.class, voting, this::getVoting);
         return this;
     }
 
     @Override
     public IGlobalContext setInventoryBuilder(IInventoryBuilder inventoryBuilder) {
         this.inventoryBuilder = inventoryBuilder;
-        if(inventoryBuilder != null) register(IInventoryBuilder.class, inventoryBuilder);
+        if(inventoryBuilder != null) register(IInventoryBuilder.class, inventoryBuilder, this::getInventoryBuilder);
         return this;
     }
 
@@ -494,28 +495,28 @@ public class GlobalContext extends AbstractContext<GlobalContext> implements IGl
     @Override
     public IGlobalContext setConfigUtils(IConfigUtils configUtils) {
         this.configUtils = configUtils;
-        if(configUtils != null) register(IConfigUtils.class, configUtils);
+        if(configUtils != null) register(IConfigUtils.class, configUtils, this::getConfigUtils);
         return this;
     }
 
     @Override
     public IGlobalContext setTimeUtils(ITimeUtils timeUtils) {
         this.timeUtils = timeUtils;
-        if(timeUtils != null) register(ITimeUtils.class, timeUtils);
+        if(timeUtils != null) register(ITimeUtils.class, timeUtils, this::getTimeUtils);
         return this;
     }
 
     @Override
     public IGlobalContext setLocalServerMetaData(ILocalServerMetaData localServerMetaData) {
         this.localServerMetaData = localServerMetaData;
-        if(localServerMetaData != null) register(ILocalServerMetaData.class, localServerMetaData);
+        if(localServerMetaData != null) register(ILocalServerMetaData.class, localServerMetaData, this::getLocalServerMetaData);
         return this;
     }
 
     @Override
     public IGlobalContext setPlugin(JavaPlugin plugin) {
         this.plugin = plugin;
-        if(plugin != null) register(Plugin.class, plugin);
+        if(plugin != null) register(Plugin.class, plugin, this::getPlugin);
         return this;
     }
     /**
@@ -569,9 +570,8 @@ public class GlobalContext extends AbstractContext<GlobalContext> implements IGl
      * Validates that all required dependencies are set
      * @throws IllegalStateException if required dependencies are missing
      */
-    public void validate() {
+    public void validateRequiredDependencies() {
         StringBuilder missing = new StringBuilder();
-        
         if (gameMode == null) missing.append("gameMode, ");
         if (gameState == null) missing.append("gameState, ");
         if (utils == null) missing.append("utils, ");
@@ -590,6 +590,7 @@ public class GlobalContext extends AbstractContext<GlobalContext> implements IGl
      * @return Summary string
      */
     public String getDependencySummary() {
+        // TODO: Update using dependencyMap and loop
         StringBuilder summary = new StringBuilder("GlobalContext Dependencies:\n");
 
         summary.append("- GameMode: ").append(gameMode != null ? "✓" : "✗").append("\n");

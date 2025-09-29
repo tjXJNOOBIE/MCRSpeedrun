@@ -1,5 +1,6 @@
 package com.tjxjnoobie.proxy.Commands;
 
+import com.tjxjnoobie.api.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IProxyUtils;
 import com.tjxjnoobie.api.interfaces.IPunishManager;
@@ -19,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Kick implements SimpleCommand {
-
+    @Inject IPunishManager punishManager;
     private final IGlobalContext globalContext;
     private final ProxyServer proxyServer;
 
@@ -126,7 +127,6 @@ public class Kick implements SimpleCommand {
      * increments the kick count, and logs the punishment details.
      */
     public void kickPlayer(CommandSource source, Optional<Player> player, UUID targetUUID, String targetName, String senderName, String reason) throws SQLException {
-        IPunishManager punishManager = globalContext.getPunishManager();
         IProxyUtils proxyUtils = globalContext.getProxyUtils();
         Instant kickTimeNow = Instant.now();
         Timestamp kickTime = Timestamp.from(kickTimeNow);

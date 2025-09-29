@@ -7,6 +7,7 @@ import com.velocitypowered.api.proxy.ConsoleCommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -49,16 +50,24 @@ public class Warn implements SimpleCommand {
         if (source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
             if (rankCache.isStaff(senderUUID) || rankCache.hasPermission(senderUUID, "network.warn")) {
-                handleWarn(sender, targetPlayer, targetName, reason);
+                try {
+                    handleWarn(sender, targetPlayer, targetName, reason);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }else{
                 sender.sendMessage(proxyUtils.withPrefix("No permission."));
             }
         } else if (source instanceof ConsoleCommandSource) {
-            handleWarn(console, targetPlayer, targetName, reason);
+            try {
+                handleWarn(console, targetPlayer, targetName, reason);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private void handleWarn(CommandSource source, Optional<Player> targetPlayer, String targetName, String reason) {
+    private void handleWarn(CommandSource source, Optional<Player> targetPlayer, String targetName, String reason) throws SQLException {
         UUID targetUUID = retrieveUUID(targetPlayer, targetName, source);
         if (targetUUID == null) {
             return;
@@ -88,7 +97,7 @@ public class Warn implements SimpleCommand {
         return targetUUID;
     }
 
-    private void warnPlayer(CommandSource source, UUID targetUUID, String targetName, String reason) {
+    private void warnPlayer(CommandSource source, UUID targetUUID, String targetName, String reason) throws SQLException {
         IPunishManager punishManager = globalContext.getPunishManager();
         IProxyUtils proxyUtils = globalContext.getProxyUtils();
         Instant warnStart = Instant.now();

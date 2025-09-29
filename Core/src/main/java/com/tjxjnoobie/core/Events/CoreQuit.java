@@ -1,10 +1,8 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.API.cache.RankCache;
-import com.tjxjnoobie.API.managers.GameType;
-import com.tjxjnoobie.API.managers.RetentionManager;
-import com.tjxjnoobie.enums.GameTypeEnum;
-import com.tjxjnoobie.interfaces.*;
+import com.tjxjnoobie.api.interfaces.CoreQuitHandler;
+import com.tjxjnoobie.api.interfaces.IRankCache;
+import com.tjxjnoobie.api.interfaces.IRetentionManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;

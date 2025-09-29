@@ -2,9 +2,9 @@ package com.tjxjnoobie.kingdomFactions.Events;
 
 
 
-import com.tjxjnoobie.interfaces.BlockPlaceHandler;
-import com.tjxjnoobie.interfaces.InterfaceManager;
-import com.tjxjnoobie.interfaces.MainInterFace;
+import com.tjxjnoobie.api.interfaces.BlockPlaceHandler;
+import com.tjxjnoobie.api.interfaces.InterfaceManager;
+import com.tjxjnoobie.api.interfaces.MainInterFace;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

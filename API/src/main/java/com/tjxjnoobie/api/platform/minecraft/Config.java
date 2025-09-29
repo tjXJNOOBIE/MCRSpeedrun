@@ -21,6 +21,8 @@ public class Config {
     public static String redis_password;
     public static Connection connection;
 
+
+    //TODO Change from X -> Novus for config file name
     public static void createConfig() {
         // Define the path for the configuration file
         File configFile = new File("plugins/X/database.yml");
@@ -70,6 +72,7 @@ public class Config {
                 Map<String, Object> config = yaml.load(fis);
 
                 // Load the MySQL configuration values
+                // TODO: Make universal config value holder
                 Map<String, Object> mysqlConfig = (Map<String, Object>) config.get("mysql");
                 host = (String) mysqlConfig.get("host");
                 port = (String) mysqlConfig.get("port");

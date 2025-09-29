@@ -1,11 +1,13 @@
-package com.tjxjnoobie.api.platform.velocity.managers;
+package com.tjxjnoobie.api.platform.minecraft.velocity.managers;
 
+import com.tjxjnoobie.api.annotations.Inject;
 import com.tjxjnoobie.api.contexts.GlobalContext;
 import com.tjxjnoobie.api.interfaces.IPlayerProfile;
+import com.tjxjnoobie.api.interfaces.IPunishManager;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.Redis;
-import com.tjxjnoobie.api.platform.velocity.logs.PunishLog;
+import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.ScanParams;
 import redis.clients.jedis.resps.ScanResult;
@@ -17,15 +19,16 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PunishManager implements IUtils {
-
+public class PunishManager implements IUtils, IPunishManager {
+    @Inject IUtils utils;
+    @Inject GlobalContext globalContext;
     private final Jedis jedis = Redis.jedis;
-    private final GlobalContext globalContext;
 
     public PunishManager(GlobalContext globalContext) {
         this.globalContext = globalContext;
     }
 
+    @Override
     public void cacheAllPunishments() {
 
         String query = "SELECT UUID, USERNAME, MUTES, KICKS, BANS, WARNS, BANNED, WARNED, MUTED, " +
@@ -121,7 +124,7 @@ public class PunishManager implements IUtils {
         }
     }
 
-
+    @Override
     public boolean isPunished(UUID uuid, String username, String punishment) {
         // Check Redis cache first
         String cacheKey = "punish:" + uuid.toString();
@@ -183,6 +186,7 @@ public class PunishManager implements IUtils {
         return false;
     }
 
+    @Override
     public int getPunishmentNumber(String punishment, UUID uuid, String username) {
         // Check Redis cache first
         String cacheKey = "punish:" + uuid.toString();
@@ -217,7 +221,9 @@ public class PunishManager implements IUtils {
             return punishmentNumber;
         }
     }
-    public int incrementPunishLogCount(String redisKey, UUID uuid, String punishment) {
+
+    @Override
+    public void incrementPunishLogCount(String redisKey, UUID uuid, String punishment) {
         // Determine the base key for the punishment logs
         String baseKey = redisKey + ":" + uuid.toString() + ":" + punishment;
 
@@ -230,9 +236,8 @@ public class PunishManager implements IUtils {
         // Create a new hash entry with the next available number
         String newHashKey = baseKey + ":" + nextNumber;
         jedis.hset(newHashKey, "WARN_AMOUNT", "1"); // Initialize with a default value or as needed
-
-        return nextNumber;
     }
+    @Override
     public int getPunishLogCount(UUID uuid, String punishment) {
         // Construct the base key pattern for the punishment logs
         String baseKeyPattern = "punishLog:" + uuid.toString() + ":" + punishment + ":*";
@@ -264,7 +269,7 @@ public class PunishManager implements IUtils {
 
     }
 
-
+    @Override
     public PunishLog getActivePunishment(UUID uuid, String username, String punishment) throws SQLException {
 
         String punishLogKey = "punishLog:" + uuid.toString()+":"+punishment;
@@ -325,7 +330,7 @@ public class PunishManager implements IUtils {
 
 
 
-
+    @Override
     public void setTimedPunishment(UUID uuid ,String username, String punishment, Timestamp punishStart, Timestamp punishEnd, String reason, String punishedBy, String result) throws SQLException {
         String booleanResult = switch (punishment) {
             case "BANS" -> "BANNED";
@@ -346,6 +351,7 @@ public class PunishManager implements IUtils {
         setPunishNumber(punishment,punishNumber,uuid);
         logPunishment(uuid,username,punishStart,punishEnd,punishment,punishedBy,reason);
     }
+    @Override
     public void logPunishmentByUsername(String username , Timestamp startDate, Timestamp endDate , String punishment, String sender, String reason) throws SQLException {
         IPlayerProfile playerProfile = globalContext.getPlayerProfile();
         String punishKey = "punishLog:"+username+":"+punishment;
@@ -361,8 +367,8 @@ public class PunishManager implements IUtils {
         MySQL.executePreparedStatement("INSERT INTO punish_logs (START_DATE, END_DATE, PUNISHMENT, REASON, SENDER, PUNISHED, PUNISHED_UUID) VALUES (?, ?, ?, ?, ?, ?, ?)",startDate,endDate,punishment,reason,sender,username,UUIDStr);
 
     }
-
-    public void logPunishment(UUID uuid, String punished , Timestamp startDate, Timestamp endDate , String punishment, String sender, String reason) throws SQLException {
+    @Override
+    public void logPunishment(UUID uuid, String punished, Timestamp startDate, Timestamp endDate, String punishment, String sender, String reason) throws SQLException {
         int logNumber = getPunishLogCount(uuid,punishment);
 
         String punishKey = "punishLog:"+uuid.toString()+":"+punishment+":"+logNumber;
@@ -394,19 +400,24 @@ public class PunishManager implements IUtils {
 
 
 
-
+    @Override
     public void setPunishNumber(String punishment, int punishNumber, UUID uuid) throws SQLException {
         String redisKey = "punish:"+uuid.toString();
         MySQL.executePreparedStatement("UPDATE punish SET "+punishment+"= ? WHERE UUID= ?",punishNumber,uuid.toString());
         jedis.hset(redisKey,punishment, String.valueOf(punishNumber));
 
     }
+
+    @Override
     public void setPunished(UUID uuid,String punishment, int isPunished) throws SQLException {
         String redisKey = "punish:"+uuid.toString();
         MySQL.executePreparedStatement("UPDATE punish SET "+punishment+"= ? WHERE UUID= ?",isPunished,uuid.toString());
         jedis.hset(redisKey,punishment,String.valueOf(isPunished));
 
     }
+
+
+    @Override
     public void setPunishedByUsername(String username,String punishment, int isPunished) throws SQLException {
         String redisKey = "punish:"+username;
         MySQL.executePreparedStatement("UPDATE punish SET "+punishment+"= ? WHERE UUID= ?",isPunished,username);

@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.velocity;
+package com.tjxjnoobie.api.platform.minecraft.velocity;
 
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.PlayerProfile;

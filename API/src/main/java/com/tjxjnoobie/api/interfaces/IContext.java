@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.interfaces;
 
 import java.util.HashMap;
+import java.util.function.Supplier;
 
 /**
  * Base interface for context management providing dependency injection capabilities
@@ -29,8 +30,9 @@ public interface IContext<T> {
      * @param instance The instance to register
      * @param <U> The type parameter
      */
-    <U> void register(Class<U> clazz, U instance);
-    
+
+    <U> void register(Class<U> clazz, U instance, Supplier<U> factory);
+
     /**
      * Checks if a dependency is registered
      * @param clazz The class type to check

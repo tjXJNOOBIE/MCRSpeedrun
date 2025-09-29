@@ -1,14 +1,8 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.API.cache.LobbyStatsCache;
-import com.tjxjnoobie.API.cache.RankCache;
-import com.tjxjnoobie.API.managers.Debugger;
-import com.tjxjnoobie.API.managers.GameType;
-import com.tjxjnoobie.API.GlobalContext;
-import com.tjxjnoobie.API.minecraft.RankMC;
-import com.tjxjnoobie.API.utils.Utils;
-import com.tjxjnoobie.enums.GameTypeEnum;
-import com.tjxjnoobie.interfaces.*;
+import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.enums.GameTypeEnum;
+import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
