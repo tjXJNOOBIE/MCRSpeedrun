@@ -25,7 +25,7 @@ public class WebsiteApplication {
 
         @GetMapping("/test")
         public String hello() {
-        return "Spring Boot is working!";
+        return "Spring Boot is working!!";
     }
     }
 }
