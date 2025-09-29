@@ -22,7 +22,7 @@
     <gitCommitIdLength>8</gitCommitIdLength>
 
     <!-- Branches that do NOT get a qualifier (-SNAPSHOT) when building -->
-    <nonQualifierBranches>master</nonQualifierBranches>
+    <nonQualifierBranches>master,HEAD,main</nonQualifierBranches>
 
     <!-- Start from 0.0.0 if no tag exists yet -->
     <regexVersionTag>v([0-9]+\.[0-9]+\.[0-9]+)</regexVersionTag>
