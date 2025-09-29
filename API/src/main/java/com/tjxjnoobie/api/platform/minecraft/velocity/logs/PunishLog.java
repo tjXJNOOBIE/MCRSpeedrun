@@ -35,7 +35,6 @@ public class PunishLog {
     public String getSender() {
         return sender;
     }
-
     public String getPunished() {
         return punished;
     }
