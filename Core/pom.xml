@@ -8,13 +8,12 @@
   <parent>
     <groupId>com.tjxjnoobie</groupId>
     <artifactId>Novus</artifactId>
-    <version>0.1-ALPHA</version>
+    <version>0</version>
     <relativePath>../pom.xml</relativePath> <!-- adjust as needed -->
   </parent>
 
   <groupId>com.tjxjnoobie.core</groupId>
   <artifactId>Core</artifactId>
-  <version>0.1-ALPHA</version>
   <packaging>jar</packaging>
 
   <name>Core</name>
