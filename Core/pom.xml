@@ -7,13 +7,12 @@
   <!-- parent project configuration -->
   <parent>
     <groupId>com.tjxjnoobie</groupId>
-    <artifactId>Novus</artifactId>
+    <artifactId>novus</artifactId>
     <version>0</version>
     <relativePath>../pom.xml</relativePath> <!-- adjust as needed -->
   </parent>
 
-  <groupId>com.tjxjnoobie.core</groupId>
-  <artifactId>Core</artifactId>
+  <artifactId>core</artifactId>
   <packaging>jar</packaging>
 
   <name>Core</name>
@@ -50,9 +49,10 @@
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.tjxjnoobie.api</groupId>
-      <artifactId>API</artifactId>
-    </dependency>
+      <dependency>
+          <groupId>com.tjxjnoobie.api</groupId>
+          <artifactId>API</artifactId>
+      </dependency>
+
   </dependencies>
 </project>

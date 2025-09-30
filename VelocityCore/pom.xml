@@ -125,11 +125,10 @@
       <groupId>com.mysql</groupId>
       <artifactId>mysql-connector-j</artifactId>
     </dependency>
-    <dependency>
-      <groupId>com.tjxjnoobie.api</groupId>
-      <artifactId>API</artifactId>
-        <version>0</version>
-    </dependency>
+      <dependency>
+          <groupId>com.tjxjnoobie.api</groupId>
+          <artifactId>API</artifactId>
+      </dependency>
 
   </dependencies>
 </project>
