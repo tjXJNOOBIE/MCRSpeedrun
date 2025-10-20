@@ -59,27 +59,6 @@ public interface IContext<T> {
      * @param contexts List of contexts to inject dependencies from
      */
     void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException;
-    
-    /**
-     * Injects all dependencies from all registered contexts globally.
-     * Performs context building, wave-based injection, and optional target injection.
-     */
-    void injectAllContextsGlobally() throws IllegalAccessException;
-    
-    /**
-     * Injects all dependencies from all registered contexts globally with target injection.
-     * Performs context building, wave-based injection, and injects into the provided target.
-     * 
-     * @param target The target object to inject after context initialization (e.g., Main plugin instance)
-     */
-    void injectAllContextsGlobally(Object target) throws IllegalAccessException;
-    
-    /**
-     * Gets the context instance itself
-     *
-     * @return The context instance
-     */
-     T getContext();
 
 
 
