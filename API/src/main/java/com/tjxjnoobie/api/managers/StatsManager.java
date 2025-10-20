@@ -47,17 +47,20 @@ public class StatsManager {
 
     public String getPos(String statfor, String table, int Pos) {
         String name = "CantGetName";
-        try {
-            PreparedStatement st = MySQL.connection.prepareStatement("SELECT * FROM '"+table+"`+ ORDER BY `"+statfor+"` DESC limit " + Pos);
-            ResultSet rs = st.executeQuery();
-            if (rs.next()) {
-                name = rs.getString("USERNAME");
-            } else {
-                name = "CantGetName";
+        String query = "SELECT * FROM `" + table + "` ORDER BY `" + statfor + "` DESC LIMIT ?";
+
+        try (PreparedStatement st = MySQL.connection.prepareStatement(query)) {
+            st.setInt(1, Pos);
+
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    name = rs.getString("USERNAME");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return name;
     }
 
@@ -75,7 +78,7 @@ public class StatsManager {
     }
 
     public String getBestSRTime(UUID uuid) throws SQLException {
-        ResultSet rs = MySQL.getResult("SELCET BEST_TIME FROM speedrun_stats WHERE UUID= ?",uuid.toString());
+        ResultSet rs = MySQL.getResult("SELECT BEST_TIME FROM speedrun_stats WHERE UUID= ?",uuid.toString());
         if(rs.next()) {
             return rs.getString("BEST_TIME");
         }
