@@ -32,7 +32,7 @@ public interface IContext<T> {
      * @throws IllegalArgumentException if dependency is not found
      * @return A Dependency Instance from {@link IDependencyMetaData}.
      */
-    <C> Object get(Class<C> clazz);
+    
 
 
     /**
