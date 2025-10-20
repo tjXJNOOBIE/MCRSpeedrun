@@ -10,6 +10,7 @@
 package com.tjxjnoobie.api.dependency.maps;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
@@ -90,8 +91,7 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
     @Override
     public void registerDependencyToGraph(Class<?> clazz) {
         computeIfAbsent(clazz, c -> {
-            IDependencyMetaData meta = getMetaData(clazz);
-            // populateMetaData is now moved to InjectionMap
+            IDependencyMetaData meta = new DependencyMetaData(c);
             Log.info("[GraphMap] Registered dependency: " + c.getSimpleName());
             return meta;
         });

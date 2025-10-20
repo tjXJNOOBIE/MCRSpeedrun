@@ -297,10 +297,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
         // Default no-op implementation - override in concrete class
         return new DependencyMap();
     }
-    default Object getAllInstances(){
-        // Default no-op implementation - override in concrete class
-
-        return this;
+    default java.util.Collection<Object> getAllInstances(){
+        return java.util.Collections.emptyList();
     }
 //    /**
 //     * Gets a dependency by its class type.

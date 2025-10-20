@@ -93,6 +93,10 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
         return Collections.emptyList();
     }
 
+    default <U> U getInstance(Class<U> clazz) {
+        return null;
+    }
+
     default IDependencyMetaData getDependency(Class<?> clazz){
         return null;
     }
