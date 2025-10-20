@@ -20,10 +20,7 @@ import org.bukkit.plugin.Plugin;
 public interface IGlobalContextAccess {
 
     IGlobalContext getGlobalContext();
-    
-    default <T> T get(Class<T> clazz) {
-        return getGlobalContext().get(clazz);
-    }
+   
     
     default Plugin plugin() {
         return getGlobalContext().getPlugin();
