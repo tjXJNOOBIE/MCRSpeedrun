@@ -137,6 +137,27 @@ public class DependencyMetaData implements IDependencyMetaData {
     }
 
     /**
+     * Returns a list of all registered dependency instances that have been created or are bound via factory.
+     *
+     * <p>This method retrieves all actual instance objects from the dependency registry by iterating over each
+     * registered {@link IDependencyMetaData}. For each metadata entry, it first attempts to return a pre-bound instance,
+     * and if not available, uses the associated factory to create one. Only non-null instances are included in the result.</p>
+     *
+     * <p>The returned list contains real objects that have been injected into the system (either directly or via factory),
+     * and does not include placeholders or null references.</p>
+     *
+     *
+     * @return A list of all currently registered and instantiated dependency objects (never null)
+     *         The list may be empty if no instances have been created.
+     */
+    @Override
+    public List<Object> getAllInstances() {
+        return dependencyMap.values().stream()
+                .map(this::ensureAndGetInstance)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+    /**
      * Sets the depth level of this component within the dependency resolution graph.
      * This influences the order in which components are resolved and initialized.
      *
