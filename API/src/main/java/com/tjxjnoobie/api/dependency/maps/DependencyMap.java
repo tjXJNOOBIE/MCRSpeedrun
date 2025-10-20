@@ -105,11 +105,6 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         Log.info("[DependencyMetaDataMap] Registered: " + clazz.getSimpleName() +
                 (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)"));
     }
-    @Override
-    public Object ensureInstance(IDependencyMetaData metaData) {
-        if (metaData == null) {
-            return null;
-        }
 
         Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
         if (instance == null && metaData.getFactory() != null) {
