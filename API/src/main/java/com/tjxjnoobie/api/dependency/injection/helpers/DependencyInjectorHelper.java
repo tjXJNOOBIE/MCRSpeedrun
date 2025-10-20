@@ -12,6 +12,7 @@ package com.tjxjnoobie.api.dependency.injection.helpers;
 import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.injection.maps.InjectionMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
@@ -30,7 +31,6 @@ import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
 
 /**
  * DependencyInjectorHelper – TODO: implement class functionality
@@ -57,10 +57,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      */
     @Override
     public Collection<Object> getAllInstances() {
-        return dependencyMap.values().stream()
-                .map(iDependencyMetaData -> getAllInstances())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return dependencyMap.getAllInstances();
     }
     /**
      * PreConstruct initialization method with highest priority (0).
@@ -101,11 +98,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     // ===== Fluent priority builder =====
     public IDependencyInjectorHelper registerImportant(Class<?> clazz, int priority) {
-        IDependencyMetaData meta = dependencyGraph.computeIfAbsent(clazz, c -> {
-            IDependencyMetaData newMeta = new IDependencyMetaData() {};
-            newMeta.setDependencyClass(c);
-            return newMeta;
-        });
+        IDependencyMetaData meta = dependencyGraph.computeIfAbsent(clazz, DependencyMetaData::new);
+        meta.setDependencyClass(clazz);
         meta.setPriority(priority);
         return this;
     }
@@ -376,11 +370,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         boolean auto = rootClass.isAnnotationPresent(AutoInjectAll.class);
 
         // Create or fetch IDependencyMetaData for this class
-        IDependencyMetaData meta = dependencyGraph.computeIfAbsent(rootClass, c -> {
-            IDependencyMetaData newMeta = getMetaData((Class<?>) target);
-            newMeta.setDependencyClass(c);
-            return newMeta;
-        });
+        IDependencyMetaData meta = dependencyMap.computeIfAbsent(rootClass, DependencyMetaData::new);
+        meta.setDependencyClass(rootClass);
 
         // track discovered dependencies & lifecycle methods
         Set<Class<?>> dependencies = new HashSet<>();

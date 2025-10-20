@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -105,6 +106,21 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)"));
     }
 
+    private Object ensureInstance(IDependencyMetaData metaData) {
+        if (metaData == null) {
+            return null;
+        }
+
+        Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
+        if (instance == null && metaData.getFactory() != null) {
+            instance = metaData.getFactory().get();
+            if (instance != null) {
+                metaData.setInstance(instance);
+            }
+        }
+        return instance;
+    }
+
     /**
      * Registers a dependency with minimal information.
      * Factory and source context can be set later.
@@ -151,6 +167,31 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     @Override
     public IDependencyMetaData getDependency(Class<?> clazz){
         return get(clazz);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <U> U getInstance(Class<U> clazz) {
+        if (clazz == null) {
+            return null;
+        }
+
+        IDependencyMetaData metaData = get(clazz);
+        Object instance = ensureInstance(metaData);
+        if (clazz.isInstance(instance)) {
+            return (U) instance;
+        }
+
+        for (IDependencyMetaData other : values()) {
+            if (other == metaData) {
+                continue;
+            }
+            Object candidate = ensureInstance(other);
+            if (clazz.isInstance(candidate)) {
+                return (U) candidate;
+            }
+        }
+        return null;
     }
     /**
      * Gets all metadata sorted by priority and depth.
@@ -203,15 +244,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     //TODO: Replace IDepende... implementation with interface methods
     @Override
     public <U> U findByAssignableType(Class<U> clazz) {
-        for (Map.Entry<Class<?>, IDependencyMetaData> entry : entrySet()) {
-            if (clazz.isAssignableFrom(entry.getKey())) {
-                IDependencyMetaData metaData = entry.getValue();
-                if (metaData != null && getDependencyInstance(clazz) != null) {
-                    return (U) getDependencyInstance(clazz);
-                }
-            }
-        }
-        return null;
+        return getInstance(clazz);
     }
 
 
@@ -240,7 +273,8 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         Map<String, Integer> stats = new HashMap<>();
         stats.put("total", size());
         stats.put("withInstances", (int) values().stream()
-                .filter(m -> getAllInstances() !=null) //TODO: Update checking all instances against null
+                .map(this::ensureInstance)
+                .filter(Objects::nonNull)
                 .count());
         stats.put("withFactories", (int) values().stream()
                 .filter(m -> m.getFactory() != null)
@@ -284,7 +318,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 report.append("  ").append(role).append(" (").append(byRole.size()).append("):\n");
                 byRole.forEach(meta -> {
                     Class<?> clazz = meta.getDependencyClass();
-                    Object instance = getAllInstances();
+                    Object instance = ensureInstance(meta);
                     report.append("    - ").append(clazz != null ? clazz.getSimpleName() : "Unknown")
                             .append(" -> ").append(instance != null ? instance.getClass().getSimpleName() : "NULL")
                             .append(" [depth=").append(meta.getDepth())
@@ -312,14 +346,17 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
             return true;
         }
 
-        // Check if any registered instance is assignable to the class
-        for (Object obj : values()) {
-            if (clazz.isInstance(obj)) {
-                return true;
-            }
-        }
+        return values().stream()
+                .map(this::ensureInstance)
+                .anyMatch(instance -> instance != null && clazz.isInstance(instance));
+    }
 
-        return false;
+    @Override
+    public Collection<Object> getAllInstances() {
+        return values().stream()
+                .map(this::ensureInstance)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
     /**
      * Clears all dependencies and logs the action.

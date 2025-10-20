@@ -27,7 +27,7 @@ public interface IDependencyMetaData  {
 
 
     default IDependencyMetaData getMetaData(Class<?> clazz){
-        return this;
+        return null;
     }
 
     /**
@@ -175,7 +175,7 @@ public interface IDependencyMetaData  {
      * @return the bound instance, or null if not yet bound
      */
     default Object getDependencyInstance(Class<?> aClass) {
-        return this;
+        return null;
     }
 
     /**

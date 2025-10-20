@@ -246,7 +246,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
 
     @Override
     public int injectAllDependencies(int maxPasses) throws IllegalAccessException {
-        Set<Object> allDeps = new HashSet<>(dependencyMap.values()); //TODO: Update to use data from depende meta data instead of pure instance of it
+        Set<Object> allDeps = new HashSet<>(dependencyMap.getAllInstances());
         Set<Object> injected = new HashSet<>();
         int totalInjected = 0;
 

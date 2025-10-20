@@ -74,8 +74,12 @@ public class DependencyMetaData implements IDependencyMetaData {
      * @param clazz The class type
      * @return The metadata, or null if not found
      */
+    @Override
     public IDependencyMetaData getMetaData(Class<?> clazz) {
-        return this;
+        if (clazz == null) {
+            return null;
+        }
+        return dependencyClass.equals(clazz) ? this : null;
     }
     /**
      * Returns the class of the dependency that this metadata represents.
@@ -233,8 +237,25 @@ public class DependencyMetaData implements IDependencyMetaData {
      *
      * @return the bound instance, or null if not yet bound
      */
-    public Object getDependencyInstance(Class<?> aClass) {
-        return instance;
+    @Override
+    public Object getDependencyInstance(Class<?> requestedType) {
+        if (instance != null) {
+            if (requestedType == null || requestedType.isInstance(instance)) {
+                return instance;
+            }
+            if (dependencyClass != null && requestedType != null && dependencyClass.isAssignableFrom(requestedType)) {
+                return instance;
+            }
+        }
+
+        if (instance == null && factory != null) {
+            Object created = factory.get();
+            if (created != null && (requestedType == null || requestedType.isInstance(created))) {
+                instance = created;
+                return instance;
+            }
+        }
+        return null;
     }
 
     /**
@@ -348,7 +369,10 @@ public class DependencyMetaData implements IDependencyMetaData {
      */
     @Override
     public boolean hasInstance(Class<?> clazz) {
-        return getMetaData(clazz) != null && getDependencyInstance(clazz) != null;
+        if (instance == null) {
+            return false;
+        }
+        return clazz == null || clazz.isInstance(instance);
     }
 
 }
