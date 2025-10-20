@@ -236,19 +236,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         return null;
     }
 
-    /**
-     * Checks if a dependency is registered
-     * Uses local dependency map for checking
-     */
-
-
-    public <U> U getOrNull(Class<U> clazz) {
-        try {
-            return get(clazz);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
 
 
 
