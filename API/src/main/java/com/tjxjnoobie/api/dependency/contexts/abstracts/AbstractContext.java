@@ -604,22 +604,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
                         return ctx.get(method.getReturnType());
                     }
 
-                    // Method-level inject
-                    if (method.isAnnotationPresent(Inject.class)) {
-                        return ctx.get(method.getReturnType());
-                    }
-
-                    // Default methods
-                    if (method.isDefault()) {
-                        return invokeDefault(proxy, method, args);
-                    }
-
-                    throw new UnsupportedOperationException(
-                            "No injection rule for " + iface.getSimpleName() + "." + method.getName()
-                    );
-                }
-        );
-    }
 
     public Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {
         final Class<?> declaringClass = method.getDeclaringClass();
