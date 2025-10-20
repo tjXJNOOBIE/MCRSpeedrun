@@ -437,7 +437,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     public void processPreConstructRetryQueue() throws InterruptedException {
         while (!preConstructRetryQueue.isEmpty()) {
             Class<?> clazz = preConstructRetryQueue.poll();
-            Object instance = dependencyMap.getInstance(clazz);
+            Object instance = dependencyMap.getDependencyInstance(clazz);
             if (instance != null) injectAndRecordMetaData(instance);
             // Thread.sleep(10); // TODO: Add proper loop
         }
@@ -520,7 +520,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             if (field.get(target) != null) return;
 
             // 1️⃣ Exact match
-            if (dependencyMap.isRegistered(fieldType)) { Object existing = dependencyMap.getInstance(fieldType); field.set(target, existing); return; }
+            if (dependencyMap.isRegistered(fieldType)) { Object existing = dependencyMap.getDependencyInstance(fieldType); field.set(target, existing); return; }
 
             // 2️⃣ Compatible implementation
             Object compat = dependencyMap.findByAssignableType(fieldType);
