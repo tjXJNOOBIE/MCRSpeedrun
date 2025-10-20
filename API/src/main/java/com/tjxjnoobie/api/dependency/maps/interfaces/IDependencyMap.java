@@ -145,25 +145,7 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
     default <U> U findByAssignableType(Class<U> clazz) {
         return null;
     }
-
-    /**
-     * Returns a map of all registered dependencies with their class types as keys.
-     * This provides a convenient key-value structure for quick lookup and access.
-     *
-     * @return a HashMap mapping class type to instance object
-     */
-    default HashMap<Class<?>, Object> toLegacyMap() {
-        return new java.util.HashMap<>();
-    }
-
-    /**
-     * Populates the registry from a legacy map of class-to-instance mappings.
-     * The source context is used to track where this data originated, which may be useful for diagnostics.
-     *
-     * @param legacyMap the map containing pre-registered dependency entries
-     * @param sourceContext the context in which these entries were loaded
-     */
-    default void fromLegacyMap(Map<Class<?>, Object> legacyMap, IContext<?> sourceContext) {}
+    
 
     /**
      * Removes a registered instance of the given class type from the registry.
