@@ -63,36 +63,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         excludedPackages.add("com.sun.");
     }
 
-    /**
-     * Override the default get() to provide actual implementation
-     * Retrieves dependency from custom maps
-     */
-    @Override
-    public <U> U get(Class<U> clazz) {
-        // Use the custom map's getInstance method
-        U instance = getInstance(clazz);
-        if (instance != null) {
-            return instance;
-        }
-        
-        // Check if there's metadata with a factory
-        IDependencyMetaData metaData = getDependency(clazz);
-        if (metaData != null && metaData.getFactory() != null) {
-            Object created = metaData.getFactory().get();
-            if (created != null) {
-                return clazz.cast(created);
-            }
-        }
-        
-        // Try to find by assignable type
-        U assignable = findByAssignableType(clazz);
-        if (assignable != null) {
-            return assignable;
-        }
-        
-        // Fallback error for compatibility
-        throw new RuntimeException("No dependency or factory found for " + clazz.getName());
-    }
+
 
     /**
      * Factory retrieval with explicit factory check
