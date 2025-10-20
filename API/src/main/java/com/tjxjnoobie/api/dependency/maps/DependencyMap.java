@@ -243,8 +243,8 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     @SuppressWarnings("unchecked")
     //TODO: Replace IDepende... implementation with interface methods
     @Override
-    public <U> U findByAssignableType(Class<U> clazz) {
-        return getInstance(clazz);
+    public IDependencyMetaData findByAssignableType(Class<?> clazz) {
+        return getDependency(clazz);
     }
 
 
