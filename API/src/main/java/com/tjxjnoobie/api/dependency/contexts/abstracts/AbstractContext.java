@@ -445,55 +445,8 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
 //            assignDepth(dependent, depth + 1, map);
 //        }
 //    }
-    /**
-     * Injects all dependencies from all registered contexts with full initialization.
-     * This method performs:
-     * 1. Context building (if contexts support it)
-     * 2. Wave-based injection (leaf dependencies first, then intermediate)
-     * 3. Top-level injection into provided target object
-     *
-     * @param target Optional target object to inject after context initialization (e.g., Main plugin instance)
-     */
-    public void injectAllContextsGlobally(Object target) throws IllegalAccessException {
-        Log.info("[DI] ===== Global context injection started =====");
-        Log.info("[DI] Total contexts registered: " + contextRegistry.size());
 
-        // Step 1: Skip explicit build step; contexts should register their dependencies directly
-        Log.info("[DI] --- Step 1: Skipping explicit build step ---");
 
-        // Step 2: Perform wave-based injection
-        Log.info("[DI] --- Step 2: Wave-based injection ---");
-        performWaveInjection(new ArrayList<>(contextRegistry));
-
-        // Step 3: Inject into target object if provided
-        if (target != null) {
-            Log.info("[DI] --- Step 3: Injecting into target ---");
-            Log.info("[DI] Target: " + target.getClass().getSimpleName());
-
-            // Inject from all contexts
-            for (IContext<?> context : contextRegistry) {
-                if (context != null) { //TODO: Verify method implementation
-                    injectAndRecordMetaData(target);
-                }
-            }
-        }
-
-        Log.info("[DI] ===== Global context injection complete =====");
-
-        // Step 4: Inject static fields for critical classes
-        Log.info("[DI] --- Step 4: Static field injection ---");
-        injectStaticFields(InterfaceManager.class); //TODO: Add 
-
-        generateDependencyReport();
-        generateInjectableReport();
-    }
-
-    /**
-     * Injects all dependencies from all registered contexts (without target injection)
-     */
-    public void injectAllContextsGlobally() throws IllegalAccessException {
-        injectAllContextsGlobally(null);
-    }
 
     /**
      * Gets all registered contexts globally

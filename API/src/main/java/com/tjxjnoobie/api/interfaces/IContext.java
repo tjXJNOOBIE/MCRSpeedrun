@@ -10,7 +10,14 @@ import java.util.Set;
  * @param <T> The type of context implementation
  */
 public interface IContext<T> {
-    
+
+    /**
+     * Gets the context instance itself
+     *
+     * @return The context instance
+     */
+
+    T getContext();
     /**
      * Gets the dependency map for direct access
      * @return HashMap containing all registered dependencies
