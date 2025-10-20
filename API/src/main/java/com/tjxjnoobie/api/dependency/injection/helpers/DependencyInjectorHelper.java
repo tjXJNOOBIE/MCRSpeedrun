@@ -56,7 +56,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * @return Collection of all dependency instances
      */
     @Override
-    public Collection<Object> getAllInstances() {
+    public List<Object> getAllInstances() {
         return dependencyMap.getAllInstances();
     }
     /**
