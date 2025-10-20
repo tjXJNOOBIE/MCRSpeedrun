@@ -10,19 +10,15 @@
 package com.tjxjnoobie.api.dependency.maps;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -39,6 +35,8 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
 
     @Inject private IDependencyInjectorHelper injectorHelper;
 
+
+    public DependencyMap dependencyMap = this;
 
 
 
@@ -106,15 +104,6 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)"));
     }
 
-        Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
-        if (instance == null && metaData.getFactory() != null) {
-            instance = metaData.getFactory().get();
-            if (instance != null) {
-                metaData.setInstance(instance);
-            }
-        }
-        return instance;
-    }
 
     /**
      * Registers a dependency with minimal information.
@@ -164,30 +153,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         return get(clazz);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public <U> U getInstance(Class<U> clazz) {
-        if (clazz == null) {
-            return null;
-        }
 
-        IDependencyMetaData metaData = get(clazz);
-        Object instance = ensureInstance(metaData);
-        if (clazz.isInstance(instance)) {
-            return (U) instance;
-        }
-
-        for (IDependencyMetaData other : values()) {
-            if (other == metaData) {
-                continue;
-            }
-            Object candidate = ensureInstance(other);
-            if (clazz.isInstance(candidate)) {
-                return (U) candidate;
-            }
-        }
-        return null;
-    }
     /**
      * Gets all metadata sorted by priority and depth.
      *
@@ -232,11 +198,9 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * Searches for a registered class that is assignable from the given class.
      *
      * @param clazz The class type to search for
-     * @param <U> The type of the dependency
      * @return The instance if found, null otherwise
      */
     @SuppressWarnings("unchecked")
-    //TODO: Replace IDepende... implementation with interface methods
     @Override
     public IDependencyMetaData findByAssignableType(Class<?> clazz) {
         return getDependency(clazz);
@@ -268,7 +232,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         Map<String, Integer> stats = new HashMap<>();
         stats.put("total", size());
         stats.put("withInstances", (int) values().stream()
-                .map(this::ensureInstance)
+                .map(this::ensureAndGetInstance)
                 .filter(Objects::nonNull)
                 .count());
         stats.put("withFactories", (int) values().stream()
@@ -313,7 +277,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 report.append("  ").append(role).append(" (").append(byRole.size()).append("):\n");
                 byRole.forEach(meta -> {
                     Class<?> clazz = meta.getDependencyClass();
-                    Object instance = ensureInstance(meta);
+                    Object instance = ensureAndGetInstance(meta);
                     report.append("    - ").append(clazz != null ? clazz.getSimpleName() : "Unknown")
                             .append(" -> ").append(instance != null ? instance.getClass().getSimpleName() : "NULL")
                             .append(" [depth=").append(meta.getDepth())
@@ -342,14 +306,14 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         }
 
         return values().stream()
-                .map(this::ensureInstance)
+                .map(this::ensureAndGetInstance)
                 .anyMatch(instance -> instance != null && clazz.isInstance(instance));
     }
 
     @Override
-    public Collection<Object> getAllInstances() {
+    public List<Object> getAllInstances() {
         return values().stream()
-                .map(this::ensureInstance)
+                .map(this::ensureAndGetInstance)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }

@@ -3,13 +3,12 @@ package com.tjxjnoobie.api.dependency.contexts.abstracts;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.maps.DependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import com.tjxjnoobie.api.platform.global.annotations.AutoInjectAll;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
@@ -36,7 +35,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     private final HashMap<Class<?>, Boolean> eligibilityCache = new HashMap<>();
     
     // Use custom dependency maps instead of plain Maps
-    protected final DependencyMap dependencyMap = new DependencyMap();
     protected final DependencyGraphMap dependencyGraph = new DependencyGraphMap();
     protected final IContextInjectionHelper contextInjectorHelper = new ContextInjectionHelper();
     
@@ -184,7 +182,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     @Override
     public Object resolveDependency(Class<?> dependencyClass) {
         // Use custom map's getInstance method
-        Object instance = getDependency(dependencyClass); 
+        Object instance = getDependency(dependencyClass);
         if (instance != null) {
             return instance;
         }
@@ -591,18 +589,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         return contextInjectorHelper.hasNoInjectFields(obj);
     }
 
-    @SuppressWarnings("unchecked")
-    public <F> F createInterfaceProxy(Class<F> iface, IContext<T> ctx) {
-        boolean auto = iface.isAnnotationPresent(AutoInjectAll.class);
-
-        return (F) Proxy.newProxyInstance(
-                iface.getClassLoader(),
-                new Class<?>[]{iface},
-                (proxy, method, args) -> {
-                    // Auto mode
-                    if (auto && method.getReturnType() != Void.TYPE && !method.isDefault()) {
-                        return ctx.get(method.getReturnType());
-                    }
 
 
     public Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {

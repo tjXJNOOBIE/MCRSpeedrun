@@ -10,6 +10,7 @@
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
@@ -24,7 +25,7 @@ import java.util.function.Supplier;
  * checking, and managing dependencies.
  */
 public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData {
-
+    DependencyMap dependencyMap = new DependencyMap();
     /**
      * Registers a dependency instance with its class type and optional factory method.
      * The factory supplier is used to create instances when needed, while direct
@@ -36,7 +37,9 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      * @param factory an optional supplier function that produces new instances of the dependency
      * @param sourceContext context information about where this registration originated
      */
-    default void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {}
+    default void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {
+    }
+
 
     /**
      * Registers a dependency instance with its class type.
@@ -89,13 +92,10 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      *
      * @return a list of all currently registered dependencies
      */
-    default Collection<Object> getAllInstances() {
+    default List<Object> getAllInstances() {
         return Collections.emptyList();
     }
 
-    default <U> U getInstance(Class<U> clazz) {
-        return null;
-    }
 
     default IDependencyMetaData getDependency(Class<?> clazz){
         return null;
@@ -137,15 +137,14 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      * Finds an instance that matches the specified class type, even if it's not exactly registered.
      * This method supports upcasting or interface-based resolution through reflection.
      *
-     * @param <U> the type of object to find
      * @param clazz the class type to match against
      * @return an instance that can be cast to the specified type, or null if none found
      */
     @SuppressWarnings("unchecked")
-    default <U> U findByAssignableType(Class<U> clazz) {
+    default IDependencyMetaData findByAssignableType(Class<?> clazz) {
         return null;
     }
-    
+
 
     /**
      * Removes a registered instance of the given class type from the registry.

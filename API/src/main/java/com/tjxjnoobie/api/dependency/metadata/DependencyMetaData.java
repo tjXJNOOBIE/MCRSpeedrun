@@ -10,6 +10,8 @@
 package com.tjxjnoobie.api.dependency.metadata;
 
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
@@ -19,9 +21,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 
-public class DependencyMetaData implements IDependencyMetaData {
+public class DependencyMetaData implements IDependencyMetaData, IDependencyInjectorHelper, IDependencyMap {
+
     private final Class<?> dependencyClass;
     private Set<Class<?>> dependencies = new HashSet<>();
     private int priority;

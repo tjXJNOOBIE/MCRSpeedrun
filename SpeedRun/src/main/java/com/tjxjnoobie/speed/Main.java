@@ -1,8 +1,7 @@
 package com.tjxjnoobie.speed;
 
-import com.tjxjnoobie.api.abstracts.interfaces.IAbstractContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -14,10 +13,13 @@ import com.tjxjnoobie.api.listeners.CoreJoinListener;
 import com.tjxjnoobie.api.listeners.CoreQuitListener;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.managers.MySQL;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.managers.FairFight;
 import com.tjxjnoobie.speed.Commands.*;
 import com.tjxjnoobie.speed.Events.bukkit.*;
+import com.tjxjnoobie.speed.managers.SpeedRunContext;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
@@ -37,7 +39,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace, IContextInjectionHelper {
 
 
      @Inject private IGameState gameState;
@@ -83,7 +85,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
      @Inject private ILocalServerMetaData localServerMetaData;
      private IContext<IGlobalContext> icontext;
      private IContext<ISpeedRunContext> iSpeedContext;
-     private IAbstractContext iAbstractContext;
      private Plugin plugin;
      private static Main instance;
      private static final String CHANNEL = "factions:sync";
@@ -97,21 +98,18 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Config.loadConfig();
         MySQL.connect();
         ReflectUtil.loadLibs();
-        IGlobalContext gc = icontext.getContext();
-        ISpeedRunContext sc = iSpeedContext.getContext();
+        icontext = new GlobalContext();
+        iSpeedContext = new SpeedRunContext();
         
         // Register Plugin in both contexts so it's available everywhere
-        gc.setPlugin(this);
-        sc.setPlugin(this);
-        
-        Log.info("[Main] Registered contexts: " + icontext.getAllContexts().size());
+        icontext.getContext().setPlugin(this);
+        iSpeedContext.getContext().setPlugin(this);
 
-        try {
-            icontext.injectAllContextsGlobally(this);
-            iSpeedContext.injectAllContextsGlobally(this);
-        } catch (IllegalAccessException e) {
-            Log.exception(e);
-        }
+
+        injectFieldsFromContext(this, iSpeedContext);
+        injectFieldsFromContext(this, icontext);
+        //TODO: Update logging to use entire context register size instead of one context
+        Log.info("[Main] Registered contexts: " + icontext.getAllContexts().size());
 
         InterfaceManager.setMainInterFace(this);
 
@@ -190,7 +188,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         gameState.removeServerID(serverID);
     }
     
-     @Inject private boolean hasNoInjectFields(Object obj) {
+     @Inject public boolean hasNoInjectFields(Object obj) {
         if (obj == null) return true;
         
         Class<?> clazz = obj.getClass();

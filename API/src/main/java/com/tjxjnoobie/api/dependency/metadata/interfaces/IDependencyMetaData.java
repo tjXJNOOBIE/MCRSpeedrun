@@ -25,6 +25,9 @@ import java.util.function.Supplier;
  */
 public interface IDependencyMetaData  {
 
+    default void populateMetaData(Class<?> clazz){
+
+    }
 
     default IDependencyMetaData getMetaData(Class<?> clazz){
         return null;
@@ -49,6 +52,10 @@ public interface IDependencyMetaData  {
      */
     default Set<Class<?>> getDependencies() {
         return new HashSet<>();
+    }
+
+    default Object ensureAndGetInstance(IDependencyMetaData metaData){
+        return null;
     }
 
     /**

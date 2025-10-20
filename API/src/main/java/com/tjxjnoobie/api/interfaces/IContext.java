@@ -1,7 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
 import java.util.List;
 import java.util.Set;
@@ -25,14 +24,6 @@ public interface IContext<T> {
      * @return HashMap containing all registered dependencies
      */
     DependencyMap getDependencyMap();
-
-    /**
-     * Gets a dependency by its class type
-     * @param clazz The class type to retrieve
-     * @throws IllegalArgumentException if dependency is not found
-     * @return A Dependency Instance from {@link IDependencyMetaData}.
-     */
-    
 
 
     /**
