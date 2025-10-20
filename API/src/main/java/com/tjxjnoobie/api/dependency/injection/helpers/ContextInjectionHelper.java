@@ -203,10 +203,16 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      * before running a single injection+record pass.
      */
     private void injectWithMergedDependencies(Object target, HashMap<Class<?>, Object> mergedDependencies) {
-        if (target == null) return;
-        if (mergedDependencies == null || mergedDependencies.isEmpty()) {
-            // still attempt injection using whatever is currently registered
-            injectAndRecordMetaData(target);
+        if (target == null) {
+            Log.warn("[DI] Cannot inject: target is null");
+            return;
+        }
+        if (mergedDependencies == null) {
+            Log.warn("[DI] Cannot inject: merged dependencies map is null");
+            return;
+        }
+        if (mergedDependencies.isEmpty()) {
+            Log.warn("[DI] Cannot inject: merged dependencies map is empty");
             return;
         }
 
