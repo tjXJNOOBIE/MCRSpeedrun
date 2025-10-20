@@ -101,6 +101,21 @@ public class DependencyMetaData implements IDependencyMetaData {
         return dependencies;
     }
 
+    @Override
+    public Object ensureAndGetInstance(IDependencyMetaData metaData) {
+        if (metaData == null) {
+            return null;
+        }
+
+        Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
+        if (instance == null && metaData.getFactory() != null) {
+            instance = metaData.getFactory().get();
+            if (instance != null) {
+                metaData.setInstance(instance);
+            }
+        }
+        return instance;
+    }
     /**
      * Sets the direct dependencies of this component.
      * This allows configuration of which types must be resolved prior to this component's initialization.
