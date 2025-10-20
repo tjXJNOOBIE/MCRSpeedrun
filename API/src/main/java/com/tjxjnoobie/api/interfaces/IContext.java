@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.interfaces;
 
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
 import java.util.List;
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
  * @param <T> The type of context implementation
  */
 public interface IContext<T> {
+
 
     /**
      * Gets the context instance itself
@@ -27,11 +29,10 @@ public interface IContext<T> {
     /**
      * Gets a dependency by its class type
      * @param clazz The class type to retrieve
-     * @param <U> The type parameter
-     * @return The dependency instance
      * @throws IllegalArgumentException if dependency is not found
+     * @return A Dependency Instance from {@link IDependencyMetaData}.
      */
-     <U> U get(Class<U> clazz);
+    <C> Object get(Class<C> clazz);
 
 
     /**
