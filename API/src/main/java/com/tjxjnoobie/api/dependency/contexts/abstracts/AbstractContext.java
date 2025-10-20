@@ -184,7 +184,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     @Override
     public Object resolveDependency(Class<?> dependencyClass) {
         // Use custom map's getInstance method
-        Object instance = getInstance(dependencyClass);
+        Object instance = getDependency(dependencyClass); 
         if (instance != null) {
             return instance;
         }
