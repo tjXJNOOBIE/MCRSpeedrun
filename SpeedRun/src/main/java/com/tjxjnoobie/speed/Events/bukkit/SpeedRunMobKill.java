@@ -6,13 +6,11 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.speed.managers.BossBarManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -26,28 +24,38 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunMobKill  implements Listener, IUtils {
+public class SpeedRunMobKill implements Listener, IUtils<ISpeedRunContext>, IMCUtils {
 
 
-    private final ISpeedRunContext speedRunContext;
+    @Inject
+    private ISpeedRunContext speedRunContext;
+    @Inject
     private IGlobalContext globalContext;
     boolean KilledBlaze = false;
     boolean killedEnderDragon = false;
-
-
-    public SpeedRunMobKill(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
-
+    @Inject
+    private IBossBarManager bossBarManager;
+    @Inject
+    private IMCUtils mcUtils;
+    @Inject
+    private IGameManager gameManager;
+    @Inject
+    private ISoundManager soundManager;
+    @Inject
+    private Plugin plugin;
+    @Inject
+    private IPlayerManager playerManager;
+    @Inject
+    private IGameMode gameMode;
+    @Inject
+    private IStatsManager statsManager;
+    @Inject
+    private ISpeedrunStatsCache srStatsCache;
 
 
     @EventHandler
     public void onMobKill(EntityDeathEvent e) throws SQLException {
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IGameManager gameManager = speedRunContext.getGameManager();
-        ISoundManager soundManager = speedRunContext.getSoundManager();
-        Plugin plugin = speedRunContext.getPlugin();
-        IPlayerManager playerManager = speedRunContext.getPlayerManager();
+
         Player killer = e.getEntity().getKiller();
         UUID uuid = killer.getUniqueId();
         String name = killer.getName();
@@ -55,14 +63,11 @@ public class SpeedRunMobKill  implements Listener, IUtils {
         String finalTime = gameManager.getFinalTimeString(uuid);
         String currentTime = gameManager.getCurrentTime();
         long currentTimeLong = gameManager.getCurrentTimeLong();
-        Player allPlayers = mcUtils.getAllPlayers();
+        Player allPlayers = getAllPlayers();
         Location allLocation = allPlayers.getLocation();
-        IGameMode gameMode = speedRunContext.getGameMode();
         GameModeEnum currentMode = gameMode.getCurrentGameMode();
-        IStatsManager statsManager = speedRunContext.getStatsManager();
-        ISpeedrunStatsCache srStatsCache = speedRunContext.getSRStatsCache();
-        boolean playerKilledBlaze = gameManager.hasKilledBlaze(uuid);
 
+        boolean playerKilledBlaze = gameManager.hasKilledBlaze(uuid);
 
 
         if (e.getEntityType() == EntityType.BLAZE && !KilledBlaze) {
@@ -71,72 +76,69 @@ public class SpeedRunMobKill  implements Listener, IUtils {
             Bukkit.broadcastMessage(displayName + " was the first to kill a §cBlaze!");
         } else if (KilledBlaze && e.getEntityType() == EntityType.BLAZE) {
             gameManager.getKilledBlaze().put(uuid, name);
-            Bukkit.broadcastMessage(displayName + " killed a §cBlaze! §7(" +currentTime + ")");
+            Bukkit.broadcastMessage(displayName + " killed a §cBlaze! §7(" + currentTime + ")");
         }
 
         if (e.getEntity() instanceof EnderDragon && !killedEnderDragon) {
-            if(gameManager.getFinished() == gameManager.getPlaying().size()){
+            if (gameManager.getFinished() == gameManager.getPlaying().size()) {
                 return;
             }
-            if(currentMode== GameModeEnum.SOLO){
-            srStatsCache.addBestTime(uuid,finalTime);
-            killer.sendMessage(prefix+"You have killed the §cEnder Dragon§f!");
-            killer.sendMessage(prefix+"Final Time: " + finalTime);
-            gameManager.stopGame();
+            if (currentMode == GameModeEnum.SOLO) {
+                srStatsCache.addBestTime(uuid, finalTime);
+                killer.sendMessage(prefix + "You have killed the §cEnder Dragon§f!");
+                killer.sendMessage(prefix + "Final Time: " + finalTime);
+                gameManager.stopGame();
             }
             soundManager.playVictoryWithDragonDeath(killer);
             gameManager.setFinalTime(uuid);
             killedEnderDragon = true;
-            Bukkit.broadcastMessage(prefix+ displayName + " §b§lHAS KILLED THE §c§lENDER DRAGON§b§l!");
+            Bukkit.broadcastMessage(prefix + displayName + " §b§lHAS KILLED THE §c§lENDER DRAGON§b§l!");
             Bukkit.broadcastMessage(prefix + displayName + "'s Final Time: " + finalTime);
             gameManager.addFinished();
             gameManager.addFinishedPlayer(uuid);
             gameManager.setWinner(killer);
-            gameManager.getWinner().sendMessage(prefix+"§a§lCongratulations! §cYou have won!");
-            sendEnderDragonBossBarMessage(allPlayers,20*7);
+            gameManager.getWinner().sendMessage(prefix + "§a§lCongratulations! §cYou have won!");
+            sendEnderDragonBossBarMessage(allPlayers, 20 * 7);
 
-        }else if(killedEnderDragon){
+        } else if (killedEnderDragon) {
             int finished = gameManager.getFinished();
             int inGame = gameManager.getPlaying().size();
             soundManager.playVictoryWithDragonDeath(killer);
             gameManager.addFinished();
             gameManager.addFinishedPlayer(uuid);
             gameManager.setFinalTime(uuid);
-            srStatsCache.addBestTime(uuid,finalTime);
-            killer.sendMessage(prefix+"Your final time is " + gameManager.getFinalTimeString(uuid));
-            Bukkit.broadcastMessage(prefix+displayName+" has killed the §cEnder Dragon"+ "§7(" +currentTime + ")");
-            new BukkitRunnable(){
+            srStatsCache.addBestTime(uuid, finalTime);
+            killer.sendMessage(prefix + "Your final time is " + gameManager.getFinalTimeString(uuid));
+            Bukkit.broadcastMessage(prefix + displayName + " has killed the §cEnder Dragon" + "§7(" + currentTime + ")");
+            new BukkitRunnable() {
                 @Override
                 public void run() {
-                    playerManager.makeSpectator(uuid,name,killer);
+                    playerManager.makeSpectator(uuid, name, killer);
                 }
-            }.runTaskLater(plugin,20*5);
-            sendEnderDragonBossBarMessage(allPlayers,20*7);
-            if(finished == inGame){
+            }.runTaskLater(plugin, 20 * 5);
+            sendEnderDragonBossBarMessage(allPlayers, 20 * 7);
+            if (finished == inGame) {
                 Bukkit.getLogger().info("All players have finished! Running end game");
-                mcUtils.sendDebugMessage(globalContext,allPlayers, getStaffPrefix()+"All players have finished! Running end game");
+                // TODO Update IMCUtils methods to remove contexts. mcUtils.sendDebugMessage(globalContext,allPlayers, getStaffPrefix()+"All players have finished! Running end game");
                 gameManager.stopGame();
             }
         }
     }
 
-    public void sendEnderDragonBossBarMessage(Player player, int time){
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
-        String displayName = player.getDisplayName();
+    public void sendEnderDragonBossBarMessage(Player player, int time) {
 
-        BossBarManager bossBarManager = new BossBarManager(getStaffPrefix() + displayName + " §b§lHAS KILLED THE ENDERDRAGON!", BarColor.RED, BarStyle.SOLID);
+        String displayName = player.getDisplayName();
         bossBarManager.addPlayer(player);
-        new BukkitRunnable(){
+        new BukkitRunnable() {
             @Override
             public void run() {
-                if(player == null){
+                if (player == null) {
                     Bukkit.getLogger().info("Player has left before bossbar manager could remove them");
                     return;
                 }
                 bossBarManager.removePlayer(player);
             }
-        }.runTaskLater(plugin,time);
+        }.runTaskLater(plugin, time);
     }
 
     public static void blockDragonDeathSound(JavaPlugin plugin) {
@@ -155,18 +157,18 @@ public class SpeedRunMobKill  implements Listener, IUtils {
             }
         });
     }
-    public void calculateBestTime(UUID uuid, Player player){
-        IGameManager gameManager = speedRunContext.getGameManager();
-        ISpeedrunStatsCache srStatsCache = speedRunContext.getSRStatsCache();
+
+    public void calculateBestTime(UUID uuid, Player player) {
         long bestTime = srStatsCache.getBestTimeLong(uuid);
         long playerFinalTime = gameManager.getFinalTime(uuid);
-        if(playerFinalTime > bestTime){
-            srStatsCache.setBestTimeLong(uuid,playerFinalTime);
+        if (playerFinalTime > bestTime) {
+            srStatsCache.setBestTimeLong(uuid, playerFinalTime);
             player.sendMessage("New personal best!");
         }
     }
-
 }
+
+
 
 
 

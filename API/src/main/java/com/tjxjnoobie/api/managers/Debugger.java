@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.interfaces.IDebugger;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

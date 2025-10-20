@@ -1,5 +1,7 @@
 package com.tjxjnoobie.api.platform.minecraft.velocity;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.PlayerProfile;
 
@@ -9,9 +11,9 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Rank {
+public class Rank implements IRank {
 
-    private  PlayerProfile playerProfile;
+    @Inject private PlayerProfile playerProfile;
     public List<String> ranks = new ArrayList<>();
 
 
@@ -20,12 +22,13 @@ public class Rank {
             MySQL.executePreparedStatement( "UPDATE player_profile SET RANK = ? WHERE UUID= ?", rank, uuid);
         }
 
-
+    @Override
     public void setRankFromUsername(String username, String rank) throws SQLException {
 
         MySQL.executePreparedStatement("UPDATE player_profile SET RANK = ? WHERE NAME= ?",rank,username);
 
     }
+    @Override
     public String getRank(UUID uuid) throws SQLException {
         ResultSet rs = MySQL.getResult("SELECT RANK FROM player_profile WHERE UUID= ?",uuid.toString());
         if(rs.next()){
@@ -34,7 +37,7 @@ public class Rank {
             return "Couldn't get rank";
         }
     }
-
+    @Override
     public int getPowerLevel(UUID uuid) throws SQLException {
         ResultSet rs = MySQL.getResult("SELECT POWERLEVEL FROM player_profile WHERE UUID= ?",uuid.toString());
         if(rs.next()){
@@ -43,6 +46,7 @@ public class Rank {
             return 1;
         }
     }
+    @Override
     public Set<String> getPermissions(UUID uuid) throws SQLException {
         String query = "SELECT PERMISSIONS FROM player_profile WHERE UUID = ?";
         ResultSet rs = null;
@@ -69,8 +73,7 @@ public class Rank {
                 .collect(Collectors.joining(",", "[", "]"));
         MySQL.executePreparedStatement(query, uuid.toString(), json);
     }
-
-    // Checks if a given player UUID has a specific permission
+    @Override
     public boolean hasPermission(UUID uuid, String permission) throws SQLException {
         Set<String> permissions = getPermissions(uuid);
         return permissions.contains(permission);
@@ -86,6 +89,7 @@ public class Rank {
             System.out.println(uuid.toString()+ " already has permission '" + permission+"'");
         }
     }
+
     public static List<Object> getAllRanks(Object value) throws SQLException {
         List<Object> rowData = new ArrayList<>();
         String query = "SELECT * FROM ranks WHERE RANK = ?";
@@ -103,7 +107,7 @@ public class Rank {
         return rowData;
     }
 
-    public String getAllRanks() throws SQLException {
+    public String getAllRanks() {
         String query = "SELECT * FROM ranks WHERE RANK IS NOT NULL";
         try {
             ResultSet rs = MySQL.getResult(query);

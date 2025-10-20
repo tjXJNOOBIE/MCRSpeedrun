@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.platform.minecraft.velocity.managers;
 
-import com.tjxjnoobie.api.annotations.Inject;
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.interfaces.IPlayerProfile;
 import com.tjxjnoobie.api.interfaces.IPunishManager;
 import com.tjxjnoobie.api.interfaces.IUtils;
@@ -20,13 +20,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class PunishManager implements IUtils, IPunishManager {
-    @Inject IUtils utils;
-    @Inject GlobalContext globalContext;
+
+   @Inject private GlobalContext globalContext;
     private final Jedis jedis = Redis.jedis;
 
-    public PunishManager(GlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
 
     @Override
     public void cacheAllPunishments() {

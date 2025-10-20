@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -8,13 +9,9 @@ import java.util.UUID;
 
 public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
 
-    private final IGlobalContext globalContext;
-    private final ISpeedRunContext speedRunContext;
-    public PlayerManager(IGlobalContext globalContext, ISpeedRunContext speedRunContext) {
-        this.globalContext = globalContext;
-        this.speedRunContext = speedRunContext;
-    }
-    
+    @Inject private IGlobalContext globalContext;
+    @Inject private ISpeedRunContext speedRunContext;
+    @Inject private IGameManager gameManager;
 
     @Override
     public void makeSpectator(UUID uuid, String name, Player player) {
@@ -30,9 +27,6 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
         }
         
         try {
-            IMCUtils mcUtils = globalContext.getMcUtils();
-            IUtils utils = globalContext.getUtils();
-            IGameManager gameManager = speedRunContext.getGameManager();
             Player target = gameManager.getInGamePlayers();
             
             hidePlayerFromAll(player,globalContext);

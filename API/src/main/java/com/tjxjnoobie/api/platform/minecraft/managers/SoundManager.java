@@ -5,14 +5,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
 public class SoundManager implements ISoundManager {
 
-    public final Plugin plugin;
+    public Plugin plugin;
 
-    public SoundManager(Plugin plugin) {
-        this.plugin = plugin;
-    }
+
 
     @Override
     public void playVictoryJingle(Player player) {

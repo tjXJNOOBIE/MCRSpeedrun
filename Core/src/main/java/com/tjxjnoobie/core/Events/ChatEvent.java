@@ -1,6 +1,8 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.ChatHandler;
 import com.tjxjnoobie.api.interfaces.IGameType;
@@ -21,13 +23,14 @@ import java.util.UUID;
 
 public class ChatEvent implements Listener, ChatHandler {
 
-    private final GlobalContext globalContext;
+    @Inject private  GlobalContext globalContext;
     private final Map<String, String> chatFormats = new HashMap<>();
     private final Map<String, String> placeholders = new HashMap<>();
 
 
-    public ChatEvent(GlobalContext globalContext) {
-        this.globalContext = globalContext;
+
+    @PostConstruct
+    public void init() {
         loadChatFormants();
     }
 

@@ -1,6 +1,8 @@
 package com.tjxjnoobie.speed;
 
-import com.tjxjnoobie.api.annotations.AutoInjectAll;
+import com.tjxjnoobie.api.abstracts.interfaces.IAbstractContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -10,10 +12,11 @@ import com.tjxjnoobie.api.listeners.BlockPlaceListener;
 import com.tjxjnoobie.api.listeners.ChatListener;
 import com.tjxjnoobie.api.listeners.CoreJoinListener;
 import com.tjxjnoobie.api.listeners.CoreQuitListener;
+import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.platform.minecraft.Config;
+import com.tjxjnoobie.api.platform.minecraft.managers.FairFight;
 import com.tjxjnoobie.speed.Commands.*;
-import com.tjxjnoobie.speed.Events.FairFight;
 import com.tjxjnoobie.speed.Events.bukkit.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -27,59 +30,64 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 
-@AutoInjectAll
-public final class Main extends JavaPlugin implements PluginMessageListener, MainInterFace, Listener, IUtils {
+
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
 
 
-    private IGameState gameState;
-    private IGameMode gameMode;
-    private IGameManager gameManager;
-    private IPlayerManager playerManager;
-    private IUtils utils;
-    private ISpeedrunStatsCache statsCache;
-    private IWorldManager worldManager;
-    private ILocationCache locationCache;
-    private ISpeedRunJoinEvent joinEvent;
-    private IQuitEvent quitEvent;
-    private IMCUtils mcUtils;
-    private IRatingCache ratingCache;
-    private IRating rating;
-    private IRatingAPI ratingAPI;
-    private IRankMC rankMC;
-    private IPlayerProfile playerProfile;
-    private IRank rank;
-    private IDebugger debugger;
-    private ISoundManager soundManager;
-    private IRankCache rankCache;
-    private IRetentionManager retentionManager;
-    private IRedis redis;
-    private IDebug debug;
-    private IVoting voting;
-    private ISpeedRunContext speedRunContext;
-    private IGlobalContext globalContext;
-    private InterfaceManager mainManager;
-    private BlockPlaceListener blockPlaceHandler;
-    private CoreJoinListener coreJoinListener;
-    private static MainInterFace mainInterFace;
-    private IBossBarManager bossBarManager;
-    private IInventoryBuilder inventoryBuilder;
-    private IInventoryManager inventoryManager;
-    private IProxyUtils proxyUtils;
-    private IGameType gameType;
-    private IStatsManager statsManager;
-    private ILobbyStatsCache lobbyStatsCache;
-    private ISpeedrunStatsCache speedrunStatsCache;
-    private IPunishManager punishManager;
-    private IPunishLog punishLog;
+     @Inject private IGameState gameState;
+     @Inject private IGameMode gameMode;
+     @Inject private IGameManager gameManager;
+     @Inject private IPlayerManager playerManager;
+     @Inject private IUtils utils;
+     @Inject private ISpeedrunStatsCache statsCache;
+     @Inject private IWorldManager worldManager;
+     @Inject private ILocationCache locationCache;
+     @Inject private ISpeedRunJoinEvent joinEvent;
+     @Inject private IQuitEvent quitEvent;
+     @Inject private IMCUtils mcUtils;
+     @Inject private IRatingCache ratingCache;
+     @Inject private IRating rating;
+     @Inject private IRatingAPI ratingAPI;
+     @Inject private IRankMC rankMC;
+     @Inject private IPlayerProfile playerProfile;
+     @Inject private IRank rank;
+     @Inject private IDebugger debugger;
+     @Inject private ISoundManager soundManager;
+     @Inject private IRankCache rankCache;
+     @Inject private IRetentionManager retentionManager;
+     @Inject private IRedis redis;
+     @Inject private IDebug debug;
+     @Inject private IVoting voting;
+     @Inject private ISpeedRunContext speedRunContext;
+     @Inject private IGlobalContext globalContext;
+     @Inject private BlockPlaceListener blockPlaceHandler;
+     @Inject private CoreJoinListener coreJoinListener;
+     @Inject private static MainInterFace mainInterFace;
+     @Inject private IBossBarManager bossBarManager;
+     @Inject private IInventoryBuilder inventoryBuilder;
+     @Inject private IInventoryManager inventoryManager;
+     @Inject private IProxyUtils proxyUtils;
+     @Inject private IGameType gameType;
+     @Inject private IStatsManager statsManager;
+     @Inject private ILobbyStatsCache lobbyStatsCache;
+     @Inject private ISpeedrunStatsCache speedrunStatsCache;
+     @Inject private IPunishManager punishManager;
+     @Inject private IPunishLog punishLog;
+     @Inject private FireEvent fireEvent;
+     @Inject private ILocalServerMetaData localServerMetaData;
+     private IContext<IGlobalContext> icontext;
+     private IContext<ISpeedRunContext> iSpeedContext;
+     private IAbstractContext iAbstractContext;
+     private Plugin plugin;
+     private static Main instance;
+     private static final String CHANNEL = "factions:sync";
 
-    private Plugin plugin;
-    private static Main instance;
-    private static final String CHANNEL = "factions:sync";
 
 
     @Override
@@ -89,25 +97,37 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         Config.loadConfig();
         MySQL.connect();
         ReflectUtil.loadLibs();
+        IGlobalContext gc = icontext.getContext();
+        ISpeedRunContext sc = iSpeedContext.getContext();
+        
+        // Register Plugin in both contexts so it's available everywhere
+        gc.setPlugin(this);
+        sc.setPlugin(this);
+        
+        Log.info("[Main] Registered contexts: " + icontext.getAllContexts().size());
+
+        try {
+            icontext.injectAllContextsGlobally(this);
+            iSpeedContext.injectAllContextsGlobally(this);
+        } catch (IllegalAccessException e) {
+            Log.exception(e);
+        }
 
         InterfaceManager.setMainInterFace(this);
-        mainInterFace = InterfaceManager.getMainInterFace();
-        globalContext.buildGlobalContext();
-        speedRunContext.buildSpeedRunContext();
-        initializeDependencies();
 
+        mainInterFace = InterfaceManager.getMainInterFace();
 
         try {
             InterfaceManager.setBlockPlaceHandler();
-            InterfaceManager.setGlobalHandler(globalContext,"com.tjxjnoobie.kingdomFactions.Events.BlockPlace", "BlockPlaceHandler");
-            InterfaceManager.setGlobalHandler(globalContext,"com.tjxjnoobie.core.Events.ChatEvent","ChatHandler");
-            InterfaceManager.setGlobalHandler(globalContext,"com.tjxjnoobie.core.Events.CoreJoin","CoreJoinHandler");
-            InterfaceManager.setGlobalHandler(globalContext,"com.tjxjnoobie.core.Events.CoreQuit","CoreQuitHandler");
+            InterfaceManager.setGlobalHandler("com.tjxjnoobie.kingdomFactions.Events.BlockPlace", "BlockPlaceHandler");
+            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.ChatEvent","ChatHandler");
+            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreJoin","CoreJoinHandler");
+            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreQuit","CoreQuitHandler");
 
 
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
                  IllegalAccessException e) {
-            throw new RuntimeException(e);
+            Log.exception(e);
         }
         gameMode.setGameMode(GameModeEnum.NORMAL);
         retentionManager.loadMockPlayers(10);
@@ -122,11 +142,10 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         }.runTaskLater(this, 20 * 10);
         debugger.loadDebuggersCache();
         gameManager.runCheckers();
-        utils.createServerID(globalContext);
-        utils.createGameID(globalContext);
-
+        createServerID();
+        createGameID(globalContext);
         String gameID = getGameID();
-        String serverID = utils.getServerID(globalContext);
+        String serverID = getServerID();
         SpeedRunMobKill.blockDragonDeathSound(this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
         getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
@@ -135,11 +154,11 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
             gameState.createServerID(serverID, gameID, "servers", "SPEEDRUN");
 
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
 
         registerEvents();
-        registerCommand("debug", new Debug(globalContext,speedRunContext));
+        registerCommand("debug", new Debug());
         registerCommand("addplayer", new AddPlayer(globalContext,speedRunContext));
         registerCommand("createworld", new CreateWorld(globalContext));
         registerCommand("changeworld", new ChangeWorldCMD(globalContext));
@@ -150,7 +169,7 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         registerCommand("debugger", new DebuggerCMD(globalContext));
         registerCommand("vote", new Vote(speedRunContext));
         registerCommand("v", new Vote(speedRunContext));
-        registerCommand("fireevent", new FireEvent(speedRunContext));
+        registerCommand("fireevent", new FireEvent());
 
 
 
@@ -167,8 +186,23 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
     public void onDisable() {
         getServer().getMessenger().unregisterOutgoingPluginChannel(this);
         getServer().getMessenger().unregisterIncomingPluginChannel(this);
-        String serverID = utils.getServerID(globalContext);
+        String serverID = getServerID();
         gameState.removeServerID(serverID);
+    }
+    
+     @Inject private boolean hasNoInjectFields(Object obj) {
+        if (obj == null) return true;
+        
+        Class<?> clazz = obj.getClass();
+        while (clazz != null && clazz != Object.class) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Inject.class)) {
+                    return false;
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return true;
     }
 
 
@@ -176,7 +210,8 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         return gameState;
     }
 
-
+    // getContext() is now provided by ContextAccess default implementation
+    // It automatically finds the @Inject IGlobalContext globalContext field
 
     public static Main getInstance() {
         return instance;
@@ -195,19 +230,24 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         Bukkit.getPluginManager().registerEvents(new CoreJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new CoreQuitListener(), this);
         Bukkit.getPluginManager().registerEvents(new BlockPlaceListener(blockPlaceHandler), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunJoinEvent(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunJoinEvent(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunDeathEvent(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunQuitEvent(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunMobKill(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunMobKill(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunHungerLevelChange(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunPlayerPickup(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunDamageEvent(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunChangeWorld(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new FairFight(speedRunContext, this), this);
+        Bukkit.getPluginManager().registerEvents(new FairFight(), this);
 
     }
 
     public void registerCommand(String command, CommandExecutor executor) {
+        Log.info(command + " has been registered with " + executor.toString());
+        if (Bukkit.getPluginCommand(command) == null) {
+            Log.error("Command '" + command + "' is not registered in plugin.yml!");
+            return;
+        }
         Objects.requireNonNull(Bukkit.getPluginCommand(command)).setExecutor(executor);
     }
 
@@ -231,6 +271,9 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
     }
 
 
+
+
+
     public void sendPluginMessage(byte[] data) {
         System.out.println("Plugin message sent with data " + Arrays.toString(data));
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -242,10 +285,7 @@ public final class Main extends JavaPlugin implements PluginMessageListener, Mai
         return this; // Return the plugin instance
     }
 
-    @Override
-    public void initializeDependencies() {
 
-    }
 }
 
 

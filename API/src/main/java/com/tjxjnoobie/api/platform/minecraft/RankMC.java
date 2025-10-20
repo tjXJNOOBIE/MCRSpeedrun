@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.platform.minecraft;
 
-import com.tjxjnoobie.api.interfaces.IRank;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IRankMC;
 import com.tjxjnoobie.api.platform.cache.RankCache;
 import com.tjxjnoobie.api.platform.minecraft.velocity.Rank;
 import org.bukkit.Bukkit;
@@ -12,22 +13,18 @@ import org.bukkit.scoreboard.Team;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.util.*;
 import java.util.function.Supplier;
 
-public abstract class RankMC implements IRank{
+public class RankMC implements IRankMC {
 
-    private final Rank rank;
-    private final RankCache rankCache;
+     @Inject private Rank rank;
+     @Inject private RankCache rankCache;
 
-    public RankMC(Rank rank, RankCache rankCache) {
-        this.rank = rank;
-        this.rankCache = rankCache;
-    }
 
-    @Override
-    public void setDisplayName(Player player) throws SQLException {
+
+
+    public void setDisplayName(Player player) {
         UUID uuid = player.getUniqueId();
         String name = player.getName();
         if(rankCache.getRank(uuid).equals("Developer")){

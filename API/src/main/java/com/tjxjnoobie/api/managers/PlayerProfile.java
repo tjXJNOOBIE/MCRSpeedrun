@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
+import com.tjxjnoobie.api.interfaces.IPlayerProfile;
 import redis.clients.jedis.Jedis;
 
 import java.sql.ResultSet;
@@ -7,7 +8,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class PlayerProfile {
+public class PlayerProfile implements IPlayerProfile {
 
     private UUID uuid;
     private String name;

@@ -1,0 +1,60 @@
+/*
+ * TJVD License (TJ Valentine’s Discretionary License) — Version 1.0 (2025)
+ *
+ * Copyright (c) 2025 Taheesh Valentine
+ *
+ * This source code is protected under the TJVD License.
+ * SEE LICENSE.TXT
+ */
+
+package com.tjxjnoobie.api.dependency.injection.helpers.interfaces;
+
+import com.tjxjnoobie.api.interfaces.IContext;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * IContextInjectionHelper – contract for context-based injection orchestration.
+ * Provides default no-op implementations so callers can safely depend on the API
+ * while concrete helpers override behavior.
+ */
+public interface IContextInjectionHelper extends IDependencyInjectorHelper {
+
+    /**
+     * Injects dependencies into a target using a single source context's dependency map.
+     */
+    default void injectFieldsFromContext(Object target, IContext<?> context) {
+        // Default no-op
+    }
+
+    /**
+     * Injects dependencies into a target object from multiple contexts.
+     */
+    default void injectFieldsFromContexts(Object target, List<IContext<?>> contexts) {
+        // Default no-op
+    }
+
+    /**
+     * Performs wave-based injection across provided contexts.
+     * Returns the set of objects injected during the first wave.
+     */
+    default Set<Object> performWaveInjection(List<IContext<?>> contexts) {
+        return new HashSet<>();
+    }
+
+    /**
+     * Injects static fields for the specified class.
+     */
+    default void injectStaticFields(Class<?> clazz) {
+        // Default no-op
+    }
+
+    /**
+     * Determines whether the given object has no @Inject fields (leaf dependency).
+     */
+    default boolean hasNoInjectFields(Object obj) {
+        return true;
+    }
+}

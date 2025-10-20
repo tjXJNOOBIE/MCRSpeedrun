@@ -12,9 +12,9 @@ import java.util.function.Predicate;
  * Abstract base class for game state management providing common state transition functionality
  * @param <T> The context type this state manager operates with
  */
-public abstract class AbstractGameStateManager<T extends AbstractContext<?>> {
+public abstract class AbstractGameStateManager<T> {
     // TODO Change abstract context to interface?
-    protected final T context;
+    protected T context;
     protected volatile GameStateEnum currentState;
     protected volatile GameStateEnum previousState;
 
@@ -27,19 +27,21 @@ public abstract class AbstractGameStateManager<T extends AbstractContext<?>> {
     // State-specific data storage
     private final ConcurrentHashMap<GameStateEnum, Object> stateData = new ConcurrentHashMap<>();
     
-    protected AbstractGameStateManager(T context, GameStateEnum initialState) {
-        if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null");
-        }
+    protected AbstractGameStateManager( GameStateEnum initialState) {
+
         if (initialState == null) {
             throw new IllegalArgumentException("Initial state cannot be null");
         }
 
-        this.context = context;
         this.currentState = initialState;
         this.previousState = null;
     }
-    
+
+    // Game loop
+    protected abstract void onLobbyStart();
+    protected abstract void onPreGameStart();
+    protected abstract void onGameStart();
+    protected abstract void onGameEnd();
     /**
      * Gets the current game state
      * @return The current state
@@ -196,14 +198,7 @@ public abstract class AbstractGameStateManager<T extends AbstractContext<?>> {
         }
     }
     
-    /**
-     * Gets the context this state manager operates with
-     * @return The context instance
-     */
-    public T getContext() {
-        return context;
-    }
-    
+
     /**
      * Validates if a state transition is allowed
      * Subclasses should override this to implement specific transition rules

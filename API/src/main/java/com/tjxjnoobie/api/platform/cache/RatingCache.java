@@ -1,11 +1,13 @@
 package com.tjxjnoobie.api.platform.cache;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRatingAPI;
 import com.tjxjnoobie.api.interfaces.IRatingCache;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
+
 
 public class RatingCache implements IRatingCache {
 
@@ -16,10 +18,12 @@ public class RatingCache implements IRatingCache {
     private double rating;
     private double volatility;
     private double deviation;
-    private IRatingAPI ratingAPI;
+    @Inject private IRatingAPI ratingAPI;
 
 
+    public RatingCache() {
 
+    }
     public RatingCache(IRatingAPI ratingAPI, UUID uuid, double rating, double deviation, double volatility) {
         this.ratingAPI = ratingAPI;
         this.uuid = uuid;

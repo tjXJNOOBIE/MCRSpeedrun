@@ -51,7 +51,7 @@ public class BlockPlace implements Listener, BlockPlaceHandler {
             dataOut.writeInt(location.getBlockZ());
             dataOut.writeUTF(e.getBlock().getType().name());
             mainInterFace = InterfaceManager.getMainInterFace();
-            mainInterFace.sendPluginMessage(out.toByteArray());
+            // mainInterFace.sendPluginMessage(out.toByteArray());
         } catch (IOException io) {
             io.printStackTrace();
         }

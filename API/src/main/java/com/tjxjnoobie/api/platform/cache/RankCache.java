@@ -1,7 +1,9 @@
 package com.tjxjnoobie.api.platform.cache;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.platform.minecraft.velocity.Rank;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -12,13 +14,21 @@ public class RankCache implements IRankCache {
     public HashMap<UUID, Integer> powerLevel = new HashMap<>();
     public HashMap<UUID, Set<String>> permissions = new HashMap<>();
     public List<String> allRanks = new ArrayList<>();
-    private final Rank rankClass;
+    @Inject private IRank rankClass;
 
-    public RankCache(Rank rankClass) throws SQLException {
-        this.rankClass = rankClass;
-        allRanks.add(rankClass.getAllRanks());
+    public RankCache() {
+
     }
-
+    @PostConstruct
+    private void init() {
+        // This runs AFTER dependency injection
+        if (rankClass != null) {
+            allRanks.add(rankClass.getAllRanks());
+            System.out.println("[RankCache] Initialized with all ranks from Rank class");
+        } else {
+            System.err.println("[RankCache] Warning: rankClass is still null after injection!");
+        }
+    }
 
 
     @Override

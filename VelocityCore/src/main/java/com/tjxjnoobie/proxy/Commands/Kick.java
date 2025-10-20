@@ -1,6 +1,6 @@
 package com.tjxjnoobie.proxy.Commands;
 
-import com.tjxjnoobie.api.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IProxyUtils;
 import com.tjxjnoobie.api.interfaces.IPunishManager;

@@ -50,8 +50,9 @@
       <artifactId>paper-api</artifactId>
     </dependency>
       <dependency>
-          <groupId>com.tjxjnoobie.api</groupId>
-          <artifactId>API</artifactId>
+          <groupId>com.tjxjnoobie</groupId>
+          <artifactId>api</artifactId>
+
       </dependency>
 
   </dependencies>

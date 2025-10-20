@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.abstracts;
 
-import com.tjxjnoobie.api.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 
 /**
@@ -11,7 +11,10 @@ public abstract class AbstractManager<T extends IGlobalContext>  {
 
     @Inject protected T context;
     protected volatile boolean initialized = false;
-    
+
+    protected AbstractManager() {
+
+    }
     protected AbstractManager(T context) {
         if (context == null) {
             throw new IllegalArgumentException("Context cannot be null");

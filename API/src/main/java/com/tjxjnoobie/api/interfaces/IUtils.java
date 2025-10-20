@@ -1,6 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import org.bukkit.Bukkit;
 
@@ -14,18 +16,30 @@ import java.util.Map;
  * Interface for utility functions providing common server operations and formatting
  * This interface defines essential utility methods for server management, messaging,
  * time formatting, and configuration handling.
+ * 
+ * @param <T> The type of context this utility interface works with
  */
-public interface IUtils {
+
+public interface IUtils<T>  {
     String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     String prefix = "§6§lNovus§8§l »»§f ";
-    String staffPrefix = "§4§lNovus §8§l»»§c ";
+    String staffPrefix = "��4§lNovus §8§l»»§c ";
     String serverID = null;
     String gameID = "";
 
     //TODO Update methods to not use globalContext in methods
 
-
-
+    /**
+     * Gets the context instance
+     * Uses the default implementation from ContextAccess with a fallback
+     * 
+     * @return The context instance
+     */
+    @Inject
+    default IGlobalContext getGlobalContext(){
+        return null;
+    }
+    
 
 
     /**
@@ -49,7 +63,7 @@ public interface IUtils {
     }
 
     default String getGameID() {
-        return gameID;
+        return getGlobalContext().getLocalServerMetaData().getGameID();
     }
 
     /**
@@ -58,14 +72,17 @@ public interface IUtils {
      *
      * @return The server ID string, typically a randomly generated alphanumeric code
      */
-    default String getServerID(IGlobalContext context) {
-        IUtils utils = context.getUtils();
-        return utils.getServerID(context);
+    default String getServerID() {
+        String serverID = getGlobalContext().getLocalServerMetaData().getServerID();
+    Log.info("[ID] Retrieving server ID... " + serverID);
+
+        return serverID;
 
     }
 
-    default void createServerID(IGlobalContext globalContext) {
-        globalContext.getLocalServerMetaData().setServerID(generateRandomID(5));
+    default void createServerID() {
+        Log.info("[ID] Creating new server ID...");
+        getGlobalContext().getLocalServerMetaData().setServerID(generateRandomID(5));
     }
 
     default void createGameID(IGlobalContext globalContext) {
@@ -80,6 +97,8 @@ public interface IUtils {
             int index = secureRandom.nextInt(CHARACTERS.length());
             id.append(CHARACTERS.charAt(index));
         }
+        Log.info("[ID] Generated ID: " + id.toString());
+
 
         return id.toString();
     }

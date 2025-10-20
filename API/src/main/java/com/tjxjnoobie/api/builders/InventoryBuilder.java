@@ -1,6 +1,5 @@
 package com.tjxjnoobie.api.builders;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.InventoryType;
 import com.tjxjnoobie.api.exceptions.*;
 import com.tjxjnoobie.api.interfaces.Debuggable;
@@ -19,14 +18,17 @@ import java.util.List;
 
 public class InventoryBuilder implements IInventoryBuilder, Debuggable {
     
-    private final Player player;
-    private final InventoryManager inventoryManager;
+    private Player player;
+    private InventoryManager inventoryManager;
     private String title;
     private int size;
     private InventoryType type;
     private int page;
     private Inventory inventory;
-    
+
+    public InventoryBuilder() {
+
+    }
     public InventoryBuilder(Player player, InventoryManager inventoryManager) {
         if (player == null) {
             throw new IllegalArgumentException("Player cannot be null");
@@ -44,10 +46,7 @@ public class InventoryBuilder implements IInventoryBuilder, Debuggable {
         sendDebugMessage(player, "[BUILDER]", "Created InventoryBuilder with defaults");
     }
     
-    @Override
-    public GlobalContext getGlobalContext() {
-        return inventoryManager.getGlobalContext();
-    }
+
     
     /**
      * Validates inventory size

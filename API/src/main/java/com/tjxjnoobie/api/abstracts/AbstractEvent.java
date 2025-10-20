@@ -1,10 +1,10 @@
 package com.tjxjnoobie.api.abstracts;
 
-import com.tjxjnoobie.api.console.Log;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.enums.*;
-import com.tjxjnoobie.api.internal.events.EventContext;
-import com.tjxjnoobie.api.internal.events.EventSerializer;
-import com.tjxjnoobie.api.internal.events.interfaces.EventListener;
+import com.tjxjnoobie.api.internal.event.EventContext;
+import com.tjxjnoobie.api.internal.event.EventSerializer;
+import com.tjxjnoobie.api.internal.event.tags.interfaces.EventListener;
 
 import java.util.EnumSet;
 import java.util.List;

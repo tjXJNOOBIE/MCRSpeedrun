@@ -1,16 +1,13 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.builders.InventoryBuilder;
-import com.tjxjnoobie.api.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.InventoryType;
 import com.tjxjnoobie.api.exceptions.InvalidInventoryTypeException;
 import com.tjxjnoobie.api.exceptions.InvalidPageNumberException;
 import com.tjxjnoobie.api.exceptions.InventoryCreationException;
 import com.tjxjnoobie.api.exceptions.InventoryNotPageableException;
-import com.tjxjnoobie.api.interfaces.Debuggable;
-import com.tjxjnoobie.api.interfaces.IInventoryManager;
-import com.tjxjnoobie.api.interfaces.IUtils;
-import com.tjxjnoobie.api.interfaces.IVoting;
+import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.minecraft.inventory.InventoryHistory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,10 +17,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
-public class InventoryManager implements IInventoryManager, Debuggable, IUtils {
+
+public  class InventoryManager implements IInventoryManager, Debuggable, IUtils<IGlobalContext> {
     
-    private final GlobalContext globalContext;
-    
+   @Inject private IGlobalContext globalContext;
+   @Inject private IVoting voting;
     // Instance maps to track player inventory types
     private final Map<UUID, InventoryType> playerInventoryTypes = new HashMap<>();
     
@@ -36,12 +34,7 @@ public class InventoryManager implements IInventoryManager, Debuggable, IUtils {
     // Set of inventory types that support pagination
     private final Set<InventoryType> pageableInventoryTypes = new HashSet<>();
 
-    public InventoryManager(GlobalContext globalContext) {
-        if (globalContext == null) {
-            throw new IllegalArgumentException("GlobalContext cannot be null");
-        }
-        this.globalContext = globalContext;
-        
+    public InventoryManager() {
         // Initialize default pageable inventory types
         initializePageableTypes();
     }
@@ -60,10 +53,7 @@ public class InventoryManager implements IInventoryManager, Debuggable, IUtils {
         // CONFIRM, VOTING, SETTINGS, PROFILE typically don't need pagination
     }
     
-    @Override
-    public GlobalContext getGlobalContext() {
-        return globalContext;
-    }
+
     
     /**
      * Validates player and throws exception if null
@@ -444,7 +434,7 @@ public class InventoryManager implements IInventoryManager, Debuggable, IUtils {
             validatePlayer(player);
             
             int size = 27; // A 3-row inventory
-            IVoting voting = globalContext.getVoting();
+
             
             if (voting == null) {
                 sendDebugMessage(player, "[MANAGER]", "Voting system not available");
@@ -486,5 +476,12 @@ public class InventoryManager implements IInventoryManager, Debuggable, IUtils {
     @Override
     public void openConfirmMenu(Player player) {
         openConfirmMenu(player, "§4§lAre you sure?");
+    }
+
+    // TODO: Try to inject default methods in impled interfaces
+    //  instead of Overriding in a weird place
+    @Override
+    public IGlobalContext getGlobalContext() {
+        return globalContext;
     }
 }

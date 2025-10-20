@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
+import com.tjxjnoobie.api.interfaces.IStatsManager;
 import org.bukkit.Bukkit;
 
 import java.sql.PreparedStatement;
@@ -7,7 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class StatsManager {
+public class StatsManager implements IStatsManager {
 
     public int getStat(String game, UUID uuid, String stat) {
         int i = 0;

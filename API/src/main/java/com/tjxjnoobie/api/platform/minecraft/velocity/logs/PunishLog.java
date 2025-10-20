@@ -1,16 +1,22 @@
 package com.tjxjnoobie.api.platform.minecraft.velocity.logs;
 
+import com.tjxjnoobie.api.interfaces.IPunishLog;
+
 import java.sql.Timestamp;
 
-public class PunishLog {
+public class PunishLog implements IPunishLog {
 
-    private final String uuid;
-    private final String punishment;
-    private final Timestamp startDate;
-    private final Timestamp endDate;
-    private final String sender;
-    private final String punished;
-    private final String reason;
+    private String uuid;
+    private String punishment;
+    private Timestamp startDate;
+    private Timestamp endDate;
+    private String sender;
+    private String punished;
+    private String reason;
+
+   public PunishLog(){
+
+   }
 
     public PunishLog(String uuid, String punishment, Timestamp startDate,Timestamp endDate, String sender, String punished, String reason){
         this.uuid = uuid;
@@ -22,7 +28,7 @@ public class PunishLog {
         this.reason = reason;
     }
 
-    
+
     public String getPunishment() {
         return punishment;
     }

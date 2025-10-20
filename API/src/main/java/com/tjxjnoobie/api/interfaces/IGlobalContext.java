@@ -1,29 +1,33 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.annotations.AutoInjectAll;
+import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
+import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.IConfigUtils;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.ITimeUtils;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.HashMap;
 
 /**
- * Interface for GlobalContext to provide dependency injection capabilities
+ * Interface for GlobalContext to provide dependency injection capabilities and metadata operations.
  */
-@AutoInjectAll
-public interface IGlobalContext  {
+@Injectable("Global Context Interface")
+public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
 
+
+    void initializeDependencies();
+
+    IGlobalContext getGlobalContext();
 
     // Core getters using interfaces
     Plugin getPlugin();
     IGameMode getGameMode();
     IGameState getGameState();
-    IUtils getUtils();
+    IUtils<IGlobalContext> getUtils();
     ISpeedrunStatsCache getSpeedrunStatsCache();
     IMCUtils getMcUtils();
-    IWorldManager getWorldManager();
+    IWorldManager<ISpeedRunContext> getWorldManager();
     IRankMC getRankMC();
     IRatingCache getRatingCache();
     IRating getRating();
@@ -47,23 +51,24 @@ public interface IGlobalContext  {
     IPunishLog getPunishLog();
     IInventoryBuilder getInventoryBuilder();
     IInventoryManager getInventoryManager();
-    IVoting getVoting();
     IConfigUtils getConfigUtils();
     ITimeUtils getTimeUtils();
     ILocalServerMetaData getLocalServerMetaData();
 
     
     // Dependency map access
-    HashMap<Class<?>, Object> getDependencyMap();
+    DependencyMap getDependencyMap();
     <T> T get(Class<T> clazz);
     
     // Setters that return the context for method chaining
     IGlobalContext setGameMode(IGameMode gameMode);
     IGlobalContext setGameState(IGameState gameState);
-    IGlobalContext setUtils(IUtils utils);
+
+    IGlobalContext setUtils(IUtils<IGlobalContext> utils);
     IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache);
     IGlobalContext setMcUtils(IMCUtils mcUtils);
-    IGlobalContext setWorldManager(IWorldManager worldManager);
+
+    IGlobalContext setWorldManager(IWorldManager<ISpeedRunContext> worldManager);
     IGlobalContext setRankMC(IRankMC rankMC);
     IGlobalContext setRatingCache(IRatingCache ratingCache);
     IGlobalContext setRating(IRating rating);
@@ -75,7 +80,6 @@ public interface IGlobalContext  {
     IGlobalContext setRankCache(IRankCache rankCache);
     IGlobalContext setRetentionManager(IRetentionManager retentionManager);
     IGlobalContext setRedis(IRedis redis);
-    IGlobalContext setPlugin(Plugin plugin);
     IGlobalContext setGameType(IGameType gameType);
     IGlobalContext setProxyUtils(IProxyUtils proxyUtils);
     IGlobalContext setStatsManager(IStatsManager statsManager);
@@ -84,12 +88,32 @@ public interface IGlobalContext  {
     IGlobalContext setPunishManager(IPunishManager punishManager);
     IGlobalContext setPunishLog(IPunishLog punishLog);
     IGlobalContext setInventoryManager(IInventoryManager inventoryManager);
-    IGlobalContext setVoting(IVoting voting);
     IGlobalContext setInventoryBuilder(IInventoryBuilder inventoryBuilder);
     IGlobalContext setConfigUtils(IConfigUtils configUtils);
     IGlobalContext setTimeUtils(ITimeUtils timeUtils);
     IGlobalContext setLocalServerMetaData(ILocalServerMetaData localServerMetaData);
-    IGlobalContext setPlugin(JavaPlugin plugin);
+
+    IGlobalContext setInterfaceManager(InterfaceManager interfaceManager);
+
+    IGlobalContext setGlobalContext(IGlobalContext globalContext);
+    IGlobalContext setPlugin(Plugin plugin);
+    InterfaceManager getInterfaceManager();
 
     void buildGlobalContext();
+
+    /**
+     * Get the metadata provider for delegation.
+     * Implementations should return their composed IAbstractClassMetaData instance.
+     * @return The metadata provider instance
+     */
+    IAbstractClassMetaData<GlobalContext> getMetadataProvider();
+    
+    /**
+     * Get the AbstractClassMetaData instance for direct access.
+     * @return The AbstractClassMetaData instance
+     */
+    default Object getAbstractClassMetaDataInstance() {
+        return getMetadataProvider();
+    }
+
 }

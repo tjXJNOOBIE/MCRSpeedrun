@@ -1,10 +1,11 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.cache.RatingCache;
-import com.tjxjnoobie.speed.managers.BossBarManager;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -21,22 +22,22 @@ import org.bukkit.scheduler.BukkitTask;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunJoinEvent implements Listener {
+public class SpeedRunJoinEvent implements Listener, IBossBarManager {
 
-    private final ISpeedRunContext speedRunContext;
-
+    @Inject private ISpeedRunContext speedRunContext;
 
     public BukkitTask bossBar;
-    public BossBarManager bossBarManager = new BossBarManager("Waiting for players..." + " has joined", BarColor.BLUE, BarStyle.SOLID);
-
-
-
-
-
-    public SpeedRunJoinEvent(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
+    
+    
+    @PostConstruct
+    private void init() {
+        createBossBar("Waiting for players..." + " has joined", BarColor.BLUE, BarStyle.SOLID);
 
     }
+
+
+
+
     @EventHandler
     public void onJoin(PlayerJoinEvent e) throws SQLException {
         IUtils utils = speedRunContext.getUtils();
@@ -46,6 +47,7 @@ public class SpeedRunJoinEvent implements Listener {
             Bukkit.getLogger().info("Speedrun join event: GameType is not SPEEDRUN!");
             return;
         }
+
         IRatingCache ratingCache = speedRunContext.getRatingCache();
         IGameState gameState = speedRunContext.getGameState();
         IGameManager gameManager = speedRunContext.getGameManager();
@@ -76,7 +78,7 @@ public class SpeedRunJoinEvent implements Listener {
         Bukkit.getLogger().info(name + " Logged in with Rating: " + ratingCache.getRating() + " Deviation: " + ratingCache.getDeviation() + " Vol: " + ratingCache.getVolatility());
 
         mcUtils.cancelTask(bossBar);
-        bossBarManager.addPlayer(player);
+        addPlayer(player); // Add player to the boss bar
 
         if (isQuitPlayer && currentGameState != GameStateEnum.LOBBY && currentGameState != GameStateEnum.ENDING) {
             e.setJoinMessage(displayName + ChatColor.DARK_GRAY + " rejoined");
@@ -105,8 +107,8 @@ public class SpeedRunJoinEvent implements Listener {
         }
 
         String message = "§b§l▶▶ §c" + startPlayers + "§e Players needed to start.. §b§l◀◀";
-        bossBarManager.updateTitle(message);
-        bossBarManager.updateProgress(progress);
+        updateTitle(message);
+        updateProgress(progress);
 
         startBossBarTask(player, currentGameState, plugin);
     }
@@ -142,7 +144,7 @@ public class SpeedRunJoinEvent implements Listener {
                 GameStateEnum gameState = currentGameState;
 
                 if (gameState != GameStateEnum.LOBBY) {
-                    bossBarManager.removePlayer(player);
+                      removePlayer(player);
                     cancel();
                     return;
                 }
@@ -169,7 +171,7 @@ public class SpeedRunJoinEvent implements Listener {
                 if (tickCounter % 20 == 0) {
                     dotCount = (dotCount + 1) % 5; // Cycle through 0 to 4
                     String dots = ".".repeat(dotCount);
-                    bossBarManager.updateTitle("§b§l▶▶ §e Waiting for players" + dots + " §b§l◀◀");
+                      updateTitle("§b§l▶▶ §e Waiting for players" + dots + " §b§l◀◀");
 
                     if (dotCount == 4) {
                         currentState = DisplayState.PLAYERS_NEEDED;
@@ -187,8 +189,8 @@ public class SpeedRunJoinEvent implements Listener {
                 if (tickCounter % 20 == 0) {
                     dotCount = (dotCount + 1) % 5; // Cycle through 0 to 4
                     String dots = ".".repeat(dotCount);
-                    bossBarManager.updateProgress(progress);
-                    bossBarManager.updateTitle("§b§l▶▶ §c" + playersNeeded + "§e Players needed to start" + dots + " §b§l◀◀");
+                      updateProgress(progress);
+                      updateTitle("§b§l▶▶ §c" + playersNeeded + "§e Players needed to start" + dots + " §b§l◀◀");
 
                     if (playersNeeded <= 0) {
                         currentState = DisplayState.GAME_STARTING;
@@ -227,7 +229,7 @@ public class SpeedRunJoinEvent implements Listener {
                 ChatColor currentArrowColor = arrowColors[arrowColorIndex];
                 String bossBarMessage = currentArrowColor + "▶▶ " + rainbowMessage + " " + currentArrowColor + "◀◀";
 
-                bossBarManager.updateTitle(bossBarMessage);
+                  updateTitle(bossBarMessage);
             }
         }.runTaskTimer(plugin, 0L, 1L); // Schedule to run every tick
     }

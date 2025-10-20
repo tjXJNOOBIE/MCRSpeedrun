@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import org.bukkit.entity.Player;
 
 import java.util.Map;

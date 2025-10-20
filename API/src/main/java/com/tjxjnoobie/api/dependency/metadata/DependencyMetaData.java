@@ -1,0 +1,356 @@
+/*
+ * TJVD License (TJ Valentine’s Discretionary License) — Version 1.0 (2025)
+ *
+ * Copyright (c) 2025 Taheesh Valentine
+ *
+ * This source code is protected under the TJVD License.
+ * SEE LICENSE.TXT
+ */
+
+package com.tjxjnoobie.api.dependency.metadata;
+
+import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
+import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Supplier;
+
+
+public class DependencyMetaData implements IDependencyMetaData {
+    private final Class<?> dependencyClass;
+    private Set<Class<?>> dependencies = new HashSet<>();
+    private int priority;
+    private int depth;
+    private DependencyRole role;
+    private final Map<LifecycleType, Method> lifecycleMethods = new EnumMap<>(LifecycleType.class);
+    private final Map<LifecycleType, Boolean> lifecycleSuccess = new EnumMap<>(LifecycleType.class);
+    private int retryCount;
+    private Object instance; // optional actual bound object
+    private IContext<?> sourceContext; // which context owns it
+    private Supplier<?> factory; // factory for creating instances
+
+    public DependencyMetaData(Class<?> dependencyClass) {
+        this.dependencyClass = dependencyClass;
+    }
+
+    /**
+     * Populates the metadata for this component by scanning fields and methods for annotations.
+     * This method identifies dependencies and pre-construction methods based on @Inject and @PreConstruct annotations.
+     *
+     * @param clazz the class to scan for dependencies and pre-construction methods
+     */
+    public void populateMetaData(Class<?> clazz) {
+        Set<Class<?>> dependencies = new HashSet<>();
+        for (Field field : clazz.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Inject.class)) {
+                dependencies.add(field.getType());
+            }
+        }
+        // Track inheritance
+        if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
+            dependencies.add(clazz.getSuperclass());
+        }
+        dependencies.addAll(Arrays.asList(clazz.getInterfaces()));
+
+        this.setDependencies(dependencies);
+        this.depth = calculateDepth(clazz, dependencies);
+        this.role = determineRole(dependencies);
+        // Detect lifecycle methods via enum
+        for (LifecycleType type : LifecycleType.values()) {
+            type.findIn(clazz).ifPresent(m -> lifecycleMethods.put(type, m));
+        }
+    }
+
+    // --- Getters / setters ---
+
+    /**
+     * Gets the metadata for a given class.
+     *
+     * @param clazz The class type
+     * @return The metadata, or null if not found
+     */
+    public IDependencyMetaData getMetaData(Class<?> clazz) {
+        return this;
+    }
+    /**
+     * Returns the class of the dependency that this metadata represents.
+     * This is the primary type being managed by the dependency graph.
+     *
+     * @return the class of the dependency
+     */
+    public Class<?> getDependencyClass() {
+        return dependencyClass;
+    }
+
+    /**
+     * Returns the set of classes that this component directly depends on.
+     * These are the types that must be resolved before this component can be initialized.
+     *
+     * @return a read-only set of dependency classes
+     */
+    public Set<Class<?>> getDependencies() {
+        return dependencies;
+    }
+
+    /**
+     * Sets the direct dependencies of this component.
+     * This allows configuration of which types must be resolved prior to this component's initialization.
+     *
+     * @param deps the set of classes this component depends on
+     */
+    public void setDependencies(Set<Class<?>> deps) {
+        this.dependencies = deps;
+    }
+
+    /**
+     * Returns the depth level of this component within the dependency resolution graph.
+     * Depth is used to determine the order of component initialization and resolution.
+     *
+     * @return the depth level (lower values mean earlier in the resolution order)
+     */
+    public int getDepth() {
+        return depth;
+    }
+
+    /**
+     * Sets the depth level of this component within the dependency resolution graph.
+     * This influences the order in which components are resolved and initialized.
+     *
+     * @param depth the depth level (lower values mean earlier in the resolution order)
+     */
+    public void setDepth(int depth) {
+        this.depth = depth;
+    }
+
+    /**
+     * Returns the role assigned to this component in the dependency graph.
+     * Roles define responsibilities such as whether a component is a provider or consumer.
+     *
+     * @return the role of this component
+     */
+    public DependencyRole getRole() {
+        return role;
+    }
+
+    /**
+     * Sets the role of this component in the dependency graph.
+     * This determines how the component behaves in the resolution and lifecycle management.
+     *
+     * @param role the role assigned to this component
+     */
+    public void setRole(DependencyRole role) {
+        this.role = role;
+    }
+
+    /**
+     * Returns the pre-construction method associated with this component.
+     * This method is invoked before the instance is fully constructed and is used for setup or validation.
+     *
+     * @return the pre-construction method, or null if not set
+     */
+    public Method getPreConstruct() {
+        return lifecycleMethods.get(LifecycleType.PRE_CONSTRUCT);
+    }
+
+    /**
+     * Sets the pre-construction method for this component.
+     * This method is called before the instance is initialized and is used for setup or validation.
+     *
+     * @param preConstruct the method to invoke before construction
+     */
+    public void setPreConstruct(Method preConstruct) {
+        if (preConstruct == null) lifecycleMethods.remove(LifecycleType.PRE_CONSTRUCT);
+        else lifecycleMethods.put(LifecycleType.PRE_CONSTRUCT, preConstruct);
+    }
+
+    /**
+     * Returns the post-construction method associated with this component.
+     * This method is invoked after the instance is fully constructed and dependencies are injected.
+     *
+     * @return the post-construction method, or null if not set
+     */
+    public Method getPostConstruct() {
+        return lifecycleMethods.get(LifecycleType.POST_CONSTRUCT);
+    }
+
+    /**
+     * Sets the post-construction method for this component.
+     * This method is called after the instance is initialized and dependencies are injected.
+     *
+     * @param postConstruct the method to invoke after construction
+     */
+    public void setPostConstruct(Method postConstruct) {
+        if (postConstruct == null) lifecycleMethods.remove(LifecycleType.POST_CONSTRUCT);
+        else lifecycleMethods.put(LifecycleType.POST_CONSTRUCT, postConstruct);
+    }
+
+    /**
+     * Checks whether the pre-construction method executed successfully.
+     * This flag indicates whether the setup phase completed without errors.
+     *
+     * @return true if the pre-construction succeeded, false otherwise
+     */
+    public boolean isPreConstructSuccess() {
+        return lifecycleSuccess.getOrDefault(LifecycleType.PRE_CONSTRUCT, false);
+    }
+
+    /**
+     * Updates the success status of the pre-construction phase.
+     * This is used to track whether setup operations completed successfully.
+     *
+     * @param success true if the pre-construction succeeded, false otherwise
+     */
+    public void setPreConstructSuccess(boolean success) {
+        lifecycleSuccess.put(LifecycleType.PRE_CONSTRUCT, success);
+    }
+
+    /**
+     * Returns the number of retry attempts made for this component during initialization.
+     * Retries are used when dependency resolution fails and must be attempted again.
+     *
+     * @return the retry count
+     */
+    public int getRetryCount() {
+        return retryCount;
+    }
+
+    /**
+     * Increments the retry count for this component.
+     * This is used to track how many times initialization has failed and been retried.
+     */
+    public void incrementRetryCount() {
+        this.retryCount++;
+    }
+
+    /**
+     * Returns the bound instance of this component, if any.
+     * This is the actual object created and managed by the dependency graph.
+     *
+     * @return the bound instance, or null if not yet bound
+     */
+    public Object getDependencyInstance(Class<?> aClass) {
+        return instance;
+    }
+
+    /**
+     * Sets the bound instance of this component.
+     * This is used to store the actual object instance after successful construction.
+     *
+     * @param instance the instance to bind
+     */
+    public void setInstance(Object instance) {
+        this.instance = instance;
+    }
+
+    /**
+     * Returns the source context that owns this dependency metadata.
+     * This identifies the context in which this component is being managed.
+     *
+     * @return the source context, or null if not assigned
+     */
+    public IContext<?> getSourceContext() {
+        return sourceContext;
+    }
+
+    /**
+     * Assigns the source context that owns this dependency metadata.
+     * This is used to track which context is responsible for managing this component.
+     *
+     * @param ctx the context that owns this metadata
+     */
+    public void setSourceContext(IContext<?> ctx) {
+        this.sourceContext = ctx;
+    }
+
+    /**
+     * Returns the priority of this component within the dependency graph.
+     * Priority influences resolution and initialization precedence relative to other components.
+     *
+     * @return the priority value
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * Sets the priority of this component within the dependency graph.
+     * Priority influences resolution and initialization precedence relative to other components.
+     *
+     * @param priority the priority value to assign
+     */
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    /**
+     * Returns the factory supplier for creating instances of this dependency.
+     * The factory is used to create new instances on demand rather than using a singleton.
+     *
+     * @return the factory supplier, or null if not set
+     */
+    public Supplier<?> getFactory() {
+        return factory;
+    }
+
+    /**
+     * Sets the factory supplier for creating instances of this dependency.
+     * This allows dynamic instance creation rather than singleton behavior.
+     *
+     * @param factory the supplier that creates new instances
+     */
+    public void setFactory(Supplier<?> factory) {
+        this.factory = factory;
+    }
+
+
+    /**
+     * Calculates the depth level of a component based on its dependency nesting.
+     * Depth is determined by examining the declaring class hierarchy of dependencies.
+     * 
+     * @param clazz the class being analyzed
+     * @param deps the set of dependencies for this class
+     * @return the calculated depth level (0 for no dependencies, higher for nested dependencies)
+     */
+    public int calculateDepth(Class<?> clazz, Set<Class<?>> deps) {
+        if (deps.isEmpty()) return 0;
+        int maxDepth = 0;
+        for (Class<?> dep : deps) {
+            if (dep != null && dep.getDeclaringClass() != null) {
+                maxDepth = Math.max(maxDepth, dep.getDeclaringClass().getDeclaringClass() != null ? 1 : 0);
+            }
+        }
+        return maxDepth;
+    }
+
+    /**
+     * Determines the role of a component within the dependency graph based on its dependency count.
+     * Roles help categorize components by their position and responsibility in the dependency hierarchy.
+     * 
+     * @param deps the set of dependencies for this component
+     * @return BASE if no dependencies, INTERMEDIATE if one dependency, ISOLATED otherwise
+     */
+    public DependencyRole determineRole(Set<Class<?>> deps) {
+        if (deps.isEmpty()) return DependencyRole.BASE;
+        if (deps.size() == 1) return DependencyRole.INTERMEDIATE;
+        return DependencyRole.ISOLATED;
+    }
+
+    /**
+     * Checks if a dependency has an instance bound.
+     *
+     * @param clazz The class type to check
+     * @return true if an instance exists, false otherwise
+     */
+    @Override
+    public boolean hasInstance(Class<?> clazz) {
+        return getMetaData(clazz) != null && getDependencyInstance(clazz) != null;
+    }
+
+}
+
+

@@ -1,13 +1,15 @@
 package com.tjxjnoobie.api.platform.cache;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.interfaces.ISpeedrunStatsCache;
 import com.tjxjnoobie.api.interfaces.IStatsManager;
 
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class SpeedrunStatsCache   {
+public class SpeedrunStatsCache implements ISpeedrunStatsCache {
 
     public HashMap<UUID, Integer> wins = new HashMap<>();
     public HashMap<UUID, Integer> losses = new HashMap<>();
@@ -19,11 +21,8 @@ public class SpeedrunStatsCache   {
     public HashMap<UUID, String> best_time = new HashMap<>();
     public HashMap<UUID, Long> best_timelong = new HashMap<>();
 
-    private final IGlobalContext globalContext;
+    @Inject private IGlobalContext globalContext;
 
-    public SpeedrunStatsCache(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
 
 
     public void createStorage(UUID uuid) throws SQLException {

@@ -9,7 +9,7 @@
 
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.console.Log;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.exceptions.InvalidGameStateChangeException;
 
 import java.util.Arrays;

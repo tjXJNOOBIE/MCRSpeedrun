@@ -1,6 +1,7 @@
 package com.tjxjnoobie.speed.managers;
 
 import com.tjxjnoobie.api.abstracts.AbstractGameStateManager;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
@@ -21,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class GameManager extends AbstractGameStateManager<SpeedRunContext> implements IGameManager, IUtils, IMCUtils{
+public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager<ISpeedRunContext>, IMCUtils {
 
     public HashMap<Long, Location> spawn = new HashMap<>();
     public HashMap<UUID, String> ingame = new HashMap<>();
@@ -60,8 +61,9 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     public boolean canMove = true;
     public GameStateEnum gameStateEnum;
 
-    private final SpeedRunContext speedRunContext;
-    private final IGlobalContext globalContext;
+    @Inject private SpeedRunContext speedRunContext;
+    @Inject private IGlobalContext globalContext;
+    @Inject private Plugin plugin; // Will be injected automatically from context
     private BukkitTask lobbyTimer;
     private BukkitTask lobby;
     private BukkitTask checkers;
@@ -70,41 +72,37 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     public BukkitTask hotBarTimer;
 
 
-
-    public GameManager(SpeedRunContext speedRunContext, IGlobalContext globalContext) {
-        super(speedRunContext,GameStateEnum.LOBBY);
-
-        this.speedRunContext = speedRunContext;
-        this.globalContext = globalContext;
+    public GameManager() {
+        super(GameStateEnum.LOBBY);
     }
 
 
-    @Override
+      
     public long getSeed() {
         return seed;
     }
 
-    @Override
+      
     public long getTimeElapsedLong() {
         return timeElapsed;
     }
 
-    @Override
+      
     public int getMinPlayers() {
         return minPlayers;
     }
 
-    @Override
+      
     public int getCurrentPlayers() {
         return ingame.size();
     }
 
-    @Override
+      
     public long getFinalTime(UUID uuid){
         return final_time.get(uuid);
     }
 
-    @Override
+      
     public String getFinalTimeString(UUID uuid){
         long finalTime = final_time.get(uuid);
         finalTime = System.currentTimeMillis() - startTime;
@@ -118,7 +116,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
 
         return String.format("§a%02d§8:§a%02d§8:§a%02d§8.§a%02d", hours, minutes, seconds, milliseconds);
     }
-    @Override
+      
     public String getCurrentTime(){
         long finalTime = System.currentTimeMillis() - startTime;
         long hours = finalTime / (1000 * 60 * 60);
@@ -129,12 +127,12 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
         // Format time
         return String.format("%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds);
     }
-    @Override
+      
     public long getCurrentTimeLong(){
         return System.currentTimeMillis() - startTime;
     }
 
-    @Override
+      
     public UUID getPlayerUUID(String name) {
         Map.Entry<UUID, String> playeruuid = null;
         for (Map.Entry<UUID, String> entry : allPlayers.entrySet()) {
@@ -364,17 +362,15 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     public void runCheckers(){
         IGameState gameState = speedRunContext.getGameState();
         IGameMode gameMode = speedRunContext.getGameMode();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
+         
        checkers = new BukkitRunnable(){
-            @Override
+              
             public void run() {
                 GameStateEnum currentState = gameState.getCurrentState();
                 int ingameSize = ingame.size();
                 int soloMessage = 29;
                 GameModeEnum currentGM = gameMode.getCurrentGameMode();
-                Player player = mcUtils.getAllPlayers();
+                Player player =   getAllPlayers();
                 if(player == null){
                     return;
                 }
@@ -386,7 +382,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
                         if(soloMessage == 30)
                         canSolo = true;
                         Bukkit.broadcastMessage(getStaffPrefix() + "You can play SOLO! Just type /solo");
-                        mcUtils.playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+                          playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
                         if(soloMessage == 0) {
                             soloMessage = 30;
                         }
@@ -395,13 +391,13 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
                     }
 
                     if (ingameSize == minPlayers) {
-                        Player allPlayers = mcUtils.getAllPlayers();
+                        Player allPlayers =   getAllPlayers();
                         Location pLocation = allPlayers.getLocation();
                         Bukkit.broadcastMessage(getStaffPrefix() + "Minimum number of players reached! Starting match...");
 
                         lobbyCountdown = 11;
                         startLobbyCountdown();
-                        mcUtils.playSoundForAll(pLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                          playSoundForAll(pLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                         cancel();
                     }
 
@@ -419,11 +415,11 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     }
     public void startLobby() {{
         IGameState gameState = speedRunContext.getGameState();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
+          
+          
+         
             new BukkitRunnable() {
-                @Override
+                  
                 public void run() {
                     Bukkit.broadcastMessage("Running Lobby Checker");
 
@@ -443,13 +439,13 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
                     }
 
                     if (ingame < minPlayers && currentState == GameStateEnum.LOBBY) {
-                        Player players = mcUtils.getAllPlayers();
+                        Player players =   getAllPlayers();
                         if(players == null){
                             return;
                         }
                         Location plocation = players.getLocation();
                         Bukkit.broadcastMessage(getPrefix() + "§c" + startPlayers + " §fMore player(s) are needed to start ");
-                        mcUtils.playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+                          playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
                         players.playSound(plocation,Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
                     }else{
                         cancel();
@@ -463,32 +459,31 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
 
     public void startPreGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
+          
+        
         ISpeedRunJoinEvent joinEvent = speedRunContext.getJoinEvent();
         IBossBarManager bossBarManager = speedRunContext.getBossBarManager();
         new BukkitRunnable() {
-            @Override
+              
             public void run() {
                 teleportPlayersToWorlds();
             }
         }.runTaskLater(plugin, 20 * 5);
 
-        Player aplayers = mcUtils.getAllPlayers();
-        String serverID = utils.getServerID(globalContext);
+        Player aplayers = getAllPlayers();
+        String serverID =   getServerID();
         gameState.setGameState(GameStateEnum.PREGAME, serverID);
         createWorlds(World.Environment.NORMAL);
         new BukkitRunnable() {
-            @Override
+              
             public void run() {
-                Player allPlayers = mcUtils.getAllPlayers();
-                Location allPlayersLocation = mcUtils.getAllPlayers().getLocation();
+                Player allPlayers = getAllPlayers();
+                Location allPlayersLocation = getAllPlayers().getLocation();
 
                 if (preGameCount == 0) {
                     cancel();
                     Bukkit.broadcastMessage(getPrefix()+ "Match has started!");
-                    mcUtils.playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                    playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Final title update before match starts
                     allPlayers.sendTitle("§aMATCH STARTED!!!", "", 10, 40, 10);
@@ -510,7 +505,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
 
                 if (preGameCount == 60 || preGameCount == 30 || (preGameCount <= 10 && preGameCount > 0)) {
                     Bukkit.broadcastMessage(getPrefix()+ "Match starting in §c" + preGameCount + " §fseconds!");
-                    mcUtils.playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                    playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 10 seconds
                     if (preGameCount == 10) {
@@ -532,19 +527,18 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
 
     public void startLobbyCountdown() {
         IVoting voting = speedRunContext.getVoting();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
+        
+         
         lobbyTimer = new BukkitRunnable() {
-            @Override
+              
             public void run() {
-                Player aplayers = mcUtils.getAllPlayers();
+                Player aplayers =   getAllPlayers();
                 Location aplocation = aplayers.getLocation();
                 Bukkit.broadcastMessage("Running Lobby countdown");
 
                 if (lobbyCountdown == 60 || lobbyCountdown == 30 || (lobbyCountdown <= 10 && lobbyCountdown > 0)) {
                     Bukkit.broadcastMessage(getPrefix()+ lobbyCountdown + " seconds until the match starts!");
-                    mcUtils.playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                      playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 60 seconds
                     if (lobbyCountdown == 60) {
@@ -560,7 +554,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
                     cancel();
                     Bukkit.broadcastMessage(getPrefix()+ "§cMatch is starting!");
                     canMove =false;
-                    mcUtils.playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                      playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Final title update
                     aplayers.sendTitle("§eMatch Starting...", "", 10, 40, 10);
@@ -581,16 +575,16 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     public void startGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
         IGameMode gameMode = speedRunContext.getGameMode();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
-        Plugin plugin = speedRunContext.getPlugin();
+          
+          
+         
         startTime = System.currentTimeMillis();
         runHotBarTimer();
         runGame();
         int players = ingame.size();
-        String serverID = utils.getServerID(globalContext);
+        String serverID =    getServerID();
         GameModeEnum CurrentGM = gameMode.getCurrentGameMode() ;
-        Player allPlayers = mcUtils.getAllPlayers();
+        Player allPlayers =   getAllPlayers();
         playDramaticBoom(allPlayers, plugin);
 
         if(players == 0 && CurrentGM == GameModeEnum.SOLO){
@@ -599,20 +593,20 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     }
 
     public void runGame() throws SQLException {
-        IUtils utils = speedRunContext.getUtils();
-        String serverID = utils.getServerID(globalContext);
+          
+        String serverID =    getServerID();
 
     }
 
 
     public void stopGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IUtils utils = speedRunContext.getUtils();
+          
+          
         IWorldManager worldManager = speedRunContext.getWorldManager();
-        Plugin plugin = speedRunContext.getPlugin();
-        String serverID = utils.getServerID(globalContext);
-        Player aplayers = mcUtils.getAllPlayers();
+         
+        String serverID =    getServerID();
+        Player aplayers =   getAllPlayers();
         World world = Bukkit.getWorld("lobby");
         Location spawn = world.getSpawnLocation();
         gameState.setGameState(GameStateEnum.ENDING,serverID);
@@ -620,14 +614,14 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
         hotBarTimer.cancel();
         // Teleport to spawn/peds
         new BukkitRunnable(){
-            @Override
+              
             public void run() {
                 aplayers.teleport(spawn);
             }
         }.runTaskLater(plugin,20*15);
         // Delete player worlds
         new BukkitRunnable(){
-            @Override
+              
             public void run() {
                 for(UUID ingame_uuid : ingame.keySet()) {
 
@@ -642,9 +636,9 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
     }
 
     public void runHotBarTimer(){
-        Plugin plugin = speedRunContext.getPlugin();
+         
         hotBarTimer = new BukkitRunnable() {
-            @Override
+              
             public void run() {
                 // Calculate elapsed time
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -668,7 +662,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
 
     public void createWorlds(World.Environment environment){
         IWorldManager worldManager = speedRunContext.getWorldManager();
-        IUtils utils = speedRunContext.getUtils();
+          
         Bukkit.broadcastMessage(getStaffPrefix()+" §cLoading Worlds...");
             for (UUID ingame_uuid : ingame.keySet()) {
                 Player player = Bukkit.getPlayer(ingame_uuid);
@@ -678,7 +672,7 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
             }
     }
     public void createWorldsWithSeed(World.Environment environment, Long seed){
-        IUtils utils = speedRunContext.getUtils();
+          
         Bukkit.broadcastMessage(getPrefix()+" §cLoading Worlds...");
 
         for(UUID ingame_uuid : ingame.keySet()) {
@@ -698,7 +692,26 @@ public abstract class GameManager extends AbstractGameStateManager<SpeedRunConte
             player.teleport(spawn);
         }
     }
+        //TODO: Update game loop to abstract
+    @Override
+    protected void onLobbyStart() {
 
+    }
+
+    @Override
+    protected void onPreGameStart() {
+
+    }
+
+    @Override
+    protected void onGameStart() {
+
+    }
+
+    @Override
+    protected void onGameEnd() {
+
+    }
 }
 
 

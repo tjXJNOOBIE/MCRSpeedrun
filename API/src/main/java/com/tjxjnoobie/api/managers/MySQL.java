@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 
 import java.sql.*;
@@ -63,6 +64,7 @@ public class MySQL {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             for (int i = 0; i < params.length; i++) {
                 stmt.setObject(i + 1, params[i]);
+                Log.info("Setting parameter " + i + " to " + params[i]);
             }
             stmt.executeUpdate();
             System.out.println("Query executed: " +sql+ " with " + Arrays.toString(params));

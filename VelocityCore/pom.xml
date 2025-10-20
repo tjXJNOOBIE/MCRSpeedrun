@@ -5,12 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>com.tjxjnoobie</groupId>
-    <artifactId>Novus</artifactId>
+    <artifactId>novus</artifactId>
     <version>0</version>
     <relativePath>../pom.xml</relativePath> <!-- adjust as needed -->
   </parent>
 
-  <groupId>com.tjxjnoobie.velocity</groupId>
   <artifactId>velocitycore</artifactId>
   <packaging>jar</packaging>
 
@@ -126,8 +125,8 @@
       <artifactId>mysql-connector-j</artifactId>
     </dependency>
       <dependency>
-          <groupId>com.tjxjnoobie.api</groupId>
-          <artifactId>API</artifactId>
+          <groupId>com.tjxjnoobie</groupId>
+          <artifactId>api</artifactId>
       </dependency>
 
   </dependencies>

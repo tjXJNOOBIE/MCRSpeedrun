@@ -7,6 +7,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
+
 public class SetSpawns implements CommandExecutor, IUtils {
 
 
@@ -35,8 +37,12 @@ public class SetSpawns implements CommandExecutor, IUtils {
         if(length > 0){
             player.sendMessage(getStaffPrefix()+"Usage: /setspawn");
         }else{
-            worldManager.saveWorldSpawn(gameTypeText,worldName,X,Y,Z,pitch,yaw);
-            worldManager.setIsSpawn(1,worldName);
+            try {
+                worldManager.saveWorldSpawn(gameTypeText,worldName,X,Y,Z,pitch,yaw);
+                worldManager.setIsSpawn(1,worldName);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             locationCache.removeLocationCache(worldName);
             locationCache.loadLocationCache();
             player.sendMessage(getStaffPrefix()+"You set spawn to X: " + X+" Y: "+Y+ " Z: "+Z);

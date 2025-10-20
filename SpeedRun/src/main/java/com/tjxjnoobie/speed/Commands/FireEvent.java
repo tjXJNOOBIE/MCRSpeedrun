@@ -1,6 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import org.bukkit.command.Command;
@@ -12,16 +12,13 @@ import org.bukkit.entity.Player;
  * Command to fire events using their interface implementations
  * Usage: /fireevent <EventClassName> [additional args]
  */
-public class FireEvent<T extends IGlobalContext> implements CommandExecutor, IUtils {
-    T context;
+public class FireEvent implements CommandExecutor, IUtils {
 
-    private final ISpeedRunContext speedRunContext;
-
+   @Inject private ISpeedRunContext speedRunContext;
 
 
-    public FireEvent(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
+
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

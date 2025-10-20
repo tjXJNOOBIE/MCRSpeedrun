@@ -92,6 +92,8 @@ public class Warn implements SimpleCommand {
                 }
             } catch (IllegalArgumentException e) {
                 source.sendMessage(proxyUtils.withStaffPrefix("Invalid UUID format for player: " + targetName));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
         return targetUUID;

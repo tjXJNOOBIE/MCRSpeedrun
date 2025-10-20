@@ -1,5 +1,6 @@
 package com.tjxjnoobie.core.Events;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.CoreQuitHandler;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.interfaces.IRetentionManager;
@@ -14,14 +15,11 @@ import java.util.UUID;
 public class CoreQuit implements Listener, CoreQuitHandler {
 
 
-    private final IRetentionManager iRetentionManager;
-    private final IRankCache iRankCache;
+    @Inject private IRetentionManager iRetentionManager;
+    @Inject private IRankCache iRankCache;
 
 
-    public CoreQuit(IRetentionManager iRetentionManager, IRankCache iRankCache) {
-        this.iRetentionManager = iRetentionManager;
-        this.iRankCache = iRankCache;
-    }
+
 
     
     @EventHandler

@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.entity.Player;
 
 /**
@@ -12,8 +12,12 @@ public interface Debuggable {
      * Gets the GlobalContext for accessing debug utilities
      * @return The GlobalContext instance
      */
-    GlobalContext getGlobalContext();
-    
+
+
+    @Inject
+    default IGlobalContext getGlobalContext() {
+        return null;
+    }
     /**
      * Sends a debug message to a player if they are a debugger
      * @param player The player to send the message to
@@ -21,13 +25,11 @@ public interface Debuggable {
      */
     default void sendDebugMessage(Player player, String message) {
         if (player != null) {
-            GlobalContext context = getGlobalContext();
-            if (context != null) {
-                boolean isDebugger = context.getDebugger().isDebugger(player.getUniqueId());
+                boolean isDebugger = getGlobalContext().getDebugger().isDebugger(player.getUniqueId());
                 if (isDebugger) {
-                    String staffPrefix = context.getUtils().getStaffPrefix();
+                    String staffPrefix = getGlobalContext().getUtils().getStaffPrefix();
                     player.sendMessage(staffPrefix + "§c" + message);
-                }
+
             }
         }
     }
@@ -40,14 +42,11 @@ public interface Debuggable {
      */
     default void sendDebugMessage(Player player, String prefix, String message) {
         if (player != null) {
-            GlobalContext context = getGlobalContext();
-            if (context != null) {
-                boolean isDebugger = context.getDebugger().isDebugger(player.getUniqueId());
+                boolean isDebugger = getGlobalContext().getDebugger().isDebugger(player.getUniqueId());
                 if (isDebugger) {
-                    String staffPrefix = context.getUtils().getStaffPrefix();
+                    String staffPrefix = getGlobalContext().getUtils().getStaffPrefix();
                     player.sendMessage(staffPrefix + "§c" + prefix + " " + message);
                 }
             }
         }
     }
-}

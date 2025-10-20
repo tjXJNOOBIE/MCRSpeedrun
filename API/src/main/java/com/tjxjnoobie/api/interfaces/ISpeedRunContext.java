@@ -2,13 +2,14 @@ package com.tjxjnoobie.api.interfaces;
 
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
-
 /**
  * Interface for SpeedRunContext to provide dependency injection capabilities
  */
 public interface ISpeedRunContext {
-    
+
+    // Getters
+    ISpeedRunContext getSpeedRunContext();
+
     // Interface based getters for dependency injection for SpeedRun Module
     Plugin getPlugin();
 
@@ -72,13 +73,9 @@ public interface ISpeedRunContext {
 
     IFairFight getFairFight();
     
-    // Dependency map access
-         HashMap<Class<?>, Object> getDependencyMap();
-          <T> T get(Class<T> clazz);
-    
-    // Setters that return the context for method chaining
-    ISpeedRunContext setPlugin(Plugin plugin);
 
+
+    // Setters that return the context for method chaining
     ISpeedRunContext setGameMode(IGameMode gameMode);
 
     ISpeedRunContext setGameState(IGameState gameState);
@@ -137,9 +134,16 @@ public interface ISpeedRunContext {
 
     ISpeedRunContext setSRStatsCache(ISpeedrunStatsCache speedrunStatsCache);
 
+    ISpeedRunContext setSpeedrunContext(ISpeedRunContext speedRunContext);
+
     ISpeedRunContext setFairFight(IFairFight fairFight);
 
     ISpeedRunContext builder();
 
     void buildSpeedRunContext();
+    void initializeDependencies();
+
+    ISpeedRunContext setPlugin(Plugin plugin);
+
+
 }

@@ -1,7 +1,6 @@
 package com.tjxjnoobie.proxy;
 
-import com.google.inject.Inject;
-import com.tjxjnoobie.api.annotations.AutoInjectAll;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
@@ -25,21 +24,20 @@ import java.sql.SQLException;
     name = "VelocityCore",
     version = "1.0"
 )
-@AutoInjectAll
 public class VelocityMain {
 
-    private Logger logger;
-    private ProxyServer proxyServer;
-    private IRank rank;
-    private IUtils utils;
-    private IProxyUtils proxyUtils;
-    private IRating rating;
-    private IPlayerProfile playerProfile;
-    private IGlobalContext globalContext;
-    private IRankCache rankCache;
-    private IPunishManager punishManager;
-    private IPunishLog punishLog;
-    private Redis redis;
+    @Inject private Logger logger;
+    @Inject private ProxyServer proxyServer;
+    @Inject private IRank rank;
+    @Inject private IUtils utils;
+    @Inject private IProxyUtils proxyUtils;
+    @Inject private IRating rating;
+    @Inject private IPlayerProfile playerProfile;
+    @Inject private IGlobalContext globalContext;
+    @Inject private IRankCache rankCache;
+    @Inject private IPunishManager punishManager;
+    @Inject private IPunishLog punishLog;
+    @Inject private Redis redis;
 
 
 

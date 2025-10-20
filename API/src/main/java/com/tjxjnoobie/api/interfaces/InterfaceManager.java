@@ -1,6 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.internal.utils.Utils;
 import com.tjxjnoobie.api.managers.Debugger;
 import com.tjxjnoobie.api.platform.cache.RankCache;
@@ -11,15 +13,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InterfaceManager {
+@Injectable("Static handlers and adapters; supports DI for static fields")
+public class InterfaceManager implements MainInterFace {
 
     private static MainInterFace mainInterFace;
     private static BlockPlaceHandler blockPlaceHandler;
     private static CoreJoinHandler coreJoinHandler;
     private static CoreQuitHandler coreQuitHandler;
     private static ChatHandler chatHandler;
-    private static GlobalContext globalContext;
-    private static final Map<String, Object> handlerMap = new HashMap<>();
+    @Inject private static IGlobalContext globalContext;
+    private static Map<String, Object> handlerMap = new HashMap<>();
 
     public static void registerHandlers(String name, Object handler) {
         handlerMap.put(name, handler);
@@ -138,29 +141,66 @@ public class InterfaceManager {
             System.out.println("Handler already setup: " + coreQuitHandler.toString());
         }
     }
-    public static void setGlobalHandler(IGlobalContext context,String className, String handlerName)
+     @Inject
+    public static void setGlobalHandler(String className, String handlerName)
             throws ClassNotFoundException, NoSuchMethodException,
             InvocationTargetException, InstantiationException, IllegalAccessException {
-        System.out.println("Trying to setup "+className+" via Reflection");
 
-        // Load the CoreQuit class.
+        if (globalContext == null) {
+            System.out.println("[DI] InterfaceManager.globalContext is null; skipping handler setup. Ensure static injection via context.injectStaticFields(InterfaceManager.class) or setGlobalContext().");
+            return;
+        }
+        
+        System.out.println("Trying to setup "+className+" via Reflection");
+        System.out.println("GlobalContext available: " + globalContext);
+
+        // Load the handler class.
         Class<?> HandlerClass = Class.forName(className);
 
-        // Assume you want to use a specific constructor – for instance, the first one.
-        Constructor<?> constructor = HandlerClass.getDeclaredConstructors()[0];
-
-        // Retrieve the parameter types for the constructor.
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-
-        // Create an array to hold constructor arguments.
-        Object[] args = new Object[parameterTypes.length];
-
-        // Automatically get each dependency from the context.
-        for (int i = 0; i < parameterTypes.length; i++) {
-            args[i] = context.get(parameterTypes[i]);
+        // Get all constructors and find the best one
+        Constructor<?>[] constructors = HandlerClass.getDeclaredConstructors();
+        System.out.println("Found " + constructors.length + " constructor(s) for " + className);
+        
+        Constructor<?> constructor = null;
+        Object[] args = null;
+        
+        // Try to find a constructor we can satisfy
+        for (Constructor<?> ctor : constructors) {
+            Class<?>[] parameterTypes = ctor.getParameterTypes();
+            System.out.println("Trying constructor with " + parameterTypes.length + " parameters");
+            
+            try {
+                Object[] tempArgs = new Object[parameterTypes.length];
+                boolean canSatisfy = true;
+                
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    System.out.println("  Parameter " + i + ": " + parameterTypes[i].getName());
+                    try {
+                        tempArgs[i] = globalContext.get(parameterTypes[i]);
+                        System.out.println("    Resolved to: " + (tempArgs[i] != null ? tempArgs[i].getClass().getName() : "null"));
+                    } catch (RuntimeException e) {
+                        System.out.println("    Cannot resolve: " + e.getMessage());
+                        canSatisfy = false;
+                        break;
+                    }
+                }
+                
+                if (canSatisfy) {
+                    constructor = ctor;
+                    args = tempArgs;
+                    System.out.println("Selected constructor with " + parameterTypes.length + " parameters");
+                    break;
+                }
+            } catch (Exception e) {
+                System.out.println("  Failed to use this constructor: " + e.getMessage());
+            }
+        }
+        
+        if (constructor == null) {
+            throw new IllegalStateException("No suitable constructor found for " + className);
         }
 
-        // Create an instance of CoreQuit using the resolved dependencies.
+        // Create an instance using the selected constructor
         Object HandlerInstance = constructor.newInstance(args);
         System.out.println("Class: " + HandlerInstance.toString() + " has been setup");
         registerHandlers(handlerName,HandlerInstance);
@@ -168,7 +208,11 @@ public class InterfaceManager {
         chatHandler = (ChatHandler) handlerMap.get("ChatHandler");
 
     }
-    public static void setupGlobalHandlers(GlobalContext context, Map<String, String> handlerConfig)
+    public static void setGlobalContext(IGlobalContext ctx) {
+        InterfaceManager.globalContext = ctx;
+    }
+
+    public static void setupGlobalHandlers(IGlobalContext context, Map<String, String> handlerConfig)
             throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
             InstantiationException, IllegalAccessException {
         // Loop through each entry in your configuration map:

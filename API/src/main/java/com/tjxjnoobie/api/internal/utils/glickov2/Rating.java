@@ -1,6 +1,8 @@
 package com.tjxjnoobie.api.internal.utils.glickov2;
 
-public class Rating {
+import com.tjxjnoobie.api.interfaces.IRating;
+
+public class Rating implements IRating {
 
     public String name; // not actually used by the calculation engine but useful to track whose rating is whose
     public double rating;
@@ -13,10 +15,10 @@ public class Rating {
     public double workingRatingDeviation;
     public double workingVolatility;
 
-    /**
-     *
-     * @param ratingSystem  An instance of the RatingCalculator object
-     */
+
+    public Rating() {
+
+    }
     public Rating(RatingCalculator ratingSystem) {
         this.rating = ratingSystem.getDefaultRating();
         this.ratingDeviation = ratingSystem.getDefaultRatingDeviation();

@@ -1,5 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -9,34 +10,30 @@ import org.bukkit.entity.Player;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class Debug implements CommandExecutor, IUtils {
+public class Debug implements CommandExecutor, IUtils, IDebug {
 
 
-    private final IGlobalContext globalContext;
-    private final ISpeedRunContext speedRunContext;
-    public Debug(IGlobalContext globalContext, ISpeedRunContext speedRunContext) {
-        this.globalContext = globalContext;
-        this.speedRunContext = speedRunContext;
-    }
+    @Inject private IGlobalContext globalContext;
+    @Inject private ISpeedRunContext speedRunContext;
+    @Inject private IGameState gameState;
+    @Inject private IGameManager gameManager;
+    @Inject private ILocationCache locationCache;
+    @Inject private IWorldManager worldManager;
+    @Inject private IRankCache rankCache;
+    @Inject private IRetentionManager retentionManager;
+    @Inject private IDebugger debugger;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
-        IGameState gameState = globalContext.getGameState();
-        IGameManager gameManager = speedRunContext.getGameManager();
-        IUtils utils = globalContext.getUtils();
-        ILocationCache locationCache = speedRunContext.getLocationCache();
-        IWorldManager worldManager = globalContext.getWorldManager();
-        IRankCache rankCache = globalContext.getRankCache();
-        IRetentionManager retentionManager = globalContext.getRetentionManager();
-        IDebugger debugger = globalContext.getDebugger();
+
         Player player = (Player) commandSender;
         UUID uuid = player.getUniqueId();
         String worldName = player.getWorld().getName();
         if(args.length== 0 && player.isOp()){
             player.sendMessage("Rank: "+ rankCache.getRank(uuid));
             player.sendMessage("Power Level: " + rankCache.getPowerLevel(uuid));
-            player.sendMessage("ServerID: "+getServerID(globalContext));
-            player.sendMessage("GameID: "+utils.getGameID());
+            player.sendMessage("ServerID: "+getServerID());
+            player.sendMessage("GameID: "+getGameID());
             player.sendMessage("Playing: "+gameManager.getPlaying());
             player.sendMessage("Watching: "+gameManager.getWatching());
             player.sendMessage("Gamestate: "+ gameState.getCurrentState());

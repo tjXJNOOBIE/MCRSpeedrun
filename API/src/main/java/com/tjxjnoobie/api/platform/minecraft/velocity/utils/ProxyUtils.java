@@ -10,10 +10,9 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 public class ProxyUtils implements IProxyUtils {
 
-    private final ProxyServer proxyServer;
+    private ProxyServer proxyServer;
     public Component staffPrefix = colorzie("&c&lZero &8&l»»&c ");
     public Component prefix = colorzie("&4&lZero&8&l »»&f ");
     public Component discord = colorzie("discord.gg/test");
@@ -27,9 +26,7 @@ public class ProxyUtils implements IProxyUtils {
 
     private static final LegacyComponentSerializer LEGACY_SERIALIZER = LegacyComponentSerializer.legacyAmpersand();
 
-    public ProxyUtils(ProxyServer proxyServer) {
-        this.proxyServer = proxyServer;
-    }
+
 
     @Override
     public String getDiscordString(){

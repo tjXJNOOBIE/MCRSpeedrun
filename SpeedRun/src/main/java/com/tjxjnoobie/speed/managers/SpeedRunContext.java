@@ -1,12 +1,11 @@
 package com.tjxjnoobie.speed.managers;
 
-import com.tjxjnoobie.api.abstracts.AbstractContext;
-import com.tjxjnoobie.api.annotations.AutoInjectAll;
+import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.plugin.Plugin;
 
-@AutoInjectAll
-public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements ISpeedRunContext {
+
+public class SpeedRunContext extends AbstractContext<ISpeedRunContext> implements ISpeedRunContext, IContext<ISpeedRunContext> {
 
     // Core dependencies using interfaces
     private Plugin plugin;
@@ -40,22 +39,27 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
     private IStatsManager statsManager;
     private ISpeedrunStatsCache speedrunStatsCache;
     private IFairFight fairFight;
+    private ISpeedRunContext speedRunContext = this;
+
+    // Helper to register both interface and concrete implementation classes
+ 
 
     /**
      * Default constructor for dependency injection
      */
     public SpeedRunContext() {
         super();
-        setContext(this);
+        this.setContext(this);
         // Initialize with null values - dependencies will be set via setters
-
+        
 
     }
 
     /**
      * Constructor with all dependencies
      */
-    public SpeedRunContext(Plugin plugin, IGameMode gameMode, IUtils utils, ISpeedrunStatsCache statsCache, IGameManager gameManager, IGameState gameState, IMCUtils mcUtils, IPlayerManager playerManager, IWorldManager worldManager, ILocationCache locationCache, ISpeedRunJoinEvent joinEvent, IQuitEvent quitEvent, IRankMC rankMC, IRatingCache ratingCache, IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, IDebugger debugger, ISoundManager soundManager, IRankCache rankCache, IRetentionManager retentionManager, IRedis redis, IDebug debug, IBossBarManager bossBarManager, IVoting voting, IInventoryManager inventoryManager, IGameType gameType, IStatsManager statsManager, ISpeedrunStatsCache speedrunStatsCache, IFairFight fairFight) {
+    public SpeedRunContext(Plugin plugin, IGameMode gameMode, IUtils utils, ISpeedrunStatsCache statsCache, IGameManager gameManager, IGameState gameState, IMCUtils mcUtils, IPlayerManager playerManager, IWorldManager worldManager, ILocationCache locationCache, ISpeedRunJoinEvent joinEvent, IQuitEvent quitEvent, IRankMC rankMC, IRatingCache ratingCache, IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, IDebugger debugger, ISoundManager soundManager, IRankCache rankCache, IRetentionManager retentionManager, IRedis redis, IDebug debug, IBossBarManager bossBarManager, IVoting voting, IInventoryManager inventoryManager, IGameType gameType, IStatsManager statsManager, ISpeedrunStatsCache speedrunStatsCache, IFairFight fairFight
+    ,ISpeedRunContext speedrunContext) {
 
 
         this.plugin = plugin;
@@ -89,49 +93,55 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
         this.statsManager = statsManager;
         this.speedrunStatsCache = speedrunStatsCache;
         this.fairFight = fairFight;
+        this.speedRunContext = speedrunContext;
     }
 
     // Fallback method for dependency injection
-    protected void initializeDependencies() {
-        // Register interface types for dependency injection
-        if (plugin != null) register(Plugin.class, plugin, this::getPlugin);
-        if (gameMode != null) register(IGameMode.class, gameMode, this::getGameMode);
-        if (gameState != null) register(IGameState.class, gameState, this::getGameState);
-        if (utils != null) register(IUtils.class, utils, this::getUtils);
-        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache, this::getStatsCache);
-        if (gameManager != null) register(IGameManager.class, gameManager, this::getGameManager);
-        if (playerManager != null) register(IPlayerManager.class, playerManager, this::getPlayerManager);
-        if (mcUtils != null) register(IMCUtils.class, mcUtils, this::getMcUtils);
-        if (worldManager != null) register(IWorldManager.class, worldManager, this::getWorldManager);
-        if (locationCache != null) register(ILocationCache.class, locationCache, this::getLocationCache);
-        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent);
-        if (quitEvent != null) register(IQuitEvent.class, quitEvent, this::getQuitEvent);
-        if (rankMC != null) register(IRankMC.class, rankMC, this::getRankMC);
-        if (ratingCache != null) register(IRatingCache.class, ratingCache, this::getRatingCache);
-        if (rating != null) register(IRating.class, rating, this::getRating);
-        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI, this::getRatingAPI);
-        if (playerProfile != null) register(IPlayerProfile.class, playerProfile, this::getPlayerProfile);
-        if (rank != null) register(IRank.class, rank, this::getRank);
-        if (debugger != null) register(IDebugger.class, debugger, this::getDebugger);
-        if (soundManager != null) register(ISoundManager.class, soundManager, this::getSoundManager);
-        if (rankCache != null) register(IRankCache.class, rankCache, this::getRankCache);
-        if (retentionManager != null) register(IRetentionManager.class, retentionManager, this::getRetentionManager);
-        if (redis != null) register(IRedis.class, redis, this::getRedis);
-        if (debug != null) register(IDebug.class, debug, this::getDebug);
-        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager, this::getBossBarManager);
-        if (voting != null) register(IVoting.class, voting, this::getVoting);
-        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
-        if (gameType != null) register(IGameType.class, gameType, this::getGameType);
-        if (statsManager != null) register(IStatsManager.class, statsManager, this::getStatsManager);
-        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache);
-        if (fairFight != null) register(IFairFight.class, fairFight, this::getFairFight);
+    public void initializeDependencies() {
+        // Register interface and concrete types for dependency injection
+        if (plugin != null) registerDependency(Plugin.class, plugin, this::getPlugin, this);
+        if (gameMode != null) registerDependency(IGameMode.class, gameMode, this::getGameMode, this);
+        if (gameState != null) registerDependency(IGameState.class, gameState, this::getGameState, this);
+        if (utils != null) registerDependency(IUtils.class, utils, this::getUtils, this);
+        if (statsCache != null) registerDependency(ISpeedrunStatsCache.class, statsCache, this::getStatsCache, this);
+        if (gameManager != null) registerDependency(IGameManager.class, gameManager, this::getGameManager, this);
+        if (playerManager != null) registerDependency(IPlayerManager.class, playerManager, this::getPlayerManager, this);
+        if (mcUtils != null) registerDependency(IMCUtils.class, mcUtils, this::getMcUtils, this);
+        if (worldManager != null) registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
+        if (locationCache != null) registerDependency(ILocationCache.class, locationCache, this::getLocationCache, this);
+        if (joinEvent != null) registerDependency(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent, this);
+        if (quitEvent != null) registerDependency(IQuitEvent.class, quitEvent, this::getQuitEvent, this);
+        if (rankMC != null) registerDependency(IRankMC.class, rankMC, this::getRankMC, this);
+        if (ratingCache != null) registerDependency(IRatingCache.class, ratingCache, this::getRatingCache, this);
+        if (rating != null) registerDependency(IRating.class, rating, this::getRating, this);
+        if (ratingAPI != null) registerDependency(IRatingAPI.class, ratingAPI, this::getRatingAPI, this);
+        if (playerProfile != null) registerDependency(IPlayerProfile.class, playerProfile, this::getPlayerProfile, this);
+        if (rank != null) registerDependency(IRank.class, rank, this::getRank, this);
+        if (debugger != null) registerDependency(IDebugger.class, debugger, this::getDebugger, this);
+        if (soundManager != null) registerDependency(ISoundManager.class, soundManager, this::getSoundManager, this);
+        if (rankCache != null) registerDependency(IRankCache.class, rankCache, this::getRankCache, this);
+        if (retentionManager != null) registerDependency(IRetentionManager.class, retentionManager, this::getRetentionManager, this);
+        if (redis != null) registerDependency(IRedis.class, redis, this::getRedis, this);
+        if (debug != null) registerDependency(IDebug.class, debug, this::getDebug, this);
+        if (bossBarManager != null) registerDependency(IBossBarManager.class, bossBarManager, this::getBossBarManager, this);
+        if (voting != null) registerDependency(IVoting.class, voting, this::getVoting, this);
+        if (inventoryManager != null) registerDependency(IInventoryManager.class, inventoryManager, this::getInventoryManager, this);
+        if (gameType != null) registerDependency(IGameType.class, gameType, this::getGameType, this);
+        if (statsManager != null) registerDependency(IStatsManager.class, statsManager, this::getStatsManager, this);
+        if (speedrunStatsCache != null) registerDependency(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache, this);
+        if (fairFight != null) registerDependency(IFairFight.class, fairFight, this::getFairFight, this);
 
         // Register the context itself
-        register(ISpeedRunContext.class, this, this::getContext);
+        registerDependency(ISpeedRunContext.class, this, () -> this, this);
+        registerDependency(ISpeedRunContext.class, this, this::getContext, this);
        // register(SpeedRunContext.class, this, this::getContext);
     }
 
     // Getters
+    @Override
+    public ISpeedRunContext getSpeedRunContext(){
+        return speedRunContext;
+    }
     @Override
     public Plugin getPlugin() {
         return plugin;
@@ -305,10 +315,9 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     // Setters that return the context for method chaining
     @Override
-
-    public SpeedRunContext setPlugin(Plugin plugin) {
+    public ISpeedRunContext setPlugin(Plugin plugin) {
         this.plugin = plugin;
-        if (plugin != null) register(Plugin.class, plugin, this::getPlugin);
+        if (plugin != null) registerDependency(Plugin.class, plugin, this::getPlugin, this);
         return this;
     }
 
@@ -316,7 +325,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameMode(IGameMode gameMode) {
         this.gameMode = gameMode;
-        if (gameMode != null) register(IGameMode.class, gameMode, this::getGameMode);
+        if (gameMode != null) registerDependency(IGameMode.class, gameMode, this::getGameMode, this);
         return this;
     }
 
@@ -324,7 +333,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameState(IGameState gameState) {
         this.gameState = gameState;
-        if (gameState != null) register(IGameState.class, gameState, this::getGameState);
+        if (gameState != null) registerDependency(IGameState.class, gameState, this::getGameState, this);
         return this;
     }
 
@@ -332,7 +341,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setUtils(IUtils utils) {
         this.utils = utils;
-        if (utils != null) register(IUtils.class, utils, this::getUtils);
+        if (utils != null) registerDependency(IUtils.class, utils, this::getUtils, this);
         return this;
     }
 
@@ -340,7 +349,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setStatsCache(ISpeedrunStatsCache statsCache) {
         this.statsCache = statsCache;
-        if (statsCache != null) register(ISpeedrunStatsCache.class, statsCache, this::getStatsCache);
+        if (statsCache != null) registerDependency(ISpeedrunStatsCache.class, statsCache, this::getStatsCache, this);
         return this;
     }
 
@@ -348,7 +357,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameManager(IGameManager gameManager) {
         this.gameManager = gameManager;
-        if (gameManager != null) register(IGameManager.class, gameManager, this::getGameManager);
+        if (gameManager != null) registerDependency(IGameManager.class, gameManager, this::getGameManager, this);
         return this;
     }
 
@@ -356,7 +365,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setPlayerManager(IPlayerManager playerManager) {
         this.playerManager = playerManager;
-        if (playerManager != null) register(IPlayerManager.class, playerManager, this::getPlayerManager);
+        if (playerManager != null) registerDependency(IPlayerManager.class, playerManager, this::getPlayerManager, this);
         return this;
     }
 
@@ -364,7 +373,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setMcUtils(IMCUtils mcUtils) {
         this.mcUtils = mcUtils;
-        if (mcUtils != null) register(IMCUtils.class, mcUtils, this::getMcUtils);
+        if (mcUtils != null) registerDependency(IMCUtils.class, mcUtils, this::getMcUtils, this);
         return this;
     }
 
@@ -372,7 +381,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setWorldManager(IWorldManager worldManager) {
         this.worldManager = worldManager;
-        if (worldManager != null) register(IWorldManager.class, worldManager, this::getWorldManager);
+        if (worldManager != null) registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
         return this;
     }
 
@@ -380,7 +389,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setLocationCache(ILocationCache locationCache) {
         this.locationCache = locationCache;
-        if (locationCache != null) register(ILocationCache.class, locationCache, this::getLocationCache);
+        if (locationCache != null) registerDependency(ILocationCache.class, locationCache, this::getLocationCache, this);
         return this;
     }
 
@@ -388,7 +397,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setJoinEvent(ISpeedRunJoinEvent joinEvent) {
         this.joinEvent = joinEvent;
-        if (joinEvent != null) register(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent);
+        if (joinEvent != null) registerDependency(ISpeedRunJoinEvent.class, joinEvent, this::getJoinEvent, this);
         return this;
     }
 
@@ -396,7 +405,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setQuitEvent(IQuitEvent quitEvent) {
         this.quitEvent = quitEvent;
-        if (quitEvent != null) register(IQuitEvent.class, quitEvent, this::getQuitEvent);
+        if (quitEvent != null) registerDependency(IQuitEvent.class, quitEvent, this::getQuitEvent, this);
         return this;
     }
 
@@ -404,7 +413,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRankMC(IRankMC rankMC) {
         this.rankMC = rankMC;
-        if (rankMC != null) register(IRankMC.class, rankMC, this::getRankMC);
+        if (rankMC != null) registerDependency(IRankMC.class, rankMC, this::getRankMC, this);
         return this;
     }
 
@@ -412,7 +421,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRatingCache(IRatingCache ratingCache) {
         this.ratingCache = ratingCache;
-        if (ratingCache != null) register(IRatingCache.class, ratingCache, this::getRatingCache);
+        if (ratingCache != null) registerDependency(IRatingCache.class, ratingCache, this::getRatingCache, this);
         return this;
     }
 
@@ -420,7 +429,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRating(IRating rating) {
         this.rating = rating;
-        if (rating != null) register(IRating.class, rating, this::getRating);
+        if (rating != null) registerDependency(IRating.class, rating, this::getRating, this);
         return this;
     }
 
@@ -428,7 +437,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRatingAPI(IRatingAPI ratingAPI) {
         this.ratingAPI = ratingAPI;
-        if (ratingAPI != null) register(IRatingAPI.class, ratingAPI, this::getRatingAPI);
+        if (ratingAPI != null) registerDependency(IRatingAPI.class, ratingAPI, this::getRatingAPI, this);
         return this;
     }
 
@@ -436,7 +445,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setPlayerProfile(IPlayerProfile playerProfile) {
         this.playerProfile = playerProfile;
-        if (playerProfile != null) register(IPlayerProfile.class, playerProfile, this::getPlayerProfile);
+        if (playerProfile != null) registerDependency(IPlayerProfile.class, playerProfile, this::getPlayerProfile, this);
         return this;
     }
 
@@ -444,7 +453,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRank(IRank rank) {
         this.rank = rank;
-        if (rank != null) register(IRank.class, rank, this::getRank);
+        if (rank != null) registerDependency(IRank.class, rank, this::getRank, this);
         return this;
     }
 
@@ -452,7 +461,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setDebugger(IDebugger debugger) {
         this.debugger = debugger;
-        if (debugger != null) register(IDebugger.class, debugger, this::getDebugger);
+        if (debugger != null) registerDependency(IDebugger.class, debugger, this::getDebugger, this);
         return this;
     }
 
@@ -460,7 +469,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setSoundManager(ISoundManager soundManager) {
         this.soundManager = soundManager;
-        if (soundManager != null) register(ISoundManager.class, soundManager, this::getSoundManager);
+        if (soundManager != null) registerDependency(ISoundManager.class, soundManager, this::getSoundManager, this);
         return this;
     }
 
@@ -468,7 +477,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRankCache(IRankCache rankCache) {
         this.rankCache = rankCache;
-        if (rankCache != null) register(IRankCache.class, rankCache, this::getRankCache);
+        if (rankCache != null) registerDependency(IRankCache.class, rankCache, this::getRankCache, this);
         return this;
     }
 
@@ -476,7 +485,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRetentionManager(IRetentionManager retentionManager) {
         this.retentionManager = retentionManager;
-        if (retentionManager != null) register(IRetentionManager.class, retentionManager, this::getRetentionManager);
+        if (retentionManager != null) registerDependency(IRetentionManager.class, retentionManager, this::getRetentionManager, this);
         return this;
     }
 
@@ -484,7 +493,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setRedis(IRedis redis) {
         this.redis = redis;
-        if (redis != null) register(IRedis.class, redis, this::getRedis);
+        if (redis != null) registerDependency(IRedis.class, redis, this::getRedis, this);
         return this;
     }
 
@@ -492,7 +501,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setDebug(IDebug debug) {
         this.debug = debug;
-        if (debug != null) register(IDebug.class, debug, this::getDebug);
+        if (debug != null) registerDependency(IDebug.class, debug, this::getDebug, this);
         return this;
     }
 
@@ -500,7 +509,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setBossBarManager(IBossBarManager bossBarManager) {
         this.bossBarManager = bossBarManager;
-        if (bossBarManager != null) register(IBossBarManager.class, bossBarManager, this::getBossBarManager);
+        if (bossBarManager != null) registerDependency(IBossBarManager.class, bossBarManager, this::getBossBarManager, this);
         return this;
     }
 
@@ -508,7 +517,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setVoting(IVoting voting) {
         this.voting = voting;
-        if (voting != null) register(IVoting.class, voting, this::getVoting);
+        if (voting != null) registerDependency(IVoting.class, voting, this::getVoting, this);
         return this;
     }
 
@@ -516,7 +525,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setInventoryManager(IInventoryManager inventoryManager) {
         this.inventoryManager = inventoryManager;
-        if (inventoryManager != null) register(IInventoryManager.class, inventoryManager, this::getInventoryManager);
+        if (inventoryManager != null) registerDependency(IInventoryManager.class, inventoryManager, this::getInventoryManager, this);
         return this;
     }
 
@@ -524,7 +533,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setGameType(IGameType gameType) {
         this.gameType = gameType;
-        if (gameType != null) register(IGameType.class, gameType, this::getGameType);
+        if (gameType != null) registerDependency(IGameType.class, gameType, this::getGameType, this);
         return this;
     }
 
@@ -532,7 +541,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setStatsManager(IStatsManager statsManager) {
         this.statsManager = statsManager;
-        if (statsManager != null) register(IStatsManager.class, statsManager, this::getStatsManager);
+        if (statsManager != null) registerDependency(IStatsManager.class, statsManager, this::getStatsManager, this);
         return this;
     }
 
@@ -540,15 +549,24 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     public SpeedRunContext setSRStatsCache(ISpeedrunStatsCache speedrunStatsCache) {
         this.speedrunStatsCache = speedrunStatsCache;
-        if (speedrunStatsCache != null) register(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache);
+        if (speedrunStatsCache != null) registerDependency(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache, this);
+        return this;
+    }
+    @Override
+    public ISpeedRunContext setSpeedrunContext(ISpeedRunContext speedRunContext) {
+        this.speedRunContext = speedRunContext;
+        if (speedRunContext != null) {
+            registerDependency(ISpeedRunContext.class, this, () -> this, this);
+            // Also register the concrete SpeedRunContext class for dependencies that need it
+            registerDependency(SpeedRunContext.class, this, () -> (SpeedRunContext) this, this);
+        }
         return this;
     }
 
     @Override
-
     public SpeedRunContext setFairFight(IFairFight fairFight) {
         this.fairFight = fairFight;
-        if (fairFight != null) register(IFairFight.class, fairFight, this::getFairFight);
+        if (fairFight != null) registerDependency(IFairFight.class, fairFight, this::getFairFight, this);
         return this;
     }
 
@@ -568,7 +586,9 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
     @Override
     public void buildSpeedRunContext() {
-        setRedis(redis).
+                setSpeedrunContext(speedRunContext).
+                setPlugin(plugin).
+                setRedis(redis).
                 setRank(rank).
                 setRatingAPI(ratingAPI).
                 setDebugger(debugger).
@@ -586,7 +606,6 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
                 setGameType(gameType).
                 setGameMode(gameMode).
                 setStatsManager(statsManager).
-                setPlugin(plugin).
                 setRatingCache(ratingCache).
                 setJoinEvent(joinEvent).
                 setDebug(debug).
@@ -597,8 +616,7 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
                 setFairFight(fairFight).
                 setPlayerManager(playerManager).
                 setRetentionManager(retentionManager).
-                setRankCache(rankCache).
-                setPlugin(plugin);
+                setRankCache(rankCache);
 
     }
 
@@ -645,4 +663,6 @@ public class SpeedRunContext extends AbstractContext<SpeedRunContext> implements
 
         return summary.toString();
     }
+
+
 }

@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.internal.utils;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.IGameType;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
+
 public class Utils implements IUtils {
 
     public final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -21,16 +23,13 @@ public class Utils implements IUtils {
     public String staffPrefix = "§4§lNovus §8§l»»§c ";
     public String serverID;
     public String gameID;
-    private final GlobalContext globalContext;
+    @Inject private GlobalContext globalContext;
 
 
 
     // Configuration storage
     private final Map<String, Object> configValues = new HashMap<>();
 
-    public Utils(GlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
 
 
 

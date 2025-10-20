@@ -14,3 +14,6 @@ commands:
   fireevent:
     description: Fire events using their interface implementations
     usage: /fireevent <EventClassName>
+  debugger:
+  vote:
+  v:

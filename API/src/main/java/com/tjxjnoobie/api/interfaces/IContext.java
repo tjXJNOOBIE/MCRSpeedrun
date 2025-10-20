@@ -1,7 +1,9 @@
 package com.tjxjnoobie.api.interfaces;
 
-import java.util.HashMap;
-import java.util.function.Supplier;
+import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * Base interface for context management providing dependency injection capabilities
@@ -13,8 +15,8 @@ public interface IContext<T> {
      * Gets the dependency map for direct access
      * @return HashMap containing all registered dependencies
      */
-    HashMap<Class<?>, Object> getDependencyMap();
-    
+    DependencyMap getDependencyMap();
+
     /**
      * Gets a dependency by its class type
      * @param clazz The class type to retrieve
@@ -22,27 +24,94 @@ public interface IContext<T> {
      * @return The dependency instance
      * @throws IllegalArgumentException if dependency is not found
      */
-    <U> U get(Class<U> clazz);
+     <U> U get(Class<U> clazz);
+
+
+    /**
+     * Injects fields into all registered dependencies in this context
+     * Performs multi-pass injection to handle nested dependencies
+     */
+    void injectAllDependencies() throws IllegalAccessException;
     
     /**
-     * Registers a dependency in the context
-     * @param clazz The class type to register
-     * @param instance The instance to register
-     * @param <U> The type parameter
+     * Injects fields into all registered dependencies with a maximum number of passes
+     * @param maxPasses Maximum number of injection passes to perform
+     * @return Number of objects successfully injected
      */
-
-    <U> void register(Class<U> clazz, U instance, Supplier<U> factory);
-
+    int injectAllDependencies(int maxPasses) throws IllegalAccessException;
+    
     /**
-     * Checks if a dependency is registered
-     * @param clazz The class type to check
-     * @return true if registered, false otherwise
+     * Injects fields from a specific context into a target object
+     * @param target The target object to inject into
+     * @param context The context to use for injection
      */
-    boolean isRegistered(Class<?> clazz);
+    void injectFieldsFromContext(Object target, IContext<?> context);
+    
+    /**
+     * Injects fields from multiple contexts into a target object
+     * @param target The target object to inject into
+     * @param contexts List of contexts to use for injection
+     */
+    void injectFieldsFromContexts(Object target, List<IContext<?>> contexts);
+    
+    /**
+     * Injects all dependencies from multiple contexts
+     * @param contexts List of contexts to inject dependencies from
+     */
+    void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException;
+    
+    /**
+     * Injects all dependencies from all registered contexts globally.
+     * Performs context building, wave-based injection, and optional target injection.
+     */
+    void injectAllContextsGlobally() throws IllegalAccessException;
+    
+    /**
+     * Injects all dependencies from all registered contexts globally with target injection.
+     * Performs context building, wave-based injection, and injects into the provided target.
+     * 
+     * @param target The target object to inject after context initialization (e.g., Main plugin instance)
+     */
+    void injectAllContextsGlobally(Object target) throws IllegalAccessException;
     
     /**
      * Gets the context instance itself
+     *
      * @return The context instance
      */
-    T getContext();
+     T getContext();
+
+
+
+    /**
+     * Checks if an object has any @Inject annotated fields
+     * @param obj The object to check
+     * @return true if the object has injectable fields, false otherwise
+     */
+    boolean hasInjectableFields(Object obj);
+    
+    /**
+     * Performs multi-wave dependency injection across multiple contexts.
+     * Wave 1: Injects leaf dependencies (objects with no @Inject fields)
+     * Wave 2: Injects intermediate dependencies
+     * 
+     * @param contexts List of contexts to inject from
+     * @return Set of objects that were injected in wave 1
+     */
+    Set<Object> performWaveInjection(List<IContext<?>> contexts) throws IllegalAccessException;
+    
+    /**
+     * Checks if an object has no @Inject annotated fields.
+     * Used to identify leaf dependencies in wave-based injection.
+     * 
+     * @param obj The object to check
+     * @return true if the object has no @Inject fields, false otherwise
+     */
+    boolean hasNoInjectFields(Object obj);
+
+    /**
+     * Returns a list of all registered context instances.
+     * @return List of all IContext instances, never null.
+     */
+     List<IContext<?>> getAllContexts();
 }

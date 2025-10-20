@@ -1,5 +1,7 @@
 package com.tjxjnoobie.speed.managers;
 
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.entity.Player;
@@ -15,11 +17,13 @@ public class Voting implements IVoting, IUtils {
     public HashMap<String, Integer> voting = new HashMap<>();
     public ArrayList<UUID> voted = new ArrayList<>();
     public String winner;
-    private final ISpeedRunContext speedRunContext;
+    @Inject private ISpeedRunContext speedRunContext;
     private Plugin plugin;
 
-    public Voting(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
+
+
+    @PostConstruct
+    private void init(){
         loadGameModes();
         runVoting();
     }

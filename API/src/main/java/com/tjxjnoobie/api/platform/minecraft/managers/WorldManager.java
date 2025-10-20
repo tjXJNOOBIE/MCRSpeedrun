@@ -1,8 +1,10 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.interfaces.IMCUtils;
-import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
+import com.tjxjnoobie.api.interfaces.IWorldManager;
 import com.tjxjnoobie.api.managers.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,15 +17,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class WorldManager implements  IUtils, IMCUtils {
+public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
 
 
 
-    private final GlobalContext globalContext;
+    @Inject private GlobalContext globalContext;
 
-    public WorldManager(GlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
+
+
 
     public void loadWorldFromSeed(String worldName, long seed) {
         WorldCreator worldCreator = new WorldCreator(worldName);
@@ -54,7 +55,7 @@ public class WorldManager implements  IUtils, IMCUtils {
         }
     }
 
-    public void createWorldFromSeed(String worldName, World.Environment environment, Long seed) {
+    public void createWorldFromSeed(String worldName, World.Environment environment, long seed){
 
         World checkWorld = Bukkit.getWorld(worldName);
         Player aplayers = getAllPlayers();
@@ -225,7 +226,7 @@ public class WorldManager implements  IUtils, IMCUtils {
     public String getSpawnWorld() {
 
         try {
-            String serverID = getServerID(globalContext);
+            String serverID = getServerID();
             String query = "SELECT SPAWNWORLD FROM servers WHERE SERVERID= ?";
             ResultSet rs = MySQL.getResult(query, serverID);
             if (rs.next()) {

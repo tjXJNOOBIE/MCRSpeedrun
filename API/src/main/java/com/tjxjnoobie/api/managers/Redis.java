@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.abstracts.AbstractManager;
-import com.tjxjnoobie.api.annotations.PostConstruct;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.platform.minecraft.Config;
@@ -18,8 +18,8 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     public static String REDIS_CHANNEL = "global:all_data";
     private static HandleBlocks handleBlocks;
 
-    protected Redis(IGlobalContext context) {
-        super(context);
+
+    public Redis() {
     }
     @PostConstruct
     @Override

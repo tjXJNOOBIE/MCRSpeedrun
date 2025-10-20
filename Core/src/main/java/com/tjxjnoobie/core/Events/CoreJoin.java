@@ -1,6 +1,6 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.api.contexts.GlobalContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.entity.Player;
@@ -12,28 +12,22 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public abstract class CoreJoin implements Listener, CoreJoinHandler, IUtils {
+public class CoreJoin implements Listener, CoreJoinHandler, IUtils<IGlobalContext> {
 
 
-    private final GlobalContext globalContext;
-    private IGameState iGameState;
+    @Inject private IGlobalContext globalContext;
+    @Inject private IGameState iGameState;
+    @Inject private IRankCache rankCache;
+    @Inject private IRankMC rankMC;
+    @Inject private IDebugger debugger ;
+    @Inject private IGameType gameType;
+    @Inject private ILobbyStatsCache lobbyStatsCache;
 
-
-    public CoreJoin(GlobalContext globalContext) {
-        this.globalContext = globalContext;
-
-
-    }
 
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onCoreJoin(PlayerJoinEvent e) throws SQLException {
-        IRankCache rankCache = globalContext.getRankCache();
-        IRankMC rankMC = globalContext.getRankMC();
-        IDebugger debugger = globalContext.getDebugger();
-        IGameType gameType = globalContext.getGameType();
-        IUtils utils = globalContext.getUtils();
-        ILobbyStatsCache lobbyStatsCache = globalContext.getLobbyStatsCache();
+
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         String uuidString = uuid.toString();

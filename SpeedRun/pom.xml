@@ -12,8 +12,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>com.tjxjnoobie.speedrun</groupId>
-    <artifactId>SpeedRun</artifactId>
+    <artifactId>speedrun</artifactId>
     <packaging>jar</packaging>
 
     <name>SpeedRun</name>
@@ -29,8 +28,9 @@
             <artifactId>ProtocolLib</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.tjxjnoobie.api</groupId>
-            <artifactId>API</artifactId>
+            <groupId>com.tjxjnoobie</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
