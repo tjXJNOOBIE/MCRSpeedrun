@@ -1,8 +1,6 @@
 package com.tjxjnoobie.api.dependency.contexts.abstracts;
 
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
-import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
@@ -35,9 +33,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     private final Set<String> allowedPackages = new HashSet<>();
     private final Set<String> excludedPackages = new ConcurrentSkipListSet<>();
     private final HashMap<Class<?>, Boolean> eligibilityCache = new HashMap<>();
-    
-    // Use custom dependency maps instead of plain Maps
-    protected final IContextInjectionHelper contextInjectorHelper = new ContextInjectionHelper();
     
     private T context;
 
@@ -204,106 +199,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         }
         
         return null;
-    }
-
-
-
-
-    @Override
-    public void injectAllDependencies() throws IllegalAccessException {
-        injectAllDependencies(1); // Default to 1 pass
-    }
-
-    @Override
-    public int injectAllDependencies(int maxPasses) throws IllegalAccessException {
-        Set<Object> allDeps = new HashSet<>(dependencyMap.getAllInstances());
-        Set<Object> injected = new HashSet<>();
-        int totalInjected = 0;
-
-        Log.info("[DI] ===== Starting multi-pass injection for " + this.getClass().getSimpleName() + " =====");
-        Log.info("[DI] Total dependencies to inject: " + allDeps.size());
-
-        for (int pass = 0; pass < maxPasses; pass++) {
-            int injectedThisPass = 0;
-
-            Log.info("[DI] --- Pass " + (pass + 1) + " ---");
-
-            for (Object dep : allDeps) {
-                if (dep == null || dep == this || injected.contains(dep)) {
-                    continue;
-                }
-
-                // Check if this dependency has injectable fields
-                if (hasInjectableFields(dep)) {
-                    Log.info("[DI] Injecting into: " + dep.getClass().getSimpleName());
-                    injectAndRecordMetaData(dep);
-                    injected.add(dep);
-                    injectedThisPass++;
-                    totalInjected++;
-                } else {
-                    // No injectable fields, mark as done
-                    injected.add(dep);
-                }
-            }
-
-            Log.info("[DI] Pass " + (pass + 1) + " completed: " + injectedThisPass + " objects injected");
-
-            // If no progress was made, we're done
-            if (injectedThisPass == 0) {
-                Log.info("[DI] No progress in pass " + (pass + 1) + ", stopping early");
-                break;
-            }
-        }
-
-        Log.info("[DI] ===== Multi-pass injection complete: " + totalInjected + " total injections =====");
-        return totalInjected;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void injectFieldsFromContext(Object target, IContext<?> context) {
-        contextInjectorHelper.injectFieldsFromContext(target, context);
-    }
-
-    @Override
-    public void injectFieldsFromContexts(Object target, List<IContext<?>> contexts) {
-        contextInjectorHelper.injectFieldsFromContexts(target, contexts);
-    }
-
-    @Override
-    public void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException {
-        if (contexts == null || contexts.isEmpty()) {
-            Log.warn("[DI] No contexts provided for injection");
-            return;
-        }
-
-        Log.info("[DI] ===== Starting multi-context injection =====");
-        Log.info("[DI] Contexts to process: " + contexts.size());
-
-        // First, inject dependencies within each context
-        for (IContext<?> context : contexts) {
-            if (context != null) {
-                Log.info("[DI] Processing context: " + context.getClass().getSimpleName());
-                context.injectAllDependencies();
-                context.injectFieldsFromContext(this, context);
-            }
-        }
-
-        Log.info("[DI] ===== Multi-context injection complete =====");
-    }
-
-
-
-    
-    /**
-     * Injects static fields of a class using the current dependency map.
-     * This is useful for injecting into utility classes or managers with static fields.
-     *
-     * @param clazz The class whose static fields should be injected
-     */
-    //TODO: Merge with regular injection method
-    public void injectStaticFields(Class<?> clazz) {
-        contextInjectorHelper.injectStaticFields(clazz);
     }
 //    public void buildDependencyGraph(Set<Class<?>> injectables) {
 //        dependencyGraph.clear();
