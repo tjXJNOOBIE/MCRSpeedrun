@@ -68,16 +68,7 @@ public interface IContext<T> {
      */
     boolean hasInjectableFields(Object obj);
     
-    /**
-     * Performs multi-wave dependency injection across multiple contexts.
-     * Wave 1: Injects leaf dependencies (objects with no @Inject fields)
-     * Wave 2: Injects intermediate dependencies
-     * 
-     * @param contexts List of contexts to inject from
-     * @return Set of objects that were injected in wave 1
-     */
-    Set<Object> performWaveInjection(List<IContext<?>> contexts) throws IllegalAccessException;
-    
+
     /**
      * Checks if an object has no @Inject annotated fields.
      * Used to identify leaf dependencies in wave-based injection.
