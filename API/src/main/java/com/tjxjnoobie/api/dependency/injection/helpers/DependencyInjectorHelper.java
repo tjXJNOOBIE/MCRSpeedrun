@@ -45,11 +45,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     private final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
     private final InjectionMap<Class<?>> injectionMap = new InjectionMap<>();
 
-    private final Set<Class<?>> injectableClasses;
-
-    public DependencyInjectorHelper(Set<Class<?>> allInjectableClasses) {
-        this.injectableClasses = allInjectableClasses;
-    }
+  
     /**
      * Gets all instances from the map.
      *
