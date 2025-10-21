@@ -20,8 +20,16 @@ import java.util.Set;
  * Provides default no-op implementations so callers can safely depend on the API
  * while concrete helpers override behavior.
  */
-public interface IContextInjectionHelper  {
+public interface IContextInjectionHelper {
 
+    /**
+     * Injects context dependencies globally into the specified target object using all available contexts.
+     * This method performs a full, global injection of dependencies across all registered contexts,
+     * applying them to the provided target instance. It may involve field injection and other context-specific logic.
+     *
+     * @param target the object into which context-dependent fields should be injected
+     * @throws IllegalAccessException if an illegal access exception occurs during field injection operations
+     */
     default void injectAllContextsGlobally(Object target) throws IllegalAccessException{
 
     }
