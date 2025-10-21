@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassMetaData<T>, IDependencyMap, IDependencyGraphMap{
 
     // Static registry to track all context instances
-    private final List<IContext<?>> contextRegistry = new ArrayList<>();
     // InjectionConfig implementation
     private final Set<String> allowedPackages = new HashSet<>();
     private final Set<String> excludedPackages = new ConcurrentSkipListSet<>();
