@@ -57,4 +57,8 @@ public interface IDependencyGraphMap extends IDependencyMap {
     default void printSummary() {
         // Empty - concrete class provides implementation
     }
+
+    default Object resolveDependencyFromGraph(Class<?> depClass){
+        return null;
+    }
 }
