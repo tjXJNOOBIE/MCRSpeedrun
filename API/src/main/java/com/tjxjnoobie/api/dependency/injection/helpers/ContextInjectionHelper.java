@@ -10,17 +10,19 @@
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * ContextInjectorHelper – Context-based injection orchestration utilities.
@@ -61,27 +63,16 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] Injecting into " + target.getClass().getSimpleName()
                 + " from context " + context.getClass().getSimpleName());
 
-        // Build merged dependency map from the single context
-        HashMap<Class<?>, Object> merged = new HashMap<>();
-        DependencyMap ctxMap = context.getDependencyMap();
-        for (Map.Entry<Class<?>, IDependencyMetaData> entry : ctxMap.entrySet()) {
-            Class<?> type = entry.getKey();
-            IDependencyMetaData meta = entry.getValue();
-            if (meta == null) continue;
-            Object inst = safeInstance(target);
-            if (inst != null) merged.put(type, inst);
-        }
-
-        // Inject using merged dependencies
-        injectWithMergedDependencies(target, merged);
+        // Inject directly from context's dependency map
+        injectAndRecordMetaData(target);
     }
 
     /**
      * Injects dependencies into a target object from multiple contexts.
-     * Merges all contexts' dependency maps and performs a single injection pass.
+     * Performs injection pass for each context sequentially.
      *
      * @param target   object to inject into
-     * @param contexts list of contexts to merge from
+     * @param contexts list of contexts to inject from
      */
     public void injectFieldsFromContexts(Object target, List<IContext<?>> contexts) {
         if (target == null || contexts == null || contexts.isEmpty()) {
@@ -92,22 +83,12 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] Injecting into " + target.getClass().getSimpleName()
                 + " from " + contexts.size() + " contexts");
 
-        // Merge all dependencies
-        HashMap<Class<?>, Object> merged = new HashMap<>();
+        // Inject from each context sequentially
         for (IContext<?> ctx : contexts) {
-            if (ctx == null) continue;
-            DependencyMap ctxMap = ctx.getDependencyMap();
-            for (Map.Entry<Class<?>, IDependencyMetaData> entry : ctxMap.entrySet()) {
-                Class<?> type = entry.getKey();
-                IDependencyMetaData meta = entry.getValue();
-                if (meta == null) continue;
-                Object inst = safeInstance(target);
-                if (inst != null) merged.putIfAbsent(type, inst);
+            if (ctx != null) {
+                injectFieldsFromContext(target, ctx);
             }
         }
-
-        // Inject using merged dependencies
-        injectWithMergedDependencies(target, merged);
     }
 
     /**
@@ -170,46 +151,29 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         Log.info("[DI] ===== Starting wave-based injection =====");
         Set<Object> wave1 = new HashSet<>();
+        Set<Object> allDependencies = new HashSet<>();
 
-        // Create merged dependency map from all contexts
-        HashMap<Class<?>, Object> mergedDependencies = new HashMap<>();
+        // Collect all dependencies from all contexts
         for (IContext<?> context : contexts) {
             if (context != null) {
-                DependencyMap ctxMap = context.getDependencyMap();
-                for (Map.Entry<Class<?>, IDependencyMetaData> entry : ctxMap.entrySet()) {
-                    IDependencyMetaData meta = entry.getValue();
-                    if (meta == null) continue;
-                    Object inst = safeInstance(null);
-                    if (inst != null) mergedDependencies.putIfAbsent(entry.getKey(), inst);
+                IDependencyMap ctxMap = context.getDependencyMap();
+                for (IDependencyMetaData meta : ctxMap.getDependencyMapValues()) {
+                    Object inst = meta.ensureAndGetInstance(meta);
+                    if (inst != null) allDependencies.add(inst);
                 }
             } else {
                 Log.critical("[DI] Cannot inject from null context");
             }
         }
-        Log.info("[DI] Merged " + mergedDependencies.size() + " dependencies from " + contexts.size() + " contexts");
+        Log.info("[DI] Collected " + allDependencies.size() + " dependencies from " + contexts.size() + " contexts");
 
         // ===== WAVE 1: Inject leaf dependencies (no @Inject fields) =====
         Log.info("[DI] --- Wave 1: Injecting leaf dependencies ---");
-        for (IContext<?> context : contexts) {
-            if (context == null) {
-                Log.critical("[DI] Cannot inject from null context");
-                continue;
-            }
-
-            // Snapshot avoid CME
-            List<Object> dependencies = new ArrayList<>();
-            for (IDependencyMetaData meta : context.getDependencyMap().values()) {
-                Object inst = safeInstance(null);
-                if (inst != null) dependencies.add(inst);
-            }
-
-            for (Object dep : dependencies) {
-                if (dep == null) continue;
-                if (hasNoInjectFields(dep) && !wave1.contains(dep)) {
-                    injectWithMergedDependencies(dep, mergedDependencies);
-                    wave1.add(dep);
-                    Log.info("[DI] Wave 1 injected: " + dep.getClass().getSimpleName());
-                }
+        for (Object dep : allDependencies) {
+            if (dep != null && hasNoInjectFields(dep)) {
+                injectAndRecordMetaData(dep);
+                wave1.add(dep);
+                Log.info("[DI] Wave 1 injected: " + dep.getClass().getSimpleName());
             }
         }
         Log.info("[DI] Wave 1 complete: " + wave1.size() + " leaf dependencies injected");
@@ -217,23 +181,11 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // ===== WAVE 2: Inject intermediate dependencies =====
         Log.info("[DI] --- Wave 2: Injecting intermediate dependencies ---");
         int wave2Count = 0;
-        for (IContext<?> context : contexts) {
-            if (context == null) continue;
-
-            // Snapshot
-            List<Object> dependencies = new ArrayList<>();
-            for (IDependencyMetaData meta : context.getDependencyMap().values()) {
-                Object inst = safeInstance(null);
-                if (inst != null) dependencies.add(inst);
-            }
-
-            for (Object dep : dependencies) {
-                if (dep == null) continue;
-                if (!wave1.contains(dep)) {
-                    injectWithMergedDependencies(dep, mergedDependencies);
-                    wave2Count++;
-                    Log.info("[DI] Wave 2 injected: " + dep.getClass().getSimpleName());
-                }
+        for (Object dep : allDependencies) {
+            if (dep != null && !wave1.contains(dep)) {
+                injectAndRecordMetaData(dep);
+                wave2Count++;
+                Log.info("[DI] Wave 2 injected: " + dep.getClass().getSimpleName());
             }
         }
         Log.info("[DI] Wave 2 complete: " + wave2Count + " intermediate dependencies injected");
@@ -241,34 +193,6 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         return wave1;
     }
-
-    /**
-     * Injects fields into a target object using a merged dependency map.
-     * All merged entries are temporarily registered into the owner's dependency map
-     * before running a single injection+record pass.
-     */
-    private void injectWithMergedDependencies(Object target, HashMap<Class<?>, Object> mergedDependencies) {
-        if (target == null) {
-            Log.warn("[DI] Cannot inject: target is null");
-            return;
-        }
-        if (mergedDependencies == null) {
-            Log.warn("[DI] Cannot inject: merged dependencies map is null");
-            return;
-        }
-        if (mergedDependencies.isEmpty()) {
-            Log.warn("[DI] Cannot inject: merged dependencies map is empty");
-            return;
-        }
-
-        for (Map.Entry<Class<?>, Object> entry : mergedDependencies.entrySet()) {
-            registerDependency(entry.getKey(), entry.getValue(), entry::getValue, null);
-        }
-
-        injectAndRecordMetaData(target);
-    }
-
-
 
     /**
      * Checks if an object has no @Inject annotated fields (leaf dependency).
@@ -285,17 +209,5 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             clazz = clazz.getSuperclass();
         }
         return true;
-    }
-
-    /**
-     * Safely retrieves an instance from metadata, tolerating null target class.
-     */
-    private Object safeInstance(Object target) {
-        try {
-            Class<?> targetClass = (target != null ? target.getClass() : Object.class);
-            return getDependencyInstance(targetClass);
-        } catch (Throwable t) {
-            return null;
-        }
     }
 }
