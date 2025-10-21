@@ -293,18 +293,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
 
 
     /**
-     * Performs multi-wave dependency injection across multiple contexts.
-     * Wave 1: Injects leaf dependencies (objects with no @Inject fields)
-     * Wave 2: Injects intermediate dependencies WITH MERGED CONTEXT MAPS
-     *
-     * @param contexts List of contexts to inject from
-     * @return Set of objects that were injected in wave 1
-     */
-    public Set<Object> performWaveInjection(List<IContext<?>> contexts) throws IllegalAccessException {
-        return contextInjectorHelper.performWaveInjection(contexts);
-    }
-
-    /**
      * Injects fields into a target object using a merged dependency map.
      * This allows cross-context dependency resolution.
      *
