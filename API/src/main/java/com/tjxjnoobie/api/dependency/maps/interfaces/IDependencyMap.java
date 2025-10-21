@@ -184,4 +184,13 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
     default String generateReport() {
         return "";
     }
+
+    /**
+     * Gets the total number of registered dependencies in this map.
+     *
+     * @return The number of dependencies currently registered
+     */
+    default int getDependencyMapSize() {
+        return 0;
+    }
 }
