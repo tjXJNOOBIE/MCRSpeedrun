@@ -42,10 +42,9 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param clazz the class type of the component to register (used for type-level binding)
      * @param instance the actual instance of the component to inject dependencies into
      * @param priority the priority level for this registration; higher values indicate earlier processing in the injection sequence
-     * @return this helper instance, enabling method chaining
      */
-    default IDependencyInjectorHelper registerImportant(Class<?> clazz, Object instance, int priority){
-        return this;
+    default void registerImportant(Class<?> clazz, Object instance, int priority){
+
     }
 
     /**
