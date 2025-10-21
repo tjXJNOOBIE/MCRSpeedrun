@@ -144,6 +144,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      * @param contexts list of contexts
      * @return set of objects injected in wave 1
      */
+   @Override
     public Set<Object> performWaveInjection(List<IContext<?>> contexts) {
         if (contexts == null || contexts.isEmpty()) {
             Log.warn("[DI] No contexts provided for wave injection");
@@ -198,6 +199,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
     /**
      * Checks if an object has no @Inject annotated fields (leaf dependency).
      */
+    @Override
     public boolean hasNoInjectFields(Object obj) {
         if (obj == null) return true;
         Class<?> clazz = obj.getClass();
