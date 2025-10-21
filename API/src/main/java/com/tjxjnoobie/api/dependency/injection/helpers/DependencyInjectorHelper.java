@@ -524,6 +524,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     /**
      * Scans the classpath for injectable classes and registers them in the dependency map.
      * This ensures the dependency map is populated before field binding occurs.
+     * Also discovers and registers implementations for interfaces.
      */
     private void scanAndRegisterInjectableClasses(Class<?> targetClass) {
         Log.info("[AUTO-BIND] Scanning classpath for injectable classes...");
@@ -533,6 +534,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Set<Class<?>> injectableClasses = findInjectableClasses(basePackage);
             Log.info("[AUTO-BIND] Found " + injectableClasses.size() + " injectable classes");
             
+            // First pass: Register all concrete classes and interfaces
             for (Class<?> clazz : injectableClasses) {
                 if (!dependencyMap.isRegistered(clazz)) {
                     try {
@@ -545,8 +547,71 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                     }
                 }
             }
+            
+            // Second pass: Find and register implementations for interfaces
+            Log.info("[AUTO-BIND] Scanning for interface implementations...");
+            registerInterfaceImplementations(basePackage, injectableClasses);
+            
         } catch (Exception e) {
             Log.error("[AUTO-BIND] Error scanning for injectable classes: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Finds all implementations for interfaces and registers them.
+     * This allows a single DI class to register the entire system.
+     */
+    private void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        Set<Class<?>> implementations = new HashSet<>();
+        
+        // Separate interfaces from implementations
+        for (Class<?> clazz : injectableClasses) {
+            if (clazz.isInterface()) {
+                interfaces.add(clazz);
+            } else {
+                implementations.add(clazz);
+            }
+        }
+        
+        Log.info("[AUTO-BIND] Found " + interfaces.size() + " interfaces and " + implementations.size() + " implementations");
+        
+        // For each interface, find and register its implementations
+        for (Class<?> interfaceClass : interfaces) {
+            Set<Class<?>> interfaceImpls = new HashSet<>();
+            
+            for (Class<?> implClass : implementations) {
+                // Check if this class implements the interface
+                if (interfaceClass.isAssignableFrom(implClass)) {
+                    interfaceImpls.add(implClass);
+                }
+            }
+            
+            if (!interfaceImpls.isEmpty()) {
+                // Register the first implementation as the default for this interface
+                Class<?> defaultImpl = interfaceImpls.iterator().next();
+                
+                try {
+                    Object instance = dependencyMap.getDependencyInstance(defaultImpl);
+                    if (instance != null) {
+                        // Register the interface to point to the implementation instance
+                        dependencyMap.registerDependency((Class<Object>) interfaceClass, instance);
+                        Log.info("[AUTO-BIND] Bound interface " + interfaceClass.getSimpleName() + 
+                                " -> " + defaultImpl.getSimpleName());
+                        
+                        // Log all implementations found
+                        if (interfaceImpls.size() > 1) {
+                            Log.info("[AUTO-BIND] Found " + interfaceImpls.size() + " implementations for " + 
+                                    interfaceClass.getSimpleName() + ": " + 
+                                    interfaceImpls.stream().map(Class::getSimpleName).reduce((a, b) -> a + ", " + b).orElse(""));
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.warn("[AUTO-BIND] Could not bind interface " + interfaceClass.getSimpleName() + ": " + e.getMessage());
+                }
+            } else {
+                Log.info("[AUTO-BIND] No implementations found for interface: " + interfaceClass.getSimpleName());
+            }
         }
     }
 
