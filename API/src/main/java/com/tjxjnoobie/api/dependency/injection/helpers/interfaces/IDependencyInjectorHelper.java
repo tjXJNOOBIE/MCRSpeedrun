@@ -35,8 +35,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param priority the priority level (higher values = higher priority)
      * @return this helper instance for method chaining
      */
-    default IDependencyInjectorHelper registerImportant(Class<?> clazz, int priority) {
-        // Default no-op implementation - override in concrete class
+    default IDependencyInjectorHelper registerImportant(Class<?> clazz, Object instance, int priority){
         return this;
     }
 
