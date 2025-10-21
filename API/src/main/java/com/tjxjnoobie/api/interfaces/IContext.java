@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 
 import java.util.List;
 
@@ -25,7 +25,7 @@ public interface IContext<T> {
      *
      * @return HashMap containing all registered dependencies
      */
-    DependencyMap getDependencyMap();
+    IDependencyMap getDependencyMap();
 
 
     /**
