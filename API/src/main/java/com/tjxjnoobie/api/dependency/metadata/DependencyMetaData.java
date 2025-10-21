@@ -91,6 +91,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return the class of the dependency
      */
+    @Override
     public Class<?> getDependencyClass() {
         return dependencyClass;
     }
@@ -101,6 +102,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return a read-only set of dependency classes
      */
+    @Override
     public Set<Class<?>> getDependencies() {
         return dependencies;
     }
@@ -126,6 +128,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @param deps the set of classes this component depends on
      */
+    @Override
     public void setDependencies(Set<Class<?>> deps) {
         this.dependencies = deps;
     }
@@ -136,6 +139,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return the depth level (lower values mean earlier in the resolution order)
      */
+    @Override
     public int getDepth() {
         return depth;
     }
@@ -167,6 +171,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @param depth the depth level (lower values mean earlier in the resolution order)
      */
+    @Override
     public void setDepth(int depth) {
         this.depth = depth;
     }
@@ -177,6 +182,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return the role of this component
      */
+    @Override
     public DependencyRole getRole() {
         return role;
     }
@@ -187,6 +193,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @param role the role assigned to this component
      */
+    @Override
     public void setRole(DependencyRole role) {
         this.role = role;
     }
@@ -197,6 +204,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return the pre-construction method, or null if not set
      */
+    @Override
     public Method getPreConstruct() {
         return lifecycleMethods.get(LifecycleType.PRE_CONSTRUCT);
     }
@@ -207,6 +215,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @param preConstruct the method to invoke before construction
      */
+    @Override
     public void setPreConstruct(Method preConstruct) {
         if (preConstruct == null) lifecycleMethods.remove(LifecycleType.PRE_CONSTRUCT);
         else lifecycleMethods.put(LifecycleType.PRE_CONSTRUCT, preConstruct);
@@ -218,6 +227,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @return the post-construction method, or null if not set
      */
+    @Override
     public Method getPostConstruct() {
         return lifecycleMethods.get(LifecycleType.POST_CONSTRUCT);
     }
@@ -228,6 +238,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      *
      * @param postConstruct the method to invoke after construction
      */
+    @Override
     public void setPostConstruct(Method postConstruct) {
         if (postConstruct == null) lifecycleMethods.remove(LifecycleType.POST_CONSTRUCT);
         else lifecycleMethods.put(LifecycleType.POST_CONSTRUCT, postConstruct);
