@@ -58,7 +58,7 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     
     // Dependency map access
     DependencyMap getDependencyMap();
-    <T> Object get(Class<T> clazz);
+
     
     // Setters that return the context for method chaining
     IGlobalContext setGameMode(IGameMode gameMode);
