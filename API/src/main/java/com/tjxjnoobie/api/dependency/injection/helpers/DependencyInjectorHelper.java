@@ -14,7 +14,6 @@ import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
-import com.tjxjnoobie.api.dependency.injection.maps.InjectionMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.annotations.AutoInjectAll;
@@ -43,9 +42,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
 
     private final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
-    private final InjectionMap<Class<?>> injectionMap = new InjectionMap<>();
 
-  
+
     /**
      * Gets all instances from the map.
      *
@@ -63,11 +61,11 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     @PreConstruct(priority = 0)
     public void initializeDependencySystem() {
         Log.info("[DI-Helper] ===== Initializing Dependency Injection System =====");
-        Log.info("[DI-Helper] Injectable classes count: " + (injectableClasses != null ? injectableClasses.size() : 0));
+        Log.info("[DI-Helper] Injectable classes count: " + dependencyGraph.size());
         
         try {
             // Build the dependency graph first
-            if (injectableClasses != null && !injectableClasses.isEmpty()) {
+            if (!dependencyGraph.isEmpty()) {
                 Log.info("[DI-Helper] Building dependency graph...");
                 buildDependencyGraph();
                 Log.info("[DI-Helper] Computing depth levels...");
@@ -89,8 +87,6 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
     }
 
-    // Default methods from IDependencyGraphMap (registerDependency, buildGraph, getWave, printSummary)
-    // are inherited and will use the interface's default implementations
 
     // ===== Fluent priority builder =====
 
@@ -225,33 +221,36 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     // ===== Graph-based dependency analysis =====
     public void buildDependencyGraph() {
-        for (Class<?> clazz : injectableClasses) {
+        for (Class<?> clazz : dependencyGraph.keySet()) {
             Set<Class<?>> dependencies = new HashSet<>();
             // Fields
             for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class) && injectableClasses.contains(field.getType())) {
+                if (field.isAnnotationPresent(Inject.class) && dependencyGraph.containsKey(field.getType())) {
                     dependencies.add(field.getType());
                 }
             }
             // Superclass
             Class<?> superClass = clazz.getSuperclass();
-            if (superClass != null && injectableClasses.contains(superClass)) dependencies.add(superClass);
+            if (superClass != null && dependencyGraph.containsKey(superClass)) dependencies.add(superClass);
             // Interfaces
             for (Class<?> iface : clazz.getInterfaces()) {
-                if (injectableClasses.contains(iface)) dependencies.add(iface);
+                if (dependencyGraph.containsKey(iface)) dependencies.add(iface);
             }
 
-            IDependencyMetaData meta = new IDependencyMetaData() {};
+            IDependencyMetaData meta = dependencyGraph.get(clazz);
+            if (meta == null) {
+                meta = new IDependencyMetaData() {};
+                dependencyGraph.put(clazz, meta);
+            }
             meta.setDependencyClass(clazz);
             meta.setDependencies(dependencies);
             meta.setRole(dependencies.isEmpty() ? DependencyRole.BASE : DependencyRole.ISOLATED);
-            dependencyGraph.put(clazz, meta);
         }
     }
 
     public void computeDepthLevels() {
         Set<Class<?>> visited = new HashSet<>();
-        for (Class<?> clazz : injectableClasses) computeDepthFor(clazz, visited, new HashSet<>());
+        for (Class<?> clazz : dependencyGraph.keySet()) computeDepthFor(clazz, visited, new HashSet<>());
     }
 
     public int computeDepthFor(Class<?> clazz, Set<Class<?>> visited, Set<Class<?>> stack) {
@@ -356,7 +355,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     // ===== Top-level injection =====
     public void injectAll() throws IllegalAccessException {
-        injectableClasses.stream()
+        dependencyGraph.keySet().stream()
                 .sorted(Comparator.comparingInt((Class<?> c) -> {
                     IDependencyMetaData meta = dependencyGraph.get(c);
                     return meta != null ? meta.getPriority() : 0;
@@ -416,9 +415,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         meta.setDepth(calculateDepth(rootClass, dependencies));
         meta.setRole(determineRole(dependencies));
 
-        // Store in graph and injection map
+        // Store in graph
         dependencyGraph.put(rootClass, meta);
-        injectionMap.put(rootClass, meta);
 
         // === Execute PreConstruct ===
         if (preConstruct != null) {
