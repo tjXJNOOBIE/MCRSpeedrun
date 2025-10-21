@@ -9,11 +9,9 @@
 
 package com.tjxjnoobie.api.dependency.maps;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.annotations.PreConstruct;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
@@ -32,8 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyMetaData> implements IDependencyGraphMap  {
 
-   @Inject
-   private IDependencyInjectorHelper injectorHelper;
+
 
 
 
@@ -73,12 +70,7 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
         Log.info("[GraphMap] Isolated nodes: " + isolatedNodes);
         Log.info("[GraphMap] Maximum depth level: " + maxDepth);
         
-        // Set up injector helper if available
-        if (injectorHelper != null) {
-            Log.info("[GraphMap] Injector helper is configured");
-        } else {
-            Log.warn("[GraphMap] No injector helper configured - delegation disabled");
-        }
+
         
         // Print initial summary if graph is not empty
         if (!isEmpty()) {
@@ -132,22 +124,20 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
      * Delegates building of dependency graph to the injector helper.
      */
     public void buildDependencyGraph() {
-           buildDependencyGraph();
+        buildDependencyGraph();
 
-
+    }
     /**
      * Delegates dependency resolution to the injector helper.
      * 
      * @param depClass the dependency class to resolve
      * @return the resolved dependency, or null if not found
      */
-    public Object resolveDependency(Class<?> depClass) {
-        if (injectorHelper != null) {
-            return injectorHelper.resolveDependency(depClass);
-        } else {
-            Log.warn("[GraphMap] No injector helper set for dependency resolution");
-            return null;
-        }
+    @Override
+    public Object resolveDependencyFromGraph(Class<?> depClass) {
+        //TODO: Make a resolver for the dependency graph map
+        return null;
     }
+
 }
 
