@@ -51,8 +51,43 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         excludedPackages.add("com.sun.");
     }
 
-    // ===== REGISTER/BASE FUNCTIONS =====
+    // ===== CORE RESOLUTION (Highest Priority) =====
 
+    /**
+     * Resolves a dependency by attempting multiple resolution strategies.
+     * First checks for direct instance, then factory, then assignable type.
+     * This is the primary method for dependency resolution.
+     *
+     * @param dependencyClass The class type to resolve
+     * @return The resolved instance, or null if not found
+     */
+    @Override
+    public Object resolveDependency(Class<?> dependencyClass) {
+        // Use custom map's getInstance method
+        Object instance = getDependency(dependencyClass);
+        if (instance != null) {
+            return instance;
+        }
+        
+        // Check if there's metadata with a factory
+        IDependencyMetaData metaData = getDependency(dependencyClass);
+        if (metaData != null && metaData.getFactory() != null) {
+            Object created = metaData.getFactory().get();
+            if (created != null) {
+                return created;
+            }
+        }
+        
+        // Try to find by assignable type
+        Object assignable = findByAssignableType(dependencyClass);
+        if (assignable != null) {
+            return assignable;
+        }
+        
+        return null;
+    }
+
+    // ===== REGISTER/BASE FUNCTIONS =====
 
     /**
      * Registers a factory supplier for a dependency class.
@@ -81,6 +116,20 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         registerDependencyToGraph(clazz);
         
         Log.info("[DI-Factory] Registered factory for: " + clazz.getSimpleName());
+    }
+
+    /**
+     * Reloads a dependency by creating a new instance from the factory and re-registering it.
+     * Replaces both the instance and factory bindings.
+     *
+     * @param <U> The type of the dependency
+     * @param clazz The class type to reload
+     * @param factory The factory supplier to create the new instance
+     */
+    public <U> void reload(Class<U> clazz, Supplier<U> factory) {
+        U instance = factory.get();
+        registerDependency(clazz, instance, factory, this);
+        registerDependencyToGraph(clazz);
     }
 
     /**
@@ -122,20 +171,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     }
 
     /**
-     * Reloads a dependency by creating a new instance from the factory and re-registering it.
-     * Replaces both the instance and factory bindings.
-     *
-     * @param <U> The type of the dependency
-     * @param clazz The class type to reload
-     * @param factory The factory supplier to create the new instance
-     */
-    public <U> void reload(Class<U> clazz, Supplier<U> factory) {
-        U instance = factory.get();
-        registerDependency(clazz, instance, factory, this);
-        registerDependencyToGraph(clazz);
-    }
-
-    /**
      * Performs automatic binding of dependencies for a target object.
      * This is a no-op in the base class and should be overridden by subclasses to provide implementation.
      *
@@ -144,39 +179,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     public void autoBind(Object target) {
         // Default no-op - subclasses can override
         Log.warn("[DI] autoBind not implemented in AbstractContext - override in subclass if needed");
-    }
-
-    /**
-     * Resolves a dependency by attempting multiple resolution strategies.
-     * First checks for direct instance, then factory, then assignable type.
-     *
-     * @param dependencyClass The class type to resolve
-     * @return The resolved instance, or null if not found
-     */
-    @Override
-    public Object resolveDependency(Class<?> dependencyClass) {
-        // Use custom map's getInstance method
-        Object instance = getDependency(dependencyClass);
-        if (instance != null) {
-            return instance;
-        }
-        
-        // Check if there's metadata with a factory
-        IDependencyMetaData metaData = getDependency(dependencyClass);
-        if (metaData != null && metaData.getFactory() != null) {
-            Object created = metaData.getFactory().get();
-            if (created != null) {
-                return created;
-            }
-        }
-        
-        // Try to find by assignable type
-        Object assignable = findByAssignableType(dependencyClass);
-        if (assignable != null) {
-            return assignable;
-        }
-        
-        return null;
     }
 
     // ===== GETTERS/SETTERS =====
@@ -234,10 +236,10 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     }
 
     /**
-     * Retrieves all registered contexts in the global registry.
-     * Returns a copy of the registry to prevent external modification.
+     * Retrieves a list containing all registered context instances from the global registry.
+     * This method returns a copy of the internal context registry to prevent external modification.
      *
-     * @return A list of all registered context instances
+     * @return A list of all IContext<?> instances currently registered in the system, never null.
      */
     public List<IContext<?>> getAllContexts() {
         return new ArrayList<>(contextRegistry);
