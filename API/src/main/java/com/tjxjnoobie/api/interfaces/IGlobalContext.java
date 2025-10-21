@@ -1,9 +1,9 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.IConfigUtils;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.ITimeUtils;
@@ -57,7 +57,7 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
 
     
     // Dependency map access
-    DependencyMap getDependencyMap();
+    IDependencyMap getDependencyMap();
 
     
     // Setters that return the context for method chaining
