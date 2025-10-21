@@ -26,21 +26,6 @@ public interface IContext<T> {
 
 
     /**
-     * Injects fields into all registered dependencies in this context
-     * Performs multi-pass injection to handle nested dependencies
-     */
-    void injectAllDependencies() throws IllegalAccessException;
-    
-    /**
-     * Injects fields into all registered dependencies with a maximum number of passes
-     * @param maxPasses Maximum number of injection passes to perform
-     * @return Number of objects successfully injected
-     */
-    int injectAllDependencies(int maxPasses) throws IllegalAccessException;
-
-
-
-    /**
      * Checks if an object has any @Inject annotated fields
      * @param obj The object to check
      * @return true if the object has injectable fields, false otherwise
