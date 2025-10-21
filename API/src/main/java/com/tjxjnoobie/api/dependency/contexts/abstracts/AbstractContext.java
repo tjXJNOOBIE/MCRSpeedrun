@@ -49,6 +49,9 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         excludedPackages.add("javax.");
         excludedPackages.add("sun.");
         excludedPackages.add("com.sun.");
+        Log.info("[PackageExclusion] Allow packages: " + allowedPackages.size()
+        + " Excluded Packages: " + excludedPackages.size());
+        
     }
 
     // ===== CORE RESOLUTION (Highest Priority) =====
