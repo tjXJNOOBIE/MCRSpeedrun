@@ -534,21 +534,15 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Set<Class<?>> injectableClasses = findInjectableClasses(basePackage);
             Log.info("[AUTO-BIND] Found " + injectableClasses.size() + " injectable classes");
             
-            // First pass: Register all concrete classes and interfaces
-            for (Class<?> clazz : injectableClasses) {
-                if (!dependencyMap.isRegistered(clazz)) {
-                    try {
-                        // Try to instantiate and register
-                        Object instance = clazz.getDeclaredConstructor().newInstance();
-                        dependencyMap.registerDependency(clazz, instance);
-                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName());
-                    } catch (Exception e) {
-                        Log.warn("[AUTO-BIND] Could not instantiate " + clazz.getSimpleName() + ": " + e.getMessage());
-                    }
-                }
-            }
+            // First pass: Analyze roles and assign them BEFORE registration
+            Log.info("[AUTO-BIND] Analyzing class dependencies to determine roles...");
+            Map<Class<?>, DependencyRole> roleMap = analyzeAndAssignRoles(injectableClasses);
             
-            // Second pass: Find and register implementations for interfaces
+            // Second pass: Register all concrete classes with their assigned roles
+            Log.info("[AUTO-BIND] Registering classes with assigned roles...");
+            registerClassesWithRoles(injectableClasses, roleMap);
+            
+            // Third pass: Find and register implementations for interfaces
             Log.info("[AUTO-BIND] Scanning for interface implementations...");
             registerInterfaceImplementations(basePackage, injectableClasses);
             
@@ -558,8 +552,57 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     }
 
     /**
+     * Analyzes all injectable classes and assigns roles based on their dependencies.
+     * Returns a map of class to assigned role for use in registration.
+     */
+    private Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses) {
+        Map<Class<?>, DependencyRole> roleMap = new HashMap<>();
+        
+        for (Class<?> clazz : injectableClasses) {
+            if (!clazz.isInterface()) {
+                Set<Class<?>> dependencies = analyzeClassDependencies(clazz);
+                DependencyRole role = determineRoleFromDependencies(dependencies);
+                roleMap.put(clazz, role);
+                Log.info("[AUTO-BIND] Analyzed " + clazz.getSimpleName() + " -> Role: " + role + 
+                        " (dependencies: " + dependencies.size() + ")");
+            }
+        }
+        
+        return roleMap;
+    }
+
+    /**
+     * Registers all concrete classes with their pre-assigned roles.
+     */
+    private void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap) {
+        for (Class<?> clazz : injectableClasses) {
+            if (!clazz.isInterface() && !dependencyMap.isRegistered(clazz)) {
+                try {
+                    // Instantiate the class
+                    Object instance = clazz.getDeclaredConstructor().newInstance();
+                    
+                    // Register with metadata
+                    dependencyMap.registerDependency(clazz, instance);
+                    
+                    // Get metadata and set the pre-assigned role
+                    IDependencyMetaData meta = dependencyMap.getDependency(clazz);
+                    if (meta != null) {
+                        DependencyRole role = roleMap.getOrDefault(clazz, DependencyRole.ISOLATED);
+                        meta.setRole(role);
+                        meta.setDependencies(analyzeClassDependencies(clazz));
+                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName() + " with role " + role);
+                    }
+                } catch (Exception e) {
+                    Log.warn("[AUTO-BIND] Could not instantiate " + clazz.getSimpleName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    /**
      * Finds all implementations for interfaces and registers them.
      * This allows a single DI class to register the entire system.
+     * Also automatically determines and assigns roles based on dependencies.
      */
     private void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses) {
         Set<Class<?>> interfaces = new HashSet<>();
@@ -575,6 +618,10 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
         
         Log.info("[AUTO-BIND] Found " + interfaces.size() + " interfaces and " + implementations.size() + " implementations");
+        
+        // Analyze and assign roles based on dependencies
+        Log.info("[AUTO-BIND] Analyzing class dependencies to determine roles...");
+        assignRolesToClasses(implementations);
         
         // For each interface, find and register its implementations
         for (Class<?> interfaceClass : interfaces) {
@@ -612,6 +659,79 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             } else {
                 Log.info("[AUTO-BIND] No implementations found for interface: " + interfaceClass.getSimpleName());
             }
+        }
+    }
+
+    /**
+     * Automatically analyzes class dependencies and assigns roles.
+     * - BASE: No @Inject fields (leaf dependencies)
+     * - INTERMEDIATE: 1-2 @Inject fields (depends on a few things)
+     * - ISOLATED: 3+ @Inject fields (complex dependencies)
+     */
+    private void assignRolesToClasses(Set<Class<?>> implementations) {
+        for (Class<?> clazz : implementations) {
+            try {
+                Set<Class<?>> dependencies = analyzeClassDependencies(clazz);
+                DependencyRole role = determineRoleFromDependencies(dependencies);
+                
+                // Get or create metadata
+                IDependencyMetaData meta = dependencyMap.getDependency(clazz);
+                if (meta != null) {
+                    meta.setRole(role);
+                    meta.setDependencies(dependencies);
+                    Log.info("[AUTO-BIND] Assigned role " + role + " to " + clazz.getSimpleName() + 
+                            " (dependencies: " + dependencies.size() + ")");
+                }
+            } catch (Exception e) {
+                Log.warn("[AUTO-BIND] Could not analyze dependencies for " + clazz.getSimpleName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Analyzes a class to find all its @Inject dependencies.
+     * Walks the class hierarchy to find all injected fields.
+     */
+    private Set<Class<?>> analyzeClassDependencies(Class<?> clazz) {
+        Set<Class<?>> dependencies = new HashSet<>();
+        
+        Class<?> current = clazz;
+        while (current != null && current != Object.class) {
+            for (Field field : current.getDeclaredFields()) {
+                // Check for @Inject annotation
+                if (field.isAnnotationPresent(Inject.class)) {
+                    dependencies.add(field.getType());
+                }
+            }
+            
+            // Check for @Inject methods
+            for (Method method : current.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Inject.class) && method.getParameterCount() == 1) {
+                    dependencies.add(method.getParameterTypes()[0]);
+                }
+            }
+            
+            current = current.getSuperclass();
+        }
+        
+        return dependencies;
+    }
+
+    /**
+     * Determines the role of a class based on its dependency count.
+     * - BASE: 0 dependencies (no injections needed)
+     * - INTERMEDIATE: 1-2 dependencies (simple dependencies)
+     * - ISOLATED: 3+ dependencies (complex dependencies)
+     */
+    private DependencyRole determineRoleFromDependencies(Set<Class<?>> dependencies) {
+        int depCount = dependencies.size();
+        
+        if (depCount == 0) {
+            return DependencyRole.BASE;
+        } else if (depCount <= 2) {
+            return DependencyRole.INTERMEDIATE;
+        } else {
+            return DependencyRole.ISOLATED;
         }
     }
 
