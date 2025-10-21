@@ -13,6 +13,8 @@ import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.internal.InjectionConfig;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,6 +28,9 @@ import java.util.Set;
  * @since 10/12/2025
  */
 public interface IDependencyInjectorHelper extends InjectionConfig {
+
+
+
 
     /**
      * Registers an instance as a key component with a specified priority for dependency injection.
@@ -42,7 +47,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     default IDependencyInjectorHelper registerImportant(Class<?> clazz, Object instance, int priority){
         return this;
     }
-
 
     /**
      * Initializes the dependency injection system.
@@ -100,8 +104,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param depClass the dependency class
      * @param clazz the declaring class
      */
-    default void injectFieldValue(Object target, java.lang.reflect.Field field, Object value, 
-                                   boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
+    default void injectFieldValue(Object target, Field field, Object value,
+                                  boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
         // Default no-op implementation - override in concrete class
     }
 
@@ -115,8 +119,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param depClass the dependency class
      * @param clazz the declaring class
      */
-    default void injectMethodValue(Object target, java.lang.reflect.Method method, Object value, 
-                                    boolean optional, Class<?> depClass, Class<?> clazz) {
+    default void injectMethodValue(Object target, Method method, Object value,
+                                   boolean optional, Class<?> depClass, Class<?> clazz) {
         // Default no-op implementation - override in concrete class
     }
 
@@ -128,7 +132,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param clazz the class containing the method
      * @param lifecycleType the type of lifecycle method (e.g., "PreConstruct", "PostConstruct")
      */
-    default void executeLifecycleMethod(java.lang.reflect.Method method, Object target, 
+    default void executeLifecycleMethod(Method method, Object target,
                                         Class<?> clazz, String lifecycleType) {
         // Default no-op implementation - override in concrete class
     }
@@ -140,7 +144,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param depClass the dependency class to find
      * @return the matching field, or null if not found
      */
-    default java.lang.reflect.Field findField(Class<?> target, Class<?> depClass) {
+    default Field findField(Class<?> target, Class<?> depClass) {
         // Default no-op implementation - override in concrete class
         return null;
     }
@@ -152,7 +156,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param dependencies the set of dependencies
      * @return the calculated depth level
      */
-    default int calculateDepth(Class<?> clazz, java.util.Set<Class<?>> dependencies) {
+    default int calculateDepth(Class<?> clazz, Set<Class<?>> dependencies) {
         // Default no-op implementation - override in concrete class
         return 0;
     }
@@ -163,7 +167,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param dependencies the set of dependencies
      * @return the determined role
      */
-    default Object determineRole(java.util.Set<Class<?>> dependencies) {
+    default Object determineRole(Set<Class<?>> dependencies) {
         // Default no-op implementation - override in concrete class
         return null;
     }
@@ -190,8 +194,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param stack current recursion stack for cycle detection
      * @return the computed depth
      */
-    default int computeDepthFor(Class<?> clazz, java.util.Set<Class<?>> visited, 
-                                java.util.Set<Class<?>> stack) {
+    default int computeDepthFor(Class<?> clazz, Set<Class<?>> visited,
+                                Set<Class<?>> stack) {
         // Default no-op implementation - override in concrete class
         return 0;
     }
