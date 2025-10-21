@@ -36,6 +36,10 @@ public interface IContextInjectionHelper extends IDependencyInjectorHelper {
         // Default no-op
     }
 
+    default void injectAllContextsGlobally(Object target) throws IllegalAccessException{
+
+    }
+    
     /**
      * Performs wave-based injection across provided contexts.
      * Returns the set of objects injected during the first wave.
