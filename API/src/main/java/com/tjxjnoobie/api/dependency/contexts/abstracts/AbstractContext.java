@@ -475,17 +475,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         return false;
     }
 
-    /**
-     * Checks if an object has no @Inject annotated fields.
-     * Used to identify leaf dependencies in wave-based injection.
-     *
-     * @param obj The object to check
-     * @return true if the object has no @Inject fields, false otherwise
-     */
-    public boolean hasNoInjectFields(Object obj) {
-        return contextInjectorHelper.hasNoInjectFields(obj);
-    }
-
 
 
     public Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {
