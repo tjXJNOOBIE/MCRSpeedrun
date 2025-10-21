@@ -37,26 +37,6 @@ public interface IContext<T> {
      * @return Number of objects successfully injected
      */
     int injectAllDependencies(int maxPasses) throws IllegalAccessException;
-    
-    /**
-     * Injects fields from a specific context into a target object
-     * @param target The target object to inject into
-     * @param context The context to use for injection
-     */
-    void injectFieldsFromContext(Object target, IContext<?> context);
-    
-    /**
-     * Injects fields from multiple contexts into a target object
-     * @param target The target object to inject into
-     * @param contexts List of contexts to use for injection
-     */
-    void injectFieldsFromContexts(Object target, List<IContext<?>> contexts);
-    
-    /**
-     * Injects all dependencies from multiple contexts
-     * @param contexts List of contexts to inject dependencies from
-     */
-    void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException;
 
 
 
@@ -68,14 +48,6 @@ public interface IContext<T> {
     boolean hasInjectableFields(Object obj);
     
 
-    /**
-     * Checks if an object has no @Inject annotated fields.
-     * Used to identify leaf dependencies in wave-based injection.
-     * 
-     * @param obj The object to check
-     * @return true if the object has no @Inject fields, false otherwise
-     */
-    boolean hasNoInjectFields(Object obj);
 
     /**
      * Returns a list of all registered context instances.
