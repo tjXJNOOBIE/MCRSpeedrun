@@ -107,6 +107,16 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
     }
 
 
+    /**
+     * Retrieves a collection of {@link IDependencyMetaData} entries representing the registered dependencies in this map.
+     * Each entry contains metadata about a registered dependency, such as its class type, factory configuration, role, and context.
+     *
+     * @return a collection of dependency metadata entries for all currently registered dependencies
+     */
+    default Collection<IDependencyMetaData> getDependencyMapValues(){
+        return null;
+    }
+
     default IDependencyMetaData getDependency(Class<?> clazz){
         return null;
     }
