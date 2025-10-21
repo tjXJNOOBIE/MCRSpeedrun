@@ -90,18 +90,48 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         if (clazz == null) {
             throw new IllegalArgumentException("Class must be non-null");
         }
-        // Allow null instance to support factory-only registration
-        DependencyMetaData metaData = new DependencyMetaData(clazz);
-        if (instance != null) {
-            metaData.setInstance(instance);
-            metaData.populateMetaData(instance.getClass());
-        }
-        metaData.setFactory(factory);
-        metaData.setSourceContext(sourceContext);
 
-        put(clazz, metaData);
-        Log.info("[DependencyMetaDataMap] Registered: " + clazz.getSimpleName() +
-                (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)"));
+        try {
+            // Allow null instance to support factory-only registration
+            Log.info("[DependencyMap] Creating metadata for: " + clazz.getSimpleName());
+            DependencyMetaData metaData = new DependencyMetaData(clazz);
+            
+            if (instance != null) {
+                Log.info("[DependencyMap] Setting instance for " + clazz.getSimpleName() + 
+                        " -> " + instance.getClass().getSimpleName());
+                metaData.setInstance(instance);
+                
+                Log.info("[DependencyMap] Populating metadata from instance class: " + instance.getClass().getName());
+                metaData.populateMetaData(instance.getClass());
+                Log.info("[DependencyMap] Metadata population completed for: " + clazz.getSimpleName());
+            } else {
+                Log.info("[DependencyMap] No instance provided - factory-only registration for: " + clazz.getSimpleName());
+            }
+            
+            if (factory != null) {
+                Log.info("[DependencyMap] Setting factory supplier for: " + clazz.getSimpleName());
+                metaData.setFactory(factory);
+            } else {
+                Log.info("[DependencyMap] No factory supplier provided for: " + clazz.getSimpleName());
+            }
+            
+            if (sourceContext != null) {
+                Log.info("[DependencyMap] Setting source context for: " + clazz.getSimpleName() + 
+                        " from context: " + sourceContext.getClass().getSimpleName());
+                metaData.setSourceContext(sourceContext);
+            } else {
+                Log.info("[DependencyMap] No source context provided for: " + clazz.getSimpleName());
+            }
+            put(clazz, metaData);
+            Log.success("[DependencyMap] Successfully registered: " + clazz.getSimpleName() +
+                    (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)") +
+                    (factory != null ? " [with factory]" : "") +
+                    (sourceContext != null ? " [from " + sourceContext.getClass().getSimpleName() + "]" : ""));
+        } catch (Exception e) {
+            Log.error("[DependencyMap] Failed to register dependency: " + clazz.getSimpleName() + 
+                    " - Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            throw e;
+        }
     }
 
 
