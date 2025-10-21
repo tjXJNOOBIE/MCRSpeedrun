@@ -79,7 +79,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             // Log summary
             Log.success("[DI-Helper] Dependency Injection System initialized successfully");
             Log.info("[DI-Helper] Graph nodes: " + dependencyGraph.size());
-            Log.info("[DI-Helper] Registered dependencies: " + dependencyMap.size());
+            Log.info("[DI-Helper] Registered dependencies: " + dependencyMap.getDependencyMapSize());
             
         } catch (Exception e) {
             Log.critical("[DI-Helper] Failed to initialize DI system: " + e.getMessage());
