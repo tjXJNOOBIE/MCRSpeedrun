@@ -359,6 +359,16 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 .collect(Collectors.toList());
     }
     /**
+     * Gets the total number of registered dependencies in this map.
+     *
+     * @return The number of dependencies currently registered
+     */
+    @Override
+    public int getDependencyMapSize() {
+        return size();
+    }
+
+    /**
      * Clears all dependencies and logs the action.
      */
     @Override
