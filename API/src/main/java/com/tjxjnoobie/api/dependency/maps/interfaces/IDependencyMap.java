@@ -54,6 +54,10 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
 
     }
 
+    default void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory){
+
+    }
+
     /**
      * Updates the existing instance of a given class in the dependency registry.
      * This allows for reassigning or refreshing a previously registered object.
@@ -61,7 +65,10 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      * @param clazz the class type whose instance should be updated
      * @param instance the new instance to replace the current one
      */
-    default <U> void updateInstance(Class<U> clazz, U instance) {}
+    default <U> void updateInstance(Class<U> clazz, U instance) {
+        //TODO: Change method params to match object instance
+    }
+
 
     /**
      * Checks whether an instance of a given class is currently registered in the registry.
