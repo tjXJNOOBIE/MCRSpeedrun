@@ -9,7 +9,6 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -42,7 +41,7 @@ import java.util.Set;
  * @author TJ
  * @since 10/17/2025
  */
-public class ContextInjectionHelper implements IContextInjectionHelper, IDependencyMap, IDependencyGraphMap {
+public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphMap {
 
 
 
