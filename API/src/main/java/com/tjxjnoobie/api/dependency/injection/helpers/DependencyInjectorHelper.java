@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * @author TJ
  * @since 10/12/2025
  */
-public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper, IDependencyGraphMap {
+public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper {
 
 
     private final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
@@ -91,24 +91,25 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     // ===== Fluent priority builder =====
 
     /**
-     * Registers a dependency instance as important with a specified priority level.
+     * Registers a dependency instance as important with a specified priority.
      *
-     * This method registers the given class and its corresponding instance in the dependency injection system,
-     * marking it as an important component. It also sets metadata for the class including the dependency class
-     * and the priority value used during injection ordering.
+     * This method registers the given class and instance as an important dependency,
+     * meaning it will be processed during injection with high priority. It first
+     * registers the dependency using the standard registration mechanism, then sets
+     * metadata to associate the class with its dependency type and priority level.
      *
-     * @param clazz the class type of the dependency to register
-     * @param instance the instance object that represents the dependency
-     * @param priority the priority level for this dependency; higher values indicate earlier execution during injection
-     * @return this helper instance for method chaining
+     * @param clazz the class of the dependency to register
+     * @param instance the instance object that represents this dependency
+     * @param priority the priority value for injection; higher values indicate earlier processing during injection
+     * @return null - this method does not return a meaningful value
      */
     @Override
-    public IDependencyInjectorHelper registerImportant(Class<?> clazz, Object instance, int priority) {
+    public void registerImportant(Class<?> clazz, Object instance, int priority) {
         registerDependency(clazz,instance);
 
         getMetaData(clazz).setDependencyClass(clazz);
         getMetaData(clazz).setPriority(priority);
-        return this;
+
     }
 
     public void initialize() throws Exception {
