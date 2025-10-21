@@ -28,12 +28,16 @@ import java.util.Set;
 public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
-     * Registers a class with high priority in the dependency injection system.
-     * Higher priority classes are initialized earlier in the dependency resolution process.
-     * 
-     * @param clazz the class to register with priority
-     * @param priority the priority level (higher values = higher priority)
-     * @return this helper instance for method chaining
+     * Registers an instance as a key component with a specified priority for dependency injection.
+     *
+     * This method allows registering a specific class and its instance into the dependency injection system,
+     * where the registration is given a priority level. Components registered with higher priorities are processed
+     * earlier in the injection lifecycle, which can be useful when dependencies have ordering requirements.
+     *
+     * @param clazz the class type of the component to register (used for type-level binding)
+     * @param instance the actual instance of the component to inject dependencies into
+     * @param priority the priority level for this registration; higher values indicate earlier processing in the injection sequence
+     * @return this helper instance, enabling method chaining
      */
     default IDependencyInjectorHelper registerImportant(Class<?> clazz, Object instance, int priority){
         return this;
