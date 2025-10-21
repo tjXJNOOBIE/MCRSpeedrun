@@ -502,7 +502,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             } else {
                 Class<?> targetClass = target.getClass();
                 if (isRequireInjectableAnnotation() && !targetClass.isAnnotationPresent(Injectable.class)) {
-                    Log.info("Skipping autoBind for non-@Injectable target: " + targetClass.getName());
+                    Log.info("[AUTO-BIND] Skipping autoBind for non-@Injectable target: " + targetClass.getName());
                     return;
                 }
 
@@ -519,13 +519,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     // --- Type-level binding (Class<?>) ---
     public void bindType(Class<?> type) throws Exception {
         if (!type.isInterface() || !isEligibleForInjection(type)) {
-            Log.info("Skipping ineligible or non-interface type: " + type.getName());
+            Log.info("[AUTO-BIND] Skipping ineligible or non-interface type: " + type.getName());
             return;
         }
 
         // 1️⃣ Already registered
         if (dependencyMap.isRegistered(type)) {
-            Log.info("Skipping exact dependency registration for " + type.getSimpleName());
+            Log.info("[AUTO-BIND] Skipping exact dependency registration for " + type.getSimpleName());
             return;
         }
 
@@ -533,7 +533,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         Object compat = dependencyMap.findByAssignableType(type);
         if (compat != null && !dependencyMap.isRegistered(type)) {
             dependencyMap.registerDependency((Class<Object>) type, compat);
-            Log.info("Auto-bound " + type.getSimpleName() + " to existing compatible dependency " + compat.getClass().getSimpleName());
+            Log.info("[AUTO-BIND] Auto-bound " + type.getSimpleName() + " to existing compatible dependency " + compat.getClass().getSimpleName());
             return;
         }
 
@@ -541,7 +541,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         if (Arrays.stream(type.getMethods()).anyMatch(Method::isDefault)) {
             Object proxy = createSelfProxy(type);
             dependencyMap.registerDependency((Class<Object>) type, proxy);
-            Log.info("Bound " + type.getSimpleName() + " to self via proxy instance.");
+            Log.info("[AUTO-BIND] Bound " + type.getSimpleName() + " to self via proxy instance.");
             return;
         }
 
@@ -551,14 +551,14 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Class<?> implClass = impls.iterator().next();
             Object instance = implClass.getDeclaredConstructor().newInstance();
             dependencyMap.registerDependency((Class<Object>) type, instance);
-            Log.info("Discovered and registered concrete class for " + type.getSimpleName() + " -> " + implClass.getSimpleName());
+            Log.info("[AUTO-BIND] Discovered and registered concrete class for " + type.getSimpleName() + " -> " + implClass.getSimpleName());
             return;
         }
 
         // 5️⃣ Fallback placeholder proxy
         Object placeholder = createPlaceholderProxy(type);
         dependencyMap.registerDependency((Class<Object>) type, placeholder);
-        Log.warn("Bound " + type.getSimpleName() + " to fallback placeholder.");
+        Log.warn("[AUTO-BIND] Bound " + type.getSimpleName() + " to fallback placeholder.");
     }
 
     // --- Field-level binding (instance) ---
