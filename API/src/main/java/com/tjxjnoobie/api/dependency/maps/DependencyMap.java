@@ -9,12 +9,10 @@
 
 package com.tjxjnoobie.api.dependency.maps;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
@@ -33,7 +31,6 @@ import java.util.stream.Collectors;
  */
 public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaData> implements IDependencyMap {
 
-    @Inject private IDependencyInjectorHelper injectorHelper;
 
 
     public DependencyMap dependencyMap = this;
@@ -87,7 +84,12 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * @param sourceContext The context that owns this dependency
      */
     public void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {
+        Log.info("[DependencyMap] Attempting to register dependency: clazz=" + (clazz != null ? clazz.getName() : "null") +
+                ", hasInstance=" + (instance != null) + ", hasFactory=" + (factory != null) + 
+                ", hasContext=" + (sourceContext != null));
+        
         if (clazz == null) {
+            Log.error("[DependencyMap] Registration failed: Class parameter is null");
             throw new IllegalArgumentException("Class must be non-null");
         }
 
@@ -122,7 +124,9 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
             } else {
                 Log.info("[DependencyMap] No source context provided for: " + clazz.getSimpleName());
             }
+
             put(clazz, metaData);
+
             Log.success("[DependencyMap] Successfully registered: " + clazz.getSimpleName() +
                     (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)") +
                     (factory != null ? " [with factory]" : "") +
@@ -150,6 +154,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     /**
      * Registers a dependency with optional factory but without a source context.
      */
+    @Override
     public void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory) {
         registerDependency(clazz, instance, factory, null);
     }
@@ -178,6 +183,12 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
 
 
 
+    /**
+     * Retrieves the metadata for a dependency of the specified class type.
+     *
+     * @param clazz The class type of the dependency to retrieve metadata for
+     * @return The metadata associated with the given class, or null if no such dependency is registered
+     */
     @Override
     public IDependencyMetaData getDependency(Class<?> clazz){
         return get(clazz);
@@ -247,7 +258,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     public IDependencyMetaData removeDependency(Class<?> clazz) {
         IDependencyMetaData removed = remove(clazz);
         if (removed != null) {
-            Log.info("[DependencyMetaDataMap] Removed: " + clazz.getSimpleName());
+            Log.info("[DependencyMap] Removed: " + clazz.getSimpleName());
         }
         return removed;
     }
@@ -354,7 +365,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     public void clear() {
         int count = size();
         super.clear();
-        Log.info("[DependencyMetaDataMap] Cleared " + count + " dependencies");
+        Log.info("[DependencyMap] Cleared " + count + " dependencies");
     }
 
 
