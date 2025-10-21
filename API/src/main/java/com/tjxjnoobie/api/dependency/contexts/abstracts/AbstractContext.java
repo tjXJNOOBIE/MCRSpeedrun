@@ -1,5 +1,9 @@
 package com.tjxjnoobie.api.dependency.contexts.abstracts;
 
+import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
@@ -33,6 +37,9 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
      * Default constructor that initializes the context with default configuration values.
      */
     public AbstractContext() {
+        IDependencyMap mapInstanceTest = new DependencyMap();
+        dependencyMap.registerImportant(IDependencyInjectorHelper.class, new DependencyInjectorHelper(), 0);
+        registerImportant(IContextInjectionHelper.class, new ContextInjectionHelper(), 0);
         initializeDefaults();
     }
     
@@ -51,7 +58,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         excludedPackages.add("com.sun.");
         Log.info("[PackageExclusion] Allow packages: " + allowedPackages.size()
         + " Excluded Packages: " + excludedPackages.size());
-        
+
     }
 
     // ===== CORE RESOLUTION (Highest Priority) =====
@@ -214,7 +221,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
      *
      * @return The dependency map
      */
-    public DependencyMap getDependencyMap() {
+    public IDependencyMap getDependencyMap() {
         return dependencyMap;
     }
 
