@@ -16,6 +16,7 @@ import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -45,51 +46,6 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
 
 
 
-
-    /**
-     * Injects dependencies into a target using a single source context's dependency map.
-     *
-     * @param target  object to inject into
-     * @param context source context providing dependencies
-     */
-    @Override
-    public void injectFieldsFromContext(Object target, IContext<?> context) {
-        if (target == null || context == null) {
-            Log.warn("[DI] Cannot inject from null target or context");
-            return;
-        }
-
-        Log.info("[DI] Injecting into " + target.getClass().getSimpleName()
-                + " from context " + context.getClass().getSimpleName());
-
-        // Inject directly from context's dependency map
-        injectAndRecordMetaData(target);
-    }
-
-    /**
-     * Injects dependencies into a target object from multiple contexts.
-     * Performs injection pass for each context sequentially.
-     *
-     * @param target   object to inject into
-     * @param contexts list of contexts to inject from
-     */
-    @Override
-    public void injectFieldsFromContexts(Object target, List<IContext<?>> contexts) {
-        if (target == null || contexts == null || contexts.isEmpty()) {
-            Log.warn("[DI] Cannot inject from null target or empty contexts");
-            return;
-        }
-
-        Log.info("[DI] Injecting into " + target.getClass().getSimpleName()
-                + " from " + contexts.size() + " contexts");
-
-        // Inject from each context sequentially
-        for (IContext<?> ctx : contexts) {
-            if (ctx != null) {
-                injectFieldsFromContext(target, ctx);
-            }
-        }
-    }
 
     /**
      * Injects all dependencies from all registered contexts with full initialization.
@@ -136,37 +92,34 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
     }
 
     /**
-     * Performs wave-based injection across provided contexts.
-     * Wave 1: inject leaf dependencies (no @Inject fields)
-     * Wave 2: inject remaining dependencies (intermediate/others)
+     * Performs wave-based injection across provided contexts using metadata roles.
+     * Wave 1: inject BASE role dependencies (no dependencies)
+     * Wave 2: inject INTERMEDIATE and other role dependencies
      *
      * @param contexts list of contexts
      * @return set of objects injected in wave 1
      */
-   @Override
+    @Override
     public Set<Object> performWaveInjection(List<IContext<?>> contexts) {
         if (contexts == null || contexts.isEmpty()) {
-            Log.warn("[DI] No contexts provided for wave injection");
+            Log.warn("[DI-WAVE] No contexts provided for wave injection");
             return new HashSet<>();
         }
 
-        Log.info("[DI] ===== Starting wave-based injection =====");
+        Log.info("[DI-WAVE] ===== Starting wave-based injection =====");
         Set<Object> wave1 = new HashSet<>();
-        Set<Object> allDependencies = new HashSet<>();
 
-        // Collect all dependencies from all contexts
+        // Collect all metadata from all contexts
+        List<IDependencyMetaData> allMetaData = new ArrayList<>();
         for (IContext<?> context : contexts) {
             if (context != null) {
                 IDependencyMap ctxMap = context.getDependencyMap();
-                for (IDependencyMetaData meta : ctxMap.getDependencyMapValues()) {
-                    Object inst = meta.ensureAndGetInstance(meta);
-                    if (inst != null) allDependencies.add(inst);
-                }
+                allMetaData.addAll(ctxMap.getDependencyMapValues());
             } else {
-                Log.critical("[DI] Cannot inject from null context");
+                Log.critical("[DI-WAVE] Cannot inject from null context");
             }
         }
-        Log.info("[DI] Collected " + allDependencies.size() + " dependencies from " + contexts.size() + " contexts");
+        Log.info("[DI-WAVE] Collected " + allMetaData.size() + " dependencies from " + contexts.size() + " contexts");
 
         // ===== WAVE 1: Inject BASE role dependencies (no dependencies) =====
         Log.info("[DI-WAVE] --- Wave 1: Injecting BASE role dependencies ---");
@@ -182,8 +135,8 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
         }
         Log.info("[DI-WAVE] Wave 1 complete: " + wave1.size() + " BASE dependencies injected");
 
-        // ===== WAVE 2: Inject intermediate dependencies =====
-        Log.info("[DI] --- Wave 2: Injecting intermediate dependencies ---");
+        // ===== WAVE 2: Inject INTERMEDIATE and other role dependencies =====
+        Log.info("[DI-WAVE] --- Wave 2: Injecting INTERMEDIATE and other dependencies ---");
         int wave2Count = 0;
         for (IDependencyMetaData meta : allMetaData) {
             if (meta != null && meta.getRole() != DependencyRole.BASE) {
