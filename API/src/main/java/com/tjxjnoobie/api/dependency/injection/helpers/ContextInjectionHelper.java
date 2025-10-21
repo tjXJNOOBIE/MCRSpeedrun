@@ -53,7 +53,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      * @param target  object to inject into
      * @param context source context providing dependencies
      */
-    @SuppressWarnings("unchecked")
+    @Override
     public void injectFieldsFromContext(Object target, IContext<?> context) {
         if (target == null || context == null) {
             Log.warn("[DI] Cannot inject from null target or context");
