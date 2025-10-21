@@ -180,7 +180,14 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     }
 
 
-
+    /**
+     * Retrieves all registered dependency metadata entries from this map.
+     *
+     * @return A collection containing the metadata for all registered dependencies
+     */
+    public Collection<IDependencyMetaData> getDependencyMapValues(){
+       return values();
+    }
 
 
     /**
