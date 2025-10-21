@@ -431,14 +431,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         Log.info("[DI] Cleared global context registry");
     }
 
-    /**
-     * Generates a comprehensive dependency report for debugging.
-     * Call this method anytime to see the current state of all dependencies.
-     */
-    public void generateDependencyReport() {
-        generateInjectableReport(); // Call the missing method
-    }
-   
 
     @Override
     public boolean hasInjectableFields(Object obj) {
