@@ -372,24 +372,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
 
 
 
-    public Object invokeDefault(Object proxy, Method method, Object[] args) throws Throwable {
-        final Class<?> declaringClass = method.getDeclaringClass();
-        // bypass access checks
-        Constructor<MethodHandles.Lookup> constructor =
-                MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-        constructor.setAccessible(true);
-
-        return constructor
-                .newInstance(declaringClass,
-                        MethodHandles.Lookup.PRIVATE | MethodHandles.Lookup.PROTECTED
-                                | MethodHandles.Lookup.PACKAGE | MethodHandles.Lookup.PUBLIC)
-                .unreflectSpecial(method, declaringClass)
-                .bindTo(proxy)
-                .invokeWithArguments(args == null ? new Object[0] : args);
-    }
-
-    
-
 
 
 }
