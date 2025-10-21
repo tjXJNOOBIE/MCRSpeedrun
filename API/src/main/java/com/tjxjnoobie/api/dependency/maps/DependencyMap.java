@@ -185,6 +185,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      *
      * @return A collection containing the metadata for all registered dependencies
      */
+    @Override
     public Collection<IDependencyMetaData> getDependencyMapValues(){
        return values();
     }
