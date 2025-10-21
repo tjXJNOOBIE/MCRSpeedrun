@@ -83,7 +83,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
      @Inject private IPunishLog punishLog;
      @Inject private FireEvent fireEvent;
      @Inject private ILocalServerMetaData localServerMetaData;
-     private IContext<IGlobalContext> icontext;
+     private IContext<IGlobalContext> iGlobalContext;
      private IContext<ISpeedRunContext> iSpeedContext;
      private Plugin plugin;
      private static Main instance;
@@ -98,20 +98,21 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Config.loadConfig();
         MySQL.connect();
         ReflectUtil.loadLibs();
-        icontext = new GlobalContext();
+        iGlobalContext = new GlobalContext();
         iSpeedContext = new SpeedRunContext();
         // Register Plugin in both contexts so it's available everywhere
-        icontext.getContext().setPlugin(this);
+        iGlobalContext.getContext().setPlugin(this);
         iSpeedContext.getContext().setPlugin(this);
 
         try {
             injectAllContextsGlobally(this);
+
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
         //TODO: Update logging to use entire context register size instead of one context
-        Log.info("[Main] Registered contexts: " + icontext.getAllContexts().size());
+        Log.info("[Main] Registered contexts: " + iGlobalContext.getAllContexts().size());
 
         InterfaceManager.setMainInterFace(this);
 
