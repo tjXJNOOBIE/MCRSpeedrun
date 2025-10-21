@@ -36,43 +36,6 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
 
 
 
-//    /**
-//     * PreConstruct initialization method with priority 10.
-//     * Initializes the dependency map after DI system is ready.
-//     * This runs after DependencyInjectorHelper (priority 0).
-//     */
-//    @PreConstruct(priority = 10)
-//    public void initializeDependencyMap() {
-//        Log.info("[DependencyMap] ===== Initializing Dependency Map =====");
-//        Log.info("[DependencyMap] Current size: " + size());
-//
-//        // Validate existing entries
-//        int validEntries = 0;
-//        int invalidEntries = 0;
-//
-//        for (Map.Entry<Class<?>, IDependencyMetaData> entry : entrySet()) {
-//            if (entry.getValue() != null && entry.getValue().getInstance(entry.) != null) {
-//                validEntries++;
-//            } else {
-//                invalidEntries++;
-//            }
-//        }
-//
-//        Log.info("[DependencyMap] Valid entries: " + validEntries);
-//        if (invalidEntries > 0) {
-//            Log.warn("[DependencyMap] Invalid entries (no instance): " + invalidEntries);
-//        }
-//
-//        // Set up injector helper if available
-//        if (injectorHelper != null) {
-//            Log.info("[DependencyMap] Injector helper is configured");
-//        } else {
-//            Log.warn("[DependencyMap] No injector helper configured - delegation disabled");
-//        }
-//
-//        Log.success("[DependencyMap] Dependency Map initialized successfully");
-//    }
-
     /**
      * Registers a dependency with its instance, factory, and source context.
      * Creates and populates metadata automatically.
@@ -96,7 +59,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         try {
             // Allow null instance to support factory-only registration
             Log.info("[DependencyMap] Creating metadata for: " + clazz.getSimpleName());
-            DependencyMetaData metaData = new DependencyMetaData(clazz);
+            IDependencyMetaData metaData = new DependencyMetaData(clazz);
             
             if (instance != null) {
                 Log.info("[DependencyMap] Setting instance for " + clazz.getSimpleName() + 
@@ -125,7 +88,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 Log.info("[DependencyMap] No source context provided for: " + clazz.getSimpleName());
             }
 
-            put(clazz, metaData);
+            computeIfAbsent(clazz, c -> metaData);
 
             Log.success("[DependencyMap] Successfully registered: " + clazz.getSimpleName() +
                     (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)") +
