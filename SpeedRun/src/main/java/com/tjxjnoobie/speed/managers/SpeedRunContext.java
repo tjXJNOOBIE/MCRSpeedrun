@@ -659,7 +659,7 @@ public class SpeedRunContext extends AbstractContext<ISpeedRunContext> implement
         summary.append("- PlayerManager: ").append(playerManager != null ? "✓" : "✗").append("\n");
         summary.append("- WorldManager: ").append(worldManager != null ? "✓" : "✗").append("\n");
         summary.append("- Debugger: ").append(debugger != null ? "✓" : "✗").append("\n");
-        summary.append("- Total registered: ").append(dependencyMap.size()).append("\n");
+        summary.append("- Total registered: ").append(dependencyMap.getDependencyMapSize()).append("\n");
 
         return summary.toString();
     }
