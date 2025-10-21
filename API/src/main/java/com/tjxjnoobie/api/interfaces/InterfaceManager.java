@@ -109,38 +109,7 @@ public class InterfaceManager implements MainInterFace {
 
         return coreJoinHandler;
     }
-    public static void setCoreQuitHandler(GlobalContext context)
-            throws ClassNotFoundException, NoSuchMethodException,
-            InvocationTargetException, InstantiationException, IllegalAccessException {
-        System.out.println("Trying to setup CoreQuit handler");
 
-        // Load the CoreQuit class.
-        Class<?> coreQuitClass = Class.forName("com.tjxjnoobie.core.Events.CoreQuit");
-
-        // Assume you want to use a specific constructor – for instance, the first one.
-        Constructor<?> constructor = coreQuitClass.getDeclaredConstructors()[0];
-
-        // Retrieve the parameter types for the constructor.
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
-
-        // Create an array to hold constructor arguments.
-        Object[] args = new Object[parameterTypes.length];
-
-        // Automatically get each dependency from the context.
-        for (int i = 0; i < parameterTypes.length; i++) {
-            args[i] = context.get(parameterTypes[i]);
-        }
-
-        // Create an instance of CoreQuit using the resolved dependencies.
-        Object coreQuitInstance = constructor.newInstance(args);
-
-        if (coreQuitHandler == null) {
-            coreQuitHandler = (CoreQuitHandler) coreQuitInstance;
-            System.out.println("Handler: " + coreQuitHandler.toString());
-        } else {
-            System.out.println("Handler already setup: " + coreQuitHandler.toString());
-        }
-    }
      @Inject
     public static void setGlobalHandler(String className, String handlerName)
             throws ClassNotFoundException, NoSuchMethodException,
