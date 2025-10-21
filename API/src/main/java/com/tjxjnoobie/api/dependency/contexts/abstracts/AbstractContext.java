@@ -307,58 +307,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         Log.info("[DI] Cleared global context registry");
     }
 
-    // ===== HELPER METHODS =====
-
-    /**
-     * Checks if an object has injectable fields.
-     * Supports both @Inject annotation and @AutoInjectAll annotation.
-     *
-     * @param obj The object to check
-     * @return true if the object has injectable fields, false otherwise
-     */
-    @Override
-    public boolean hasInjectableFields(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        Class<?> clazz = obj.getClass();
-        boolean auto = clazz.isAnnotationPresent(AutoInjectAll.class);
-
-        // If @AutoInjectAll is present, check for any non-static fields
-        if (auto) {
-            while (clazz != null && clazz != Object.class) {
-                for (Field field : clazz.getDeclaredFields()) {
-                    if (!Modifier.isStatic(field.getModifiers())) {
-                        return true;
-                    }
-                }
-                clazz = clazz.getSuperclass();
-            }
-            return false;
-        }
-
-        // Otherwise, check for @Inject annotated fields or methods
-        clazz = obj.getClass();
-        while (clazz != null && clazz != Object.class) {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class)) {
-                    return true;
-                }
-            }
-
-            for (Method method : clazz.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Inject.class)) {
-                    return true;
-                }
-            }
-
-            clazz = clazz.getSuperclass();
-        }
-
-        return false;
-    }
-
+ 
 
 
 
