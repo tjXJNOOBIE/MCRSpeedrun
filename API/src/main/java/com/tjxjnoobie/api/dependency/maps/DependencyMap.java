@@ -33,7 +33,6 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
 
 
 
-    public DependencyMap dependencyMap = this;
 
 
 
@@ -83,6 +82,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * @param factory The factory supplier for creating new instances
      * @param sourceContext The context that owns this dependency
      */
+    @Override
     public void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {
         Log.info("[DependencyMap] Attempting to register dependency: clazz=" + (clazz != null ? clazz.getName() : "null") +
                 ", hasInstance=" + (instance != null) + ", hasFactory=" + (factory != null) + 
