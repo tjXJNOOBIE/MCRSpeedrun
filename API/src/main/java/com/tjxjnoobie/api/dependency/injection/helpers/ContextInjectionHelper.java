@@ -185,15 +185,18 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
         // ===== WAVE 2: Inject intermediate dependencies =====
         Log.info("[DI] --- Wave 2: Injecting intermediate dependencies ---");
         int wave2Count = 0;
-        for (Object dep : allDependencies) {
-            if (dep != null && !wave1.contains(dep)) {
-                injectAndRecordMetaData(dep);
-                wave2Count++;
-                Log.info("[DI] Wave 2 injected: " + dep.getClass().getSimpleName());
+        for (IDependencyMetaData meta : allMetaData) {
+            if (meta != null && meta.getRole() != DependencyRole.BASE) {
+                Object inst = meta.ensureAndGetInstance(meta);
+                if (inst != null && !wave1.contains(inst)) {
+                    injectAndRecordMetaData(inst);
+                    wave2Count++;
+                    Log.info("[DI-WAVE] Wave 2 injected: " + inst.getClass().getSimpleName() + " (" + meta.getRole() + ")");
+                }
             }
         }
-        Log.info("[DI] Wave 2 complete: " + wave2Count + " intermediate dependencies injected");
-        Log.info("[DI] ===== Wave-based injection complete =====");
+        Log.info("[DI-WAVE] Wave 2 complete: " + wave2Count + " INTERMEDIATE/other dependencies injected");
+        Log.info("[DI-WAVE] ===== Wave-based injection complete =====");
 
         return wave1;
     }
