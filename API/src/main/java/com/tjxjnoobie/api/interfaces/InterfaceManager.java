@@ -12,9 +12,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Injectable("Static handlers and adapters; supports DI for static fields")
+@Injectable("Manager for cross-interface implementation")
 public class InterfaceManager implements MainInterFace {
-
+    //TODO: Remove static from methods and fields
     private static MainInterFace mainInterFace;
     private static BlockPlaceHandler blockPlaceHandler;
     private static CoreJoinHandler coreJoinHandler;
