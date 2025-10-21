@@ -110,6 +110,77 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
     }
 
     /**
+     * Injects all dependencies from multiple contexts into the current context.
+     * First injects dependencies within each context, then injects fields from contexts.
+     *
+     * @param contexts list of contexts to inject from
+     * @throws IllegalAccessException if field access fails
+     */
+    public void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException {
+        if (contexts == null || contexts.isEmpty()) {
+            Log.warn("[DI] No contexts provided for injection");
+            return;
+        }
+
+        Log.info("[DI] ===== Starting multi-context injection =====");
+        Log.info("[DI] Contexts to process: " + contexts.size());
+
+        // First, inject dependencies within each context
+        for (IContext<?> context : contexts) {
+            if (context != null) {
+                Log.info("[DI] Processing context: " + context.getClass().getSimpleName());
+                context.injectAllDependencies();
+                injectFieldsFromContext(null, context);
+            }
+        }
+
+        Log.info("[DI] ===== Multi-context injection complete =====");
+    }
+    /**
+     * Injects all dependencies from all registered contexts with full initialization.
+     * This method performs:
+     * 1. Context building (if contexts support it)
+     * 2. Wave-based injection (leaf dependencies first, then intermediate)
+     * 3. Top-level injection into provided target object
+     *
+     * @param target Optional target object to inject after context initialization (e.g., Main plugin instance)
+     */
+    @Override
+    public void injectAllContextsGlobally(Object target) throws IllegalAccessException {
+        Log.info("[DI] ===== Global context injection started =====");
+        Log.info("[DI] Total contexts registered: " + contextRegistry.size());
+
+        // Step 1: Skip explicit build step; contexts should register their dependencies directly
+        Log.info("[DI] --- Step 1: Skipping explicit build step ---");
+
+        // Step 2: Perform wave-based injection
+        Log.info("[DI] --- Step 2: Wave-based injection ---");
+        performWaveInjection(new ArrayList<>(contextRegistry));
+
+        // Step 3: Inject into target object if provided
+        if (target != null) {
+            Log.info("[DI] --- Step 3: Injecting into target ---");
+            Log.info("[DI] Target: " + target.getClass().getSimpleName());
+
+            // Inject from all contexts
+            for (IContext<?> context : contextRegistry) {
+                if (context != null) { //TODO: Verify method implementation
+                    injectAndRecordMetaData(target);
+                }
+            }
+        }
+
+        Log.info("[DI] ===== Global context injection complete =====");
+
+        // Step 4: Inject static fields for critical classes
+        //TODO: Automate this process
+        Log.info("[DI] --- Step 4: Static field injection ---");
+        injectStaticFields(InterfaceManager.class); //TODO: Add
+
+        generateInjectableReport();
+    }
+
+    /**
      * Performs wave-based injection across provided contexts.
      * Wave 1: inject leaf dependencies (no @Inject fields)
      * Wave 2: inject remaining dependencies (intermediate/others)
