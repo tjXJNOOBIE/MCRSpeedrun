@@ -109,33 +109,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // Inject using merged dependencies
         injectWithMergedDependencies(target, merged);
     }
-    /**
-     * Injects all dependencies from multiple contexts into the current context.
-     * First injects dependencies within each context, then injects fields from contexts.
-     *
-     * @param contexts list of contexts to inject from
-     * @throws IllegalAccessException if field access fails
-     */
-    public void injectAllFromContexts(List<IContext<?>> contexts) throws IllegalAccessException {
-        if (contexts == null || contexts.isEmpty()) {
-            Log.warn("[DI] No contexts provided for injection");
-            return;
-        }
 
-        Log.info("[DI] ===== Starting multi-context injection =====");
-        Log.info("[DI] Contexts to process: " + contexts.size());
-
-        // First, inject dependencies within each context
-        for (IContext<?> context : contexts) {
-            if (context != null) {
-                Log.info("[DI] Processing context: " + context.getClass().getSimpleName());
-                context.injectAllDependencies();
-                injectFieldsFromContext(null, context);
-            }
-        }
-
-        Log.info("[DI] ===== Multi-context injection complete =====");
-    }
     /**
      * Injects all dependencies from all registered contexts with full initialization.
      * This method performs:
