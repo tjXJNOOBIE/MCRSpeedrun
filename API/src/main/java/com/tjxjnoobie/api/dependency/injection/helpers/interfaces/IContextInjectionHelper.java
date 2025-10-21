@@ -22,20 +22,6 @@ import java.util.Set;
  */
 public interface IContextInjectionHelper  {
 
-    /**
-     * Injects dependencies into a target using a single source context's dependency map.
-     */
-    default void injectFieldsFromContext(Object target, IContext<?> context) {
-        // Default no-op
-    }
-
-    /**
-     * Injects dependencies into a target object from multiple contexts.
-     */
-    default void injectFieldsFromContexts(Object target, List<IContext<?>> contexts) {
-        // Default no-op
-    }
-
     default void injectAllContextsGlobally(Object target) throws IllegalAccessException{
 
     }
