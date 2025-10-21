@@ -1,6 +1,10 @@
 package com.tjxjnoobie.api.dependency.contexts;
 
 import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
+import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
@@ -57,6 +61,12 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
      */
     public GlobalContext() {
         super();
+        dependencyMap.registerDependency(IDependencyInjectorHelper.class, new DependencyInjectorHelper() );
+        registerImportant(DependencyInjectorHelper.class, new DependencyInjectorHelper(), 0 );
+
+        registerImportant(IContextInjectionHelper.class, new ContextInjectionHelper(), 0 );
+        registerImportant(ContextInjectionHelper.class, new ContextInjectionHelper(), 0 );
+
         this.setContext(this);
 
         //register(IGlobalContext.class, this, () -> this);
@@ -650,32 +660,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return classMeta.getOrCreateMetadata(clazz);
     }
 
-    /**
-     * Print a comprehensive metadata report for all tracked classes.
-     */
-    public void printMetadataReport() {
-        System.out.println("\n[META] ========== METADATA SYSTEM REPORT ==========");
-        
-        // Class loading statistics
-        System.out.println("[META] " + classMeta.getMetadataClassLoadingStatsSummary());
-        
-        // Top classes by registration count
-        System.out.println("\n[META] === TOP REGISTERED CLASSES ===");
-        dependencyMap.entrySet().stream()
-            .map(entry -> {
-                IAbstractClassMetaData<?> meta = classMeta.getOrCreateMetadata(entry.getValue().getClass());
-                return entry.getKey().getSimpleName() + " (" + meta.getRegistrationCount() + " registrations)";
-            })
-            .sorted((a, b) -> {
-                int aCount = Integer.parseInt(a.substring(a.lastIndexOf('(') + 1, a.lastIndexOf(' ')));
-                int bCount = Integer.parseInt(b.substring(b.lastIndexOf('(') + 1, b.lastIndexOf(' ')));
-                return Integer.compare(bCount, aCount);
-            })
-            .limit(10)
-            .forEach(s -> System.out.println("[META]   " + s));
-        
-        System.out.println("[META] ================================================\n");
-    }
 
 
 
@@ -721,7 +705,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         summary.append("- Redis: ").append(redis != null ? "✓" : "✗").append("\n");
         summary.append("- StatsCache: ").append(statsCache != null ? "✓" : "✗").append("\n");
         summary.append("- RatingCache: ").append(ratingCache != null ? "✓" : "✗").append("\n");
-        summary.append("- Total registered: ").append(dependencyMap.size()).append("\n");
+        summary.append("- Total registered: ").append(dependencyMap.getDependencyMapSize()).append("\n");
         
         return summary.toString();
     }
