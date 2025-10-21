@@ -3,7 +3,6 @@ package com.tjxjnoobie.api.dependency.contexts.abstracts;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.maps.DependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
@@ -15,7 +14,10 @@ import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Supplier;
@@ -35,7 +37,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     private final HashMap<Class<?>, Boolean> eligibilityCache = new HashMap<>();
     
     // Use custom dependency maps instead of plain Maps
-    protected final DependencyGraphMap dependencyGraph = new DependencyGraphMap();
     protected final IContextInjectionHelper contextInjectorHelper = new ContextInjectionHelper();
     
     private T context;
@@ -292,13 +293,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     }
 
 
-    /**
-     * Injects fields into a target object using a merged dependency map.
-     * This allows cross-context dependency resolution.
-     *
-     * @param target             The object to inject into
-     * @param mergedDependencies The merged dependency map from all contexts
-     */
 
     
     /**

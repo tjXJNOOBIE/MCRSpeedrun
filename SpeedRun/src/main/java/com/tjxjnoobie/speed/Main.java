@@ -100,7 +100,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         ReflectUtil.loadLibs();
         icontext = new GlobalContext();
         iSpeedContext = new SpeedRunContext();
-        
         // Register Plugin in both contexts so it's available everywhere
         icontext.getContext().setPlugin(this);
         iSpeedContext.getContext().setPlugin(this);
