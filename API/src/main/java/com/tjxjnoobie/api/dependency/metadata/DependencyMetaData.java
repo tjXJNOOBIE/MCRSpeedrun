@@ -160,7 +160,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      */
     @Override
     public List<Object> getAllInstances() {
-        return dependencyMap.values().stream()
+        return dependencyMap.getDependencyMapValues().stream()
                 .map(this::ensureAndGetInstance)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
