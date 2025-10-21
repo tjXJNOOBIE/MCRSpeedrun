@@ -103,15 +103,13 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // Register Plugin in both contexts so it's available everywhere
         icontext.getContext().setPlugin(this);
         iSpeedContext.getContext().setPlugin(this);
+
         try {
             injectAllContextsGlobally(this);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
-
-        injectFieldsFromContext(this, iSpeedContext);
-        injectFieldsFromContext(this, icontext);
         //TODO: Update logging to use entire context register size instead of one context
         Log.info("[Main] Registered contexts: " + icontext.getAllContexts().size());
 
