@@ -132,23 +132,8 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
      * Delegates building of dependency graph to the injector helper.
      */
     public void buildDependencyGraph() {
-        if (injectorHelper != null) {
-            injectorHelper.buildDependencyGraph();
-        } else {
-            Log.warn("[GraphMap] No injector helper set for building dependency graph");
-        }
-    }
+           buildDependencyGraph();
 
-    /**
-     * Delegates computation of depth levels to the injector helper.
-     */
-    public void computeDepthLevels() {
-        if (injectorHelper != null) {
-            injectorHelper.computeDepthLevels();
-        } else {
-            Log.warn("[GraphMap] No injector helper set for computing depth levels");
-        }
-    }
 
     /**
      * Delegates dependency resolution to the injector helper.
