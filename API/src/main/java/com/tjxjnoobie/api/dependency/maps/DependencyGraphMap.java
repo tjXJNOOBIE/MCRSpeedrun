@@ -96,14 +96,7 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
         Log.info("[GraphMap] Build complete (" + size() + " nodes)");
     }
 
-    @Override
-    public List<IDependencyMetaData> getWave(int depth) {
-        List<IDependencyMetaData> wave = new ArrayList<>();
-        for (IDependencyMetaData meta : values()) {
-            if (meta.getDepth() == depth) wave.add(meta);
-        }
-        return wave;
-    }
+  
 
     @Override
     public void printSummary() {
