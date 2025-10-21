@@ -1,6 +1,7 @@
 package com.tjxjnoobie.speed;
 
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
@@ -39,7 +40,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace, IContextInjectionHelper {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
 
 
      @Inject private IGameState gameState;
@@ -105,7 +106,9 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         iSpeedContext.getContext().setPlugin(this);
 
         try {
-            injectAllContextsGlobally(this);
+            // Use the concrete ContextInjectionHelper implementation
+            IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
+            injectionHelper.injectAllContextsGlobally(this);
 
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
