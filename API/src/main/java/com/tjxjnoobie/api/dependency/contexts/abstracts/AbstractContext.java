@@ -4,7 +4,6 @@ import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -32,14 +31,24 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     private final HashMap<Class<?>, Boolean> eligibilityCache = new HashMap<>();
     
     private T context;
+    
+    // Static flag to prevent circular dependency during helper initialization
+    private static final ThreadLocal<Boolean> INITIALIZING_HELPERS = ThreadLocal.withInitial(() -> false);
 
     /**
      * Default constructor that initializes the context with default configuration values.
      */
     public AbstractContext() {
-        IDependencyMap mapInstanceTest = new DependencyMap();
-        dependencyMap.registerImportant(IDependencyInjectorHelper.class, new DependencyInjectorHelper(), 0);
-        registerImportant(IContextInjectionHelper.class, new ContextInjectionHelper(), 0);
+        // Only register helpers if we're not already initializing them (prevents circular dependency)
+        if (!INITIALIZING_HELPERS.get()) {
+            INITIALIZING_HELPERS.set(true);
+            try {
+                dependencyMap.registerImportant(IDependencyInjectorHelper.class, new DependencyInjectorHelper(), 0);
+                dependencyMap.registerImportant(IContextInjectionHelper.class, new ContextInjectionHelper(), 0);
+            } finally {
+                INITIALIZING_HELPERS.set(false);
+            }
+        }
         initializeDefaults();
     }
     
