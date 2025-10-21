@@ -9,6 +9,7 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -24,8 +25,10 @@ import java.util.function.Supplier;
  * implementations must define the actual behavior of registering, retrieving,
  * checking, and managing dependencies.
  */
-public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData {
+public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData, IContextInjectionHelper {
     DependencyMap dependencyMap = new DependencyMap();
+    List<IContext<?>> contextRegistry = new ArrayList<>(); //TODO: Move into a interface within the registry system (undone)
+
     /**
      * Registers a dependency instance with its class type and optional factory method.
      * The factory supplier is used to create instances when needed, while direct

@@ -118,6 +118,69 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         processPreConstructRetryQueue();
     }
 
+    /**
+     * Injects all dependencies with a single pass.
+     * Default to 1 pass for standard injection.
+     *
+     * @throws IllegalAccessException if field access fails
+     */
+    public void injectAllDependencies() throws IllegalAccessException {
+        injectAllDependencies(1);
+    }
+
+    /**
+     * Injects all dependencies with multiple passes for complex dependency chains.
+     * Each pass injects dependencies that have injectable fields, continuing until
+     * no more progress is made or maxPasses is reached.
+     *
+     * @param maxPasses maximum number of injection passes to perform
+     * @return total number of objects injected across all passes
+     * @throws IllegalAccessException if field access fails
+     */
+    public int injectAllDependencies(int maxPasses) throws IllegalAccessException {
+        Set<Object> allDeps = new HashSet<>(dependencyMap.getAllInstances());
+        Set<Object> injected = new HashSet<>();
+        int totalInjected = 0;
+
+        Log.info("[DI] ===== Starting multi-pass injection for " + this.getClass().getSimpleName() + " =====");
+        Log.info("[DI] Total dependencies to inject: " + allDeps.size());
+
+        for (int pass = 0; pass < maxPasses; pass++) {
+            int injectedThisPass = 0;
+
+            Log.info("[DI] --- Pass " + (pass + 1) + " ---");
+
+            for (Object dep : allDeps) {
+                if (dep == null || dep == this || injected.contains(dep)) {
+                    continue;
+                }
+
+                // Check if this dependency has injectable fields
+                if (hasInjectableFields(dep)) {
+                    Log.info("[DI] Injecting into: " + dep.getClass().getSimpleName());
+                    injectAndRecordMetaData(dep);
+                    injected.add(dep);
+                    injectedThisPass++;
+                    totalInjected++;
+                } else {
+                    // No injectable fields, mark as done
+                    injected.add(dep);
+                }
+            }
+
+            Log.info("[DI] Pass " + (pass + 1) + " completed: " + injectedThisPass + " objects injected");
+
+            // If no progress was made, we're done
+            if (injectedThisPass == 0) {
+                Log.info("[DI] No progress in pass " + (pass + 1) + ", stopping early");
+                break;
+            }
+        }
+
+        Log.info("[DI] ===== Multi-pass injection complete: " + totalInjected + " total injections =====");
+        return totalInjected;
+    }
+
     // ===== Helper methods for DI System ===== \\
 
 
@@ -273,6 +336,55 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
         visited.add(clazz);
         return depth;
+    }
+
+    /**
+     * Checks if an object has injectable fields.
+     * Supports both @Inject annotation and @AutoInjectAll annotation.
+     *
+     * @param obj The object to check
+     * @return true if the object has injectable fields, false otherwise
+     */
+    public boolean hasInjectableFields(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+
+        Class<?> clazz = obj.getClass();
+        boolean auto = clazz.isAnnotationPresent(AutoInjectAll.class);
+
+        // If @AutoInjectAll is present, check for any non-static fields
+        if (auto) {
+            while (clazz != null && clazz != Object.class) {
+                for (Field field : clazz.getDeclaredFields()) {
+                    if (!Modifier.isStatic(field.getModifiers())) {
+                        return true;
+                    }
+                }
+                clazz = clazz.getSuperclass();
+            }
+            return false;
+        }
+
+        // Otherwise, check for @Inject annotated fields or methods
+        clazz = obj.getClass();
+        while (clazz != null && clazz != Object.class) {
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Inject.class)) {
+                    return true;
+                }
+            }
+
+            for (Method method : clazz.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Inject.class)) {
+                    return true;
+                }
+            }
+
+            clazz = clazz.getSuperclass();
+        }
+
+        return false;
     }
 
     /**

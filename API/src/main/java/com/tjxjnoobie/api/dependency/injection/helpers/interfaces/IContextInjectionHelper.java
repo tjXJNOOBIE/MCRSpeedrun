@@ -20,7 +20,7 @@ import java.util.Set;
  * Provides default no-op implementations so callers can safely depend on the API
  * while concrete helpers override behavior.
  */
-public interface IContextInjectionHelper extends IDependencyInjectorHelper {
+public interface IContextInjectionHelper  {
 
     /**
      * Injects dependencies into a target using a single source context's dependency map.
@@ -39,7 +39,7 @@ public interface IContextInjectionHelper extends IDependencyInjectorHelper {
     default void injectAllContextsGlobally(Object target) throws IllegalAccessException{
 
     }
-    
+
     /**
      * Performs wave-based injection across provided contexts.
      * Returns the set of objects injected during the first wave.

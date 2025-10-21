@@ -15,6 +15,7 @@ import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
@@ -108,7 +109,6 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // Inject using merged dependencies
         injectWithMergedDependencies(target, merged);
     }
-
     /**
      * Injects all dependencies from multiple contexts into the current context.
      * First injects dependencies within each context, then injects fields from contexts.
