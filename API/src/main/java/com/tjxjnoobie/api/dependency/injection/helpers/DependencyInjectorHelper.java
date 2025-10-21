@@ -506,13 +506,112 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                     return;
                 }
 
-                // Walk all fields for instance binding
-                for (Field field : targetClass.getDeclaredFields()) {
-                    bindField(target, field);
-                }
+                Log.info("[AUTO-BIND] Starting autoBind for: " + targetClass.getSimpleName());
+                
+                // First, scan and register all injectable classes at runtime
+                scanAndRegisterInjectableClasses(targetClass);
+                
+                // Then bind fields from the now-populated dependencyMap
+                bindFieldsFromTarget(target, targetClass);
+                
+                Log.info("[AUTO-BIND] AutoBind completed for: " + targetClass.getSimpleName());
             }
         } catch (Exception e) {
             Log.exception(e);
+        }
+    }
+
+    /**
+     * Scans the classpath for injectable classes and registers them in the dependency map.
+     * This ensures the dependency map is populated before field binding occurs.
+     */
+    private void scanAndRegisterInjectableClasses(Class<?> targetClass) {
+        Log.info("[AUTO-BIND] Scanning classpath for injectable classes...");
+        String basePackage = targetClass.getPackage() != null ? targetClass.getPackage().getName() : "";
+        
+        try {
+            Set<Class<?>> injectableClasses = findInjectableClasses(basePackage);
+            Log.info("[AUTO-BIND] Found " + injectableClasses.size() + " injectable classes");
+            
+            for (Class<?> clazz : injectableClasses) {
+                if (!dependencyMap.isRegistered(clazz)) {
+                    try {
+                        // Try to instantiate and register
+                        Object instance = clazz.getDeclaredConstructor().newInstance();
+                        dependencyMap.registerDependency(clazz, instance);
+                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName());
+                    } catch (Exception e) {
+                        Log.warn("[AUTO-BIND] Could not instantiate " + clazz.getSimpleName() + ": " + e.getMessage());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.error("[AUTO-BIND] Error scanning for injectable classes: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Finds all injectable classes in the given package.
+     * Looks for classes with @Injectable annotation or interface implementations.
+     */
+    private Set<Class<?>> findInjectableClasses(String basePackage) {
+        Set<Class<?>> injectableClasses = new HashSet<>();
+        String path = basePackage.replace('.', '/');
+
+        try {
+            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                File dir = new File(resource.getFile());
+                if (dir.exists() && dir.isDirectory()) {
+                    walkDirectoryForInjectables(dir, basePackage, injectableClasses);
+                }
+            }
+        } catch (IOException e) {
+            Log.warn("[AUTO-BIND] Failed to scan package " + basePackage + ": " + e.getMessage());
+        }
+        
+        return injectableClasses;
+    }
+
+    /**
+     * Recursively walks directory to find injectable classes.
+     */
+    private void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results) {
+        File[] files = dir.listFiles();
+        if (files == null) return;
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                walkDirectoryForInjectables(file, packageName + "." + file.getName(), results);
+            } else if (file.getName().endsWith(".class")) {
+                String className = packageName + '.' + file.getName().replace(".class", "");
+                try {
+                    Class<?> clazz = Class.forName(className);
+                    // Register if it's injectable or an interface with implementations
+                    if (clazz.isAnnotationPresent(Injectable.class) || 
+                        (clazz.isInterface() && !clazz.getName().startsWith("java."))) {
+                        results.add(clazz);
+                    }
+                } catch (Throwable ignored) {
+                    // Skip classes that can't be loaded
+                }
+            }
+        }
+    }
+
+    /**
+     * Binds fields from the target object using the now-populated dependency map.
+     */
+    private void bindFieldsFromTarget(Object target, Class<?> targetClass) {
+        Log.info("[AUTO-BIND] Binding fields for: " + targetClass.getSimpleName());
+        
+        Class<?> clazz = targetClass;
+        while (clazz != null && clazz != Object.class) {
+            for (Field field : clazz.getDeclaredFields()) {
+                bindField(target, field);
+            }
+            clazz = clazz.getSuperclass();
         }
     }
 
