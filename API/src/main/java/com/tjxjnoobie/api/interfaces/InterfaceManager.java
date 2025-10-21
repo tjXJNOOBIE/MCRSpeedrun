@@ -1,11 +1,10 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.internal.utils.Utils;
 import com.tjxjnoobie.api.managers.Debugger;
 import com.tjxjnoobie.api.platform.cache.RankCache;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.minecraft.RankMC;
 
 import java.lang.reflect.Constructor;
@@ -145,7 +144,7 @@ public class InterfaceManager implements MainInterFace {
                 for (int i = 0; i < parameterTypes.length; i++) {
                     System.out.println("  Parameter " + i + ": " + parameterTypes[i].getName());
                     try {
-                        tempArgs[i] = globalContext.get(parameterTypes[i]);
+                        tempArgs[i] = globalContext.getDependencyMap().getDependency(parameterTypes[i]);
                         System.out.println("    Resolved to: " + (tempArgs[i] != null ? tempArgs[i].getClass().getName() : "null"));
                     } catch (RuntimeException e) {
                         System.out.println("    Cannot resolve: " + e.getMessage());
@@ -201,7 +200,7 @@ public class InterfaceManager implements MainInterFace {
 
             // Retrieve each dependency from your GlobalContext.
             for (int i = 0; i < parameterTypes.length; i++) {
-                args[i] = context.get(parameterTypes[i]);
+                args[i] = context.getDependencyMap().getDependency(parameterTypes[i]);
             }
 
             // Create an instance of the handler.
