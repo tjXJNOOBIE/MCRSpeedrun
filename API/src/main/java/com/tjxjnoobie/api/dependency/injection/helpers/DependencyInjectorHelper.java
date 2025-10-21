@@ -80,7 +80,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Log.success("[DI-Helper] Dependency Injection System initialized successfully");
             Log.info("[DI-Helper] Graph nodes: " + dependencyGraph.size());
             Log.info("[DI-Helper] Registered dependencies: " + dependencyMap.getDependencyMapSize());
-            
+
         } catch (Exception e) {
             Log.critical("[DI-Helper] Failed to initialize DI system: " + e.getMessage());
             throw new RuntimeException("DI System initialization failed", e);
@@ -490,10 +490,12 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         autoBind(target); // existing registration logic
 
         boolean auto = rootClass.isAnnotationPresent(AutoInjectAll.class);
-
-        // Create or fetch IDependencyMetaData for this class
-        IDependencyMetaData meta = dependencyMap.registerDependency(rootClass, DependencyMetaData::new);
-        meta.setDependencyClass(rootClass);
+        // Get metadata for this class (already registered by autoBind)
+        IDependencyMetaData meta = dependencyMap.getDependency(rootClass);
+        if (meta == null) {
+            // Fallback: create metadata if not found
+            meta = new DependencyMetaData(rootClass);
+        }
 
         // track discovered dependencies & lifecycle methods
         Set<Class<?>> dependencies = new HashSet<>();
