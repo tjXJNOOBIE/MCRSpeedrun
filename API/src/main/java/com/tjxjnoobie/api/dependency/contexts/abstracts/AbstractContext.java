@@ -388,20 +388,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
                 .invokeWithArguments(args == null ? new Object[0] : args);
     }
 
-
-    /**
-     * Resolves a lifecycle method for the given class using the LifecycleType enum.
-     * Prefers metadata if present, falling back to scanning the class via LifecycleType.findIn().
-     */
-    public Optional<Method> getLifecycleMethod(Class<?> clazz, LifecycleType type) {
-        if (clazz == null || type == null) return Optional.empty();
-        IDependencyMetaData meta = dependencyGraph.get(clazz);
-        if (meta != null) {
-            Method m = (type == LifecycleType.PRE_CONSTRUCT) ? meta.getPreConstruct() : meta.getPostConstruct();
-            if (m != null) return Optional.of(m);
-        }
-        return type.findIn(clazz);
-    }
+    
 
 
 
