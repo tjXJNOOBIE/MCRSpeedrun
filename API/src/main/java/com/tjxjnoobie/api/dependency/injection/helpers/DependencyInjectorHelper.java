@@ -492,7 +492,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         boolean auto = rootClass.isAnnotationPresent(AutoInjectAll.class);
 
         // Create or fetch IDependencyMetaData for this class
-        IDependencyMetaData meta = dependencyMap.computeIfAbsent(rootClass, DependencyMetaData::new);
+        IDependencyMetaData meta = dependencyMap.registerDependency(rootClass, DependencyMetaData::new);
         meta.setDependencyClass(rootClass);
 
         // track discovered dependencies & lifecycle methods
