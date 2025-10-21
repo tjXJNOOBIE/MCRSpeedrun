@@ -9,6 +9,7 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
+import com.tjxjnoobie.api.dependency.maps.DependencyGraphMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
 import java.util.List;
@@ -24,6 +25,7 @@ import java.util.Set;
  */
 public interface IDependencyGraphMap extends IDependencyMap {
 
+    DependencyGraphMap dependencyGraph = new DependencyGraphMap();
 
     /**
      * Register a new dependency class into the graph.
