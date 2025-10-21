@@ -9,6 +9,7 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -26,23 +27,18 @@ import java.util.Set;
 
 /**
  * ContextInjectorHelper – Context-based injection orchestration utilities.
- * Extracted from AbstractContext to remove injection/binding responsibilities
- * from the base context class. All operations delegate to an owning
- * IDependencyInjectorHelper for resolution and injection primitives.
- *
- * Responsibilities:
- * - Inject fields into a target from one or more contexts
+ * Concrete implementation of IContextInjectionHelper that handles:
+ * - AutoBind phase to register context dependencies
  * - Wave-based injection across multiple contexts
  * - Static field injection using current DI registry
- * - Utilities for detection of injectable surfaces
+ * - Detection of injectable surfaces
  *
- * Note: This helper does not own stateful DI registries; it operates on the
- * registries exposed by the provided owner helper instance.
+ * This helper operates on the static registries exposed by IDependencyMap and IDependencyGraphMap.
  *
  * @author TJ
  * @since 10/17/2025
  */
-public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphMap {
+public class ContextInjectionHelper implements IContextInjectionHelper, IDependencyMap, IDependencyGraphMap {
 
 
 
@@ -50,7 +46,7 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
     /**
      * Injects all dependencies from all registered contexts with full initialization.
      * This method performs:
-     * 1. Context building (if contexts support it)
+     * 1. AutoBind phase - scan all contexts and register their dependencies in DependencyMap
      * 2. Wave-based injection (leaf dependencies first, then intermediate)
      * 3. Top-level injection into provided target object
      *
@@ -61,8 +57,15 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
         Log.info("[DI] ===== Global context injection started =====");
         Log.info("[DI] Total contexts registered: " + contextRegistry.size());
 
-        // Step 1: Skip explicit build step; contexts should register their dependencies directly
-        Log.info("[DI] --- Step 1: Skipping explicit build step ---");
+        // Step 1: AutoBind phase - register all context dependencies in DependencyMap first
+        Log.info("[DI] --- Step 1: AutoBind phase - registering context dependencies ---");
+        for (IContext<?> context : contextRegistry) {
+            if (context != null) {
+                Log.info("[DI] AutoBinding context: " + context.getClass().getSimpleName());
+                autoBind(context);
+            }
+        }
+        Log.info("[DI] AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
 
         // Step 2: Perform wave-based injection
         Log.info("[DI] --- Step 2: Wave-based injection ---");
@@ -152,6 +155,14 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
         Log.info("[DI-WAVE] ===== Wave-based injection complete =====");
 
         return wave1;
+    }
+
+    /**
+     * Injects static fields for the specified class.
+     */
+    @Override
+    public void injectStaticFields(Class<?> clazz) {
+        // Default no-op - can be overridden in subclasses
     }
 
     /**
