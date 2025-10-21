@@ -168,16 +168,19 @@ public class ContextInjectionHelper implements IDependencyMap, IDependencyGraphM
         }
         Log.info("[DI] Collected " + allDependencies.size() + " dependencies from " + contexts.size() + " contexts");
 
-        // ===== WAVE 1: Inject leaf dependencies (no @Inject fields) =====
-        Log.info("[DI] --- Wave 1: Injecting leaf dependencies ---");
-        for (Object dep : allDependencies) {
-            if (dep != null && hasNoInjectFields(dep)) {
-                injectAndRecordMetaData(dep);
-                wave1.add(dep);
-                Log.info("[DI] Wave 1 injected: " + dep.getClass().getSimpleName());
+        // ===== WAVE 1: Inject BASE role dependencies (no dependencies) =====
+        Log.info("[DI-WAVE] --- Wave 1: Injecting BASE role dependencies ---");
+        for (IDependencyMetaData meta : allMetaData) {
+            if (meta != null && meta.getRole() == DependencyRole.BASE) {
+                Object inst = meta.ensureAndGetInstance(meta);
+                if (inst != null) {
+                    injectAndRecordMetaData(inst);
+                    wave1.add(inst);
+                    Log.info("[DI-WAVE] Wave 1 injected: " + inst.getClass().getSimpleName() + " (BASE)");
+                }
             }
         }
-        Log.info("[DI] Wave 1 complete: " + wave1.size() + " leaf dependencies injected");
+        Log.info("[DI-WAVE] Wave 1 complete: " + wave1.size() + " BASE dependencies injected");
 
         // ===== WAVE 2: Inject intermediate dependencies =====
         Log.info("[DI] --- Wave 2: Injecting intermediate dependencies ---");
