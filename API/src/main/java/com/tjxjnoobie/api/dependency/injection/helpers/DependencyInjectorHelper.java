@@ -119,69 +119,6 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         processPreConstructRetryQueue();
     }
 
-    /**
-     * Injects all dependencies with a single pass.
-     * Default to 1 pass for standard injection.
-     *
-     * @throws IllegalAccessException if field access fails
-     */
-    public void injectAllDependencies() throws IllegalAccessException {
-        injectAllDependencies(1);
-    }
-
-    /**
-     * Injects all dependencies with multiple passes for complex dependency chains.
-     * Each pass injects dependencies that have injectable fields, continuing until
-     * no more progress is made or maxPasses is reached.
-     *
-     * @param maxPasses maximum number of injection passes to perform
-     * @return total number of objects injected across all passes
-     * @throws IllegalAccessException if field access fails
-     */
-    public int injectAllDependencies(int maxPasses) throws IllegalAccessException {
-        Set<Object> allDeps = new HashSet<>(dependencyMap.getAllInstances());
-        Set<Object> injected = new HashSet<>();
-        int totalInjected = 0;
-
-        Log.info("[DI] ===== Starting multi-pass injection for " + this.getClass().getSimpleName() + " =====");
-        Log.info("[DI] Total dependencies to inject: " + allDeps.size());
-
-        for (int pass = 0; pass < maxPasses; pass++) {
-            int injectedThisPass = 0;
-
-            Log.info("[DI] --- Pass " + (pass + 1) + " ---");
-
-            for (Object dep : allDeps) {
-                if (dep == null || dep == this || injected.contains(dep)) {
-                    continue;
-                }
-
-                // Check if this dependency has injectable fields
-                if (hasInjectableFields(dep)) {
-                    Log.info("[DI] Injecting into: " + dep.getClass().getSimpleName());
-                    injectAndRecordMetaData(dep);
-                    injected.add(dep);
-                    injectedThisPass++;
-                    totalInjected++;
-                } else {
-                    // No injectable fields, mark as done
-                    injected.add(dep);
-                }
-            }
-
-            Log.info("[DI] Pass " + (pass + 1) + " completed: " + injectedThisPass + " objects injected");
-
-            // If no progress was made, we're done
-            if (injectedThisPass == 0) {
-                Log.info("[DI] No progress in pass " + (pass + 1) + ", stopping early");
-                break;
-            }
-        }
-
-        Log.info("[DI] ===== Multi-pass injection complete: " + totalInjected + " total injections =====");
-        return totalInjected;
-    }
-
     // ===== Helper methods for DI System ===== \\
 
 
