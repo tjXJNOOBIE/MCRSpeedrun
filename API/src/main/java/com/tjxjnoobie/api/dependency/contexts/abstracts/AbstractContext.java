@@ -403,41 +403,6 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         return type.findIn(clazz);
     }
 
-    /**
-     * Executes a lifecycle method (PRE_CONSTRUCT or POST_CONSTRUCT) with error handling.
-     * Records PRE_CONSTRUCT success/failure in metadata when available.
-     */
-    public void executeLifecycle(Object target, LifecycleType type) {
-        if (target == null || type == null) return;
-        Class<?> clazz = (target instanceof Class) ? (Class<?>) target : target.getClass();
-        Optional<Method> maybe = getLifecycleMethod(clazz, type);
-        if (maybe.isEmpty()) return;
-
-        Method method = maybe.get();
-        try {
-            method.setAccessible(true);
-            if (Modifier.isStatic(method.getModifiers())) {
-                method.invoke(null);
-            } else {
-                if (target instanceof Class) {
-                    Log.warn("[DI] Skipping " + type + " for " + clazz.getSimpleName() + " (no instance)");
-                    return;
-                }
-                method.invoke(target);
-            }
-            IDependencyMetaData meta = dependencyGraph.get(clazz);
-            if (meta != null && type == LifecycleType.PRE_CONSTRUCT) {
-                meta.setPreConstructSuccess(true);
-            }
-        } catch (Exception e) {
-            IDependencyMetaData meta = dependencyGraph.get(clazz);
-            if (meta != null && type == LifecycleType.PRE_CONSTRUCT) {
-                meta.setPreConstructSuccess(false);
-                meta.incrementRetryCount();
-            }
-            Log.critical("[DI] " + type + " failed for " + clazz.getSimpleName() + " :: " + e.getMessage());
-        }
-    }
 
 
 }
