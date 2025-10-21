@@ -189,16 +189,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         Log.info("[DI] Unbound dependency: " + clazz.getSimpleName());
     }
 
-    /**
-     * Performs automatic binding of dependencies for a target object.
-     * This is a no-op in the base class and should be overridden by subclasses to provide implementation.
-     *
-     * @param target The object to perform auto-binding on
-     */
-    public void autoBind(Object target) {
-        // Default no-op - subclasses can override
-        Log.warn("[DI] autoBind not implemented in AbstractContext - override in subclass if needed");
-    }
+
 
     // ===== GETTERS/SETTERS =====
 
