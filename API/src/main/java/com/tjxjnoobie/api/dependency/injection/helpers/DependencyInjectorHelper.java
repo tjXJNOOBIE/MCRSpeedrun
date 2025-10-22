@@ -133,10 +133,14 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 if (isStatic) field.set(null, value);
                 else field.set(target, value);
             } else if (!optional) {
-                System.err.println("[DI] Missing required dependency: " + depClass.getSimpleName());
+                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() 
+                        + " | Needed by: " + clazz.getSimpleName() 
+                        + " | Field: " + field.getName()
+                        + " | Static: " + isStatic);
             }
         } catch (Exception e) {
-            System.err.println("[DI] Failed injecting " + depClass.getName() + " into " + clazz.getName());
+            Log.error("[DI] Failed injecting " + depClass.getName() + " into " + clazz.getName());
+            Log.exception(e);
         }
     }
 
@@ -148,9 +152,12 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         try {
             if (value != null) method.invoke(target, value);
             else if (!optional)
-                System.err.println("[DI] Missing required dependency: " + depClass.getSimpleName());
+                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() 
+                        + " | Needed by: " + clazz.getSimpleName() 
+                        + " | Method: " + method.getName());
         } catch (Exception e) {
-            System.err.println("[DI] Failed injecting via method " + method.getName() + " in " + clazz.getName());
+            Log.error("[DI] Failed injecting via method " + method.getName() + " in " + clazz.getName());
+            Log.exception(e);
         }
     }
     /**
@@ -182,7 +189,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             method.setAccessible(true);
             method.invoke(target);
         } catch (Exception e) {
-            System.err.println("[DI] " + lifecycleType + " failed for " + clazz.getSimpleName());
+            Log.error("[DI] " + lifecycleType + " failed for " + clazz.getSimpleName());
+            Log.exception(e);
         }
     }
 
