@@ -4,6 +4,8 @@ import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.internal.utils.glickov2.Rating;
 import com.tjxjnoobie.api.internal.utils.glickov2.RatingCalculator;
 import com.tjxjnoobie.api.internal.utils.glickov2.RatingPeriodResults;
+import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.console.style.LogColors;
 import com.velocitypowered.api.command.SimpleCommand;
 
 import java.util.*;
@@ -25,9 +27,9 @@ public class Sim implements SimpleCommand, IUtils {
         Map<UUID, Rating> players = new HashMap<>();
         // Simulate final times (replace with your actual logic)
 
-        System.out.println("Players Map (UUID -> Player Name):");
+        Log.info(LogColors.cyan("Players Map (UUID -> Player Name):"));
         for (Map.Entry<UUID, Rating> entry : players.entrySet()) {
-            System.out.printf("UUID: %s -> Player: %s%n", entry.getKey(), entry.getValue().getName());
+            Log.info(LogColors.blue("  UUID: " + entry.getKey() + " -> Player: " + entry.getValue().getName()));
         }
         // Create players
         Random random = new Random();
@@ -57,17 +59,17 @@ public class Sim implements SimpleCommand, IUtils {
 
 
             // Debugging: Print out the final_time map
-            System.out.println("Final Times Map (UUID -> Time):");
+            Log.info(LogColors.cyan("Final Times Map (UUID -> Time):"));
             for (Map.Entry<UUID, Double> entry : final_time.entrySet()) {
-                System.out.printf("UUID: %s -> Time: %.2f%n", entry.getKey(), entry.getValue());
+                Log.info(LogColors.blue("  UUID: " + entry.getKey() + " -> Time: " + String.format("%.2f", entry.getValue())));
             }
 
             // Check alignment between players and final_time
             for (UUID playerId : players.keySet()) {
                 if (!final_time.containsKey(playerId)) {
-                    System.out.printf("WARNING: Player UUID %s found in players but not in final_time map.%n", playerId);
+                    Log.warn(LogColors.yellow("Player UUID " + playerId + " found in players but not in final_time map."));
                 } else {
-                    System.out.printf("OK: Player UUID %s is aligned with final_time map.%n", playerId);
+                    Log.success(LogColors.green("Player UUID " + playerId + " is aligned with final_time map."));
                 }
             }
 
@@ -75,7 +77,7 @@ public class Sim implements SimpleCommand, IUtils {
         for (int match = 1; match <= 100; match++) {
             List<UUID> uuids = new ArrayList<>(players.keySet());
             List<Map.Entry<UUID, Rating>> entryList = new ArrayList<>(players.entrySet());
-            System.out.printf("Before Match %d:%n", match);
+            Log.info(LogColors.boldYellow("=== Before Match " + match + " ==="));
             final_time.clear();
             for (UUID playerId : players.keySet()) {// Skip fresh player since it's already added
                 double simulatedTime = 5.0 + (10.0 * random.nextDouble());
@@ -101,7 +103,7 @@ public class Sim implements SimpleCommand, IUtils {
 
                     double player1RatingBefore = player1.getRating();
                     double player2RatingBefore = player2.getRating();
-                    System.out.println(player1.getName()+"  Rating Before: " +player1RatingBefore + " "+player2.getName()+" Rating before: "+player2RatingBefore);
+                    Log.info(LogColors.purple(player1.getName() + " Rating Before: " + String.format("%.2f", player1RatingBefore) + " | " + player2.getName() + " Rating Before: " + String.format("%.2f", player2RatingBefore)));
                     if (player1Time == player2Time) {
                         // Draw
                         ratingPeriodResults.addDraw(player1, player2);
@@ -113,13 +115,7 @@ public class Sim implements SimpleCommand, IUtils {
                         double player2NetChange = player2RatingAfter - player2RatingBefore;
 
                         // Debug line for tie with Elo change
-                        System.out.printf(
-                                "%s tied with %s (Final Time: %.2f). Elo Change: %s (%.2f), %s (%.2f)%n",
-                                player1.getName(), player2.getName(),
-                                player1Time,
-                                player1.getName(), player1NetChange,
-                                player2.getName(), player2NetChange
-                        );
+                        Log.info(LogColors.yellow(player1.getName() + " tied with " + player2.getName() + " (Final Time: " + String.format("%.2f", player1Time) + "). Elo Change: " + player1.getName() + " (" + String.format("%+.2f", player1NetChange) + "), " + player2.getName() + " (" + String.format("%+.2f", player2NetChange) + ")"));
                     } else if (player1Time > player2Time) {
                         // Player 1 wins
                         ratingPeriodResults.addResult(player1, player2);
@@ -133,14 +129,7 @@ public class Sim implements SimpleCommand, IUtils {
                         double player2NetChange = player2RatingAfter - player2RatingBefore;
 
 // Display results with proper labels for gain/loss
-                        System.out.printf(
-                                "%s won versus %s (Final Time: %.2f vs %.2f). Net Gain/Loss: %s (%+.2f), %s (%+.2f)%n",
-                                player1.getName(), player2.getName(),
-                                player1Time, player2Time,
-                                player1.getName(), player1NetChange,
-                                player2.getName(), player2NetChange
-
-                        );
+                        Log.success(LogColors.green(player1.getName() + " won versus " + player2.getName() + " (Final Time: " + String.format("%.2f", player1Time) + " vs " + String.format("%.2f", player2Time) + "). Net Gain/Loss: " + player1.getName() + " (" + String.format("%+.2f", player1NetChange) + "), " + player2.getName() + " (" + String.format("%+.2f", player2NetChange) + ")"));
                     } else {
                         // Player 2 wins
                         ratingPeriodResults.addResult(player2, player1);
@@ -154,13 +143,7 @@ public class Sim implements SimpleCommand, IUtils {
                         double player2NetChange = player2RatingAfter - player2RatingBefore;
 
 // Display results with proper labels for gain/loss
-                        System.out.printf(
-                                "%s lost to %s (Final Time: %.2f vs %.2f). Net Gain/Loss: %s (%+.2f), %s (%+.2f)%n",
-                                player1.getName(), player2.getName(),
-                                player1Time, player2Time,
-                                player1.getName(), player2NetChange,
-                                player2.getName(), player1NetChange
-                        );
+                        Log.warn(LogColors.red(player1.getName() + " lost to " + player2.getName() + " (Final Time: " + String.format("%.2f", player1Time) + " vs " + String.format("%.2f", player2Time) + "). Net Gain/Loss: " + player1.getName() + " (" + String.format("%+.2f", player1NetChange) + "), " + player2.getName() + " (" + String.format("%+.2f", player2NetChange) + ")"));
                     }
 
 
@@ -179,15 +162,13 @@ public class Sim implements SimpleCommand, IUtils {
                 return Double.compare(getFinalTime(uuid2), getFinalTime(uuid1));
             });
             // Print updated rankings
-            System.out.printf("After Match %d:%n", match);
+            Log.info(LogColors.boldYellow("=== After Match " + match + " ==="));
             for (int rank = 0; rank < entryList.size(); rank++) {
                 Map.Entry<UUID, Rating> entry = entryList.get(rank);
                 UUID playerId = entry.getKey();
                 Rating player = entry.getValue();
-                System.out.printf("%d. %s: %.2f (Final Time: %.2f)%n",
-                        rank + 1, player.getName(), player.getRating(), getFinalTime(playerId));
+                Log.info(LogColors.cyan((rank + 1) + ". " + player.getName() + ": " + String.format("%.2f", player.getRating()) + " (Final Time: " + String.format("%.2f", getFinalTime(playerId)) + ")"));
             }
-            System.out.println();
         }
     }
     public static double getFinalTime(UUID uuid) {
