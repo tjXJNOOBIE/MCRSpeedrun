@@ -40,7 +40,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 
-@Injectable("Main class for Minecraft Speerun Module")
+@Injectable("Main class for Minecraft Speedrun Module")
 public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
 
 
