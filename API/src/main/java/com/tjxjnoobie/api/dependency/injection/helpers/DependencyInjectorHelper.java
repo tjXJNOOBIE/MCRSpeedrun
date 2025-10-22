@@ -789,13 +789,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                     //     results.add(clazz);
                     // }
                     
-                    // Temporary: Accept all non-java classes
-                    if (!clazz.getName().startsWith("java.") && 
-                        !clazz.getName().startsWith("javax.") &&
-                        !clazz.getName().startsWith("org.bukkit.") &&
-                        !clazz.getName().startsWith("sun.")) {
-                        results.add(clazz);
-                    }
+
                 } catch (Throwable ignored) {
                     // Skip classes that can't be loaded
                 }
