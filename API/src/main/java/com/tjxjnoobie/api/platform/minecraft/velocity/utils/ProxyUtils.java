@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public class ProxyUtils implements IProxyUtils {
 
-    private ProxyServer proxyServer;
+    public ProxyServer proxyServer;
     public Component staffPrefix = colorzie("&c&lZero &8&l»»&c ");
     public Component prefix = colorzie("&4&lZero&8&l »»&f ");
     public Component discord = colorzie("discord.gg/test");
