@@ -501,17 +501,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 bindType((Class<?>) target);
             } else {
                 Class<?> targetClass = target.getClass();
-                if (isRequireInjectableAnnotation() && !targetClass.isAnnotationPresent(Injectable.class)) {
-                    Log.info("[AUTO-BIND] Skipping autoBind for non-@Injectable target: " + targetClass.getName());
-                    return;
-                }
-
                 Log.info("[AUTO-BIND] Starting autoBind for: " + targetClass.getSimpleName());
                 
                 // First, scan and register all injectable classes at runtime
                 scanAndRegisterInjectableClasses(targetClass);
                 
                 // Then bind fields from the now-populated dependencyMap
+                // The actual injection methods will check @Injectable eligibility
                 bindFieldsFromTarget(target, targetClass);
                 
                 Log.info("[AUTO-BIND] AutoBind completed for: " + targetClass.getSimpleName());
