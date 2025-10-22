@@ -166,10 +166,12 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Log.warn("[DI] Cannot inject static fields of null class");
             return;
         }
-        if (isRequireInjectableAnnotation() && !clazz.isAnnotationPresent(Injectable.class)) {
-            Log.info("[DI] Skipping static injection for non-@Injectable class: " + clazz.getName());
-            return;
-        }
+        // TODO: Wire all DI classes with @Injectable annotation before re-enabling this check
+        // Currently commented out to allow injection without @Injectable requirement
+        // if (isRequireInjectableAnnotation() && !clazz.isAnnotationPresent(Injectable.class)) {
+        //     Log.info("[DI] Skipping static injection for non-@Injectable class: " + clazz.getName());
+        //     return;
+        // }
         injectFieldsForClass(null, clazz, autoInject, true, false, null);
     }
     /**
