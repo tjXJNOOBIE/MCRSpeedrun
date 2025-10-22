@@ -5,7 +5,6 @@ import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.metadata.enums.ClassSetting;
@@ -52,7 +51,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
 
 
     
-    @Inject private IGlobalContext globalContext = this;
+    private IGlobalContext globalContext = this;
     private InterfaceManager interfaceManager = new InterfaceManager();
     private Plugin plugin; //TODO: Remove bukkit import from global context
 
@@ -61,7 +60,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
      */
     public GlobalContext() {
         super();
-        dependencyMap.registerDependency(IDependencyInjectorHelper.class, new DependencyInjectorHelper() );
+        registerImportant(IDependencyInjectorHelper.class, new DependencyInjectorHelper(),0 );
         registerImportant(DependencyInjectorHelper.class, new DependencyInjectorHelper(), 0 );
 
         registerImportant(IContextInjectionHelper.class, new ContextInjectionHelper(), 0 );
