@@ -143,30 +143,32 @@ public interface InjectionConfig {
         }
         
         // 5. PRIMARY CHECK: @Injectable annotation (whitelist approach)
-        if (isRequireInjectableAnnotation()) {
-            // Only types with @Injectable are eligible
-            boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
-            
-            if (!hasAnnotation) {
-                // Not annotated - reject with detailed logging
-                Log.warn("[DI-Eligibility] MISSING @Injectable on " + typeName
-                        + " | package=" + packageName 
-                        + " | Add: @Injectable(\"description\")");
-                return false;
-            }
-            
-            // Has @Injectable - accept (already passed exclusion check)
-            Injectable annotation = type.getAnnotation(Injectable.class);
-            String description = annotation.value();
-            if (description != null && !description.isEmpty()) {
-                Log.success("[DI-Eligibility] Accepted " + typeName
-                        + " | @Injectable(\"" + description + "\")");
-            } else {
-                Log.success("[DI-Eligibility] ✅ Accepted " + typeName 
-                        + " | @Injectable (no description)");
-            }
-            return true;
-        }
+        // TODO: Wire all DI classes with @Injectable annotation before re-enabling this check
+        // Currently commented out to allow injection without @Injectable requirement
+        // if (isRequireInjectableAnnotation()) {
+        //     // Only types with @Injectable are eligible
+        //     boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
+        //     
+        //     if (!hasAnnotation) {
+        //         // Not annotated - reject with detailed logging
+        //         Log.warn("[DI-Eligibility] MISSING @Injectable on " + typeName
+        //                 + " | package=" + packageName 
+        //                 + " | Add: @Injectable(\"description\")");
+        //         return false;
+        //     }
+        //     
+        //     // Has @Injectable - accept (already passed exclusion check)
+        //     Injectable annotation = type.getAnnotation(Injectable.class);
+        //     String description = annotation.value();
+        //     if (description != null && !description.isEmpty()) {
+        //         Log.success("[DI-Eligibility] Accepted " + typeName
+        //                 + " | @Injectable(\"" + description + "\")");
+        //     } else {
+        //         Log.success("[DI-Eligibility] ✅ Accepted " + typeName 
+        //                 + " | @Injectable (no description)");
+        //     }
+        //     return true;
+        // }
         
         // 6. FALLBACK: Package-based filtering (when @Injectable not required)
         // This is for backward compatibility or when you want package-level control
