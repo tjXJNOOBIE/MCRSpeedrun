@@ -1,6 +1,5 @@
 package com.tjxjnoobie.api.internal;
 
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
 import java.util.Collections;
@@ -237,6 +236,8 @@ public interface InjectionConfig {
     /**
      * Generates a report of all types checked for injection eligibility
      * Shows which have @Injectable and which are missing it
+     * TODO: Re-enable after all classes are properly annotated with @Injectable
+     * Currently disabled since @Injectable requirement is temporarily disabled
      */
     default void generateInjectableReport() {
         Log.info("[DI-Injectable-Report] ========== @Injectable ANNOTATION REPORT ==========");
@@ -258,21 +259,26 @@ public interface InjectionConfig {
         for (Map.Entry<Class<?>, Boolean> entry : cache.entrySet()) {
             if (entry.getValue()) {
                 Class<?> type = entry.getKey();
-                boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
+                // TODO: Re-enable @Injectable annotation checking after all classes are annotated
+                // boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
                 String typeName = type.getSimpleName();
                 String packageName = type.getPackage() != null ? type.getPackage().getName() : "";
                 
-                if (hasAnnotation) {
-                    Injectable annotation = type.getAnnotation(Injectable.class);
-                    String description = annotation.value();
-                    if (description != null && !description.isEmpty()) {
-                        Log.success("[DI-Injectable-Report]   ✅ " + typeName + " | @Injectable(\"" + description + "\")");
-                    } else {
-                        Log.success("[DI-Injectable-Report]   ✅ " + typeName + " | @Injectable");
-                    }
-                } else {
-                    Log.info("[DI-Injectable-Report]   ✅ " + typeName + " | package=" + packageName);
-                }
+                // TODO: Re-enable annotation-based reporting
+                // if (hasAnnotation) {
+                //     Injectable annotation = type.getAnnotation(Injectable.class);
+                //     String description = annotation.value();
+                //     if (description != null && !description.isEmpty()) {
+                //         Log.success("[DI-Injectable-Report]   ✅ " + typeName + " | @Injectable(\"" + description + "\")");
+                //     } else {
+                //         Log.success("[DI-Injectable-Report]   ✅ " + typeName + " | @Injectable");
+                //     }
+                // } else {
+                //     Log.info("[DI-Injectable-Report]   ✅ " + typeName + " | package=" + packageName);
+                // }
+                
+                // Temporary: Show all accepted types without annotation details
+                Log.info("[DI-Injectable-Report]   ✅ " + typeName + " | package=" + packageName);
                 accepted++;
             }
         }
@@ -284,7 +290,8 @@ public interface InjectionConfig {
                 Class<?> type = entry.getKey();
                 String typeName = type.getSimpleName();
                 String packageName = type.getPackage() != null ? type.getPackage().getName() : "";
-                boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
+                // TODO: Re-enable @Injectable annotation checking
+                // boolean hasAnnotation = type.isAnnotationPresent(Injectable.class);
                 
                 // Check if it's missing @Injectable (and not excluded for other reasons)
                 boolean isExcluded = false;
@@ -295,13 +302,18 @@ public interface InjectionConfig {
                     }
                 }
                 
-                if (!hasAnnotation && !isExcluded && isRequireInjectableAnnotation()) {
-                    Log.warn("[DI-Injectable-Report]   ❌ " + typeName + " | MISSING @Injectable | package=" + packageName);
-                    missingAnnotation++;
-                } else {
-                    Log.info("[DI-Injectable-Report]   ❌ " + typeName + " | " + 
-                            (isExcluded ? "excluded package" : "other reason"));
-                }
+                // TODO: Re-enable annotation-based rejection reporting
+                // if (!hasAnnotation && !isExcluded && isRequireInjectableAnnotation()) {
+                //     Log.warn("[DI-Injectable-Report]   ❌ " + typeName + " | MISSING @Injectable | package=" + packageName);
+                //     missingAnnotation++;
+                // } else {
+                //     Log.info("[DI-Injectable-Report]   ❌ " + typeName + " | " + 
+                //             (isExcluded ? "excluded package" : "other reason"));
+                // }
+                
+                // Temporary: Show all rejected types without annotation details
+                Log.info("[DI-Injectable-Report]   ❌ " + typeName + " | " + 
+                        (isExcluded ? "excluded package" : "other reason") + " | package=" + packageName);
                 rejected++;
             }
         }
@@ -311,17 +323,21 @@ public interface InjectionConfig {
         Log.info("[DI-Injectable-Report] Total types checked: " + totalChecked);
         Log.info("[DI-Injectable-Report] Accepted: " + accepted);
         Log.info("[DI-Injectable-Report] Rejected: " + rejected);
-        Log.info("[DI-Injectable-Report] Missing @Injectable: " + missingAnnotation);
+        // TODO: Re-enable after annotation checking is restored
+        // Log.info("[DI-Injectable-Report] Missing @Injectable: " + missingAnnotation);
         
-        if (missingAnnotation > 0) {
-            Log.warn("[DI-Injectable-Report]");
-            Log.warn("[DI-Injectable-Report] ⚠️  " + missingAnnotation + " types are missing @Injectable annotation!");
-            Log.warn("[DI-Injectable-Report] Add @Injectable(\"description\") to these interfaces to enable injection.");
-        } else {
-            Log.success("[DI-Injectable-Report]");
-            Log.success("[DI-Injectable-Report] ✅ All checked types have proper @Injectable annotations!");
-        }
+        // TODO: Re-enable warning messages
+        // if (missingAnnotation > 0) {
+        //     Log.warn("[DI-Injectable-Report]");
+        //     Log.warn("[DI-Injectable-Report] ⚠️  " + missingAnnotation + " types are missing @Injectable annotation!");
+        //     Log.warn("[DI-Injectable-Report] Add @Injectable(\"description\") to these interfaces to enable injection.");
+        // } else {
+        //     Log.success("[DI-Injectable-Report]");
+        //     Log.success("[DI-Injectable-Report] ✅ All checked types have proper @Injectable annotations!");
+        // }
         
+        Log.info("[DI-Injectable-Report]");
+        Log.info("[DI-Injectable-Report] NOTE: @Injectable annotation checking is currently disabled");
         Log.info("[DI-Injectable-Report] ================================================================");
     }
     
