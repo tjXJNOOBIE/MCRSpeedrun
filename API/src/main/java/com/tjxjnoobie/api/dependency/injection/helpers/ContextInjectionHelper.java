@@ -46,10 +46,12 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
     /**
      * Injects all dependencies from all registered contexts with full initialization.
-     * This method performs:
-     * 1. AutoBind phase - scan all contexts and register their dependencies in DependencyMap
-     * 2. Wave-based injection (leaf dependencies first, then intermediate)
-     * 3. Top-level injection into provided target object
+     * This method performs sequential phases with wait gates:
+     * 1. AutoBind phase - scan all contexts and register their dependencies (WAIT GATE)
+     * 2. Role calculation - analyze dependencies and assign roles (WAIT GATE)
+     * 3. Graph registration - register in DependencyGraphMap with roles (WAIT GATE)
+     * 4. Wave-based injection - inject dependencies in order
+     * 5. Target injection - inject into main target object
      *
      * @param target Optional target object to inject after context initialization (e.g., Main plugin instance)
      */
@@ -58,28 +60,39 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] ===== Global context injection started =====");
         Log.info("[DI] Total contexts registered: " + contextRegistry.size());
 
-        // Step 1: AutoBind phase - register all context dependencies in DependencyMap first
-        Log.info("[DI] --- Step 1: AutoBind phase - registering context dependencies ---");
+        // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
+        Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
         for (IContext<?> context : contextRegistry) {
             if (context != null) {
                 Log.info("[DI] AutoBinding context: " + context.getClass().getSimpleName());
                 dependencyInjectorHelper.autoBind(context);
+                // WAIT: autoBind must complete for this context before moving to next
             }
         }
-        Log.info("[DI] AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
+        Log.info("[DI] ✓ AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
 
-        // Step 2: Perform wave-based injection
-        Log.info("[DI] --- Step 2: Wave-based injection ---");
+        // ===== PHASE 2: Role Calculation (WAIT GATE) =====
+        Log.info("[DI] --- Phase 2: Calculating dependency roles ---");
+        calculateAndAssignRoles();
+        Log.info("[DI] ✓ Role calculation complete");
+
+        // ===== PHASE 3: Graph Registration (WAIT GATE) =====
+        Log.info("[DI] --- Phase 3: Registering dependencies in graph ---");
+        registerDependenciesInGraph();
+        Log.info("[DI] ✓ Graph registration complete");
+
+        // ===== PHASE 4: Wave-based injection =====
+        Log.info("[DI] --- Phase 4: Wave-based injection ---");
         performWaveInjection(new ArrayList<>(contextRegistry));
 
-        // Step 3: Inject into target object if provided
+        // ===== PHASE 5: Target injection =====
         if (target != null) {
-            Log.info("[DI] --- Step 3: Injecting into target ---");
+            Log.info("[DI] --- Phase 5: Injecting into target ---");
             Log.info("[DI] Target: " + target.getClass().getSimpleName());
 
             // Inject from all contexts
             for (IContext<?> context : contextRegistry) {
-                if (context != null) { //TODO: Verify method implementation
+                if (context != null) {
                     dependencyInjectorHelper.injectAndRecordMetaData(target);
                 }
             }
@@ -87,12 +100,60 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         Log.info("[DI] ===== Global context injection complete =====");
 
-        // Step 4: Inject static fields for critical classes
-        //TODO: Automate this process
-        Log.info("[DI] --- Step 4: Static field injection ---");
-        dependencyInjectorHelper.injectStaticFields(InterfaceManager.class); //TODO: Add
+        // ===== PHASE 6: Static field injection =====
+        Log.info("[DI] --- Phase 6: Static field injection ---");
+        dependencyInjectorHelper.injectStaticFields(InterfaceManager.class);
 
         generateInjectableReport();
+    }
+
+    /**
+     * Phase 2: Calculate and assign roles to all registered dependencies.
+     * This must complete before graph registration.
+     */
+    private void calculateAndAssignRoles() {
+        for (IDependencyMetaData meta : dependencyMap.getDependencyMapValues()) {
+            if (meta != null && meta.getDependencyClass() != null) {
+                // Role is already calculated during autoBind, but we verify here
+                if (meta.getRole() == null) {
+                    Set<Class<?>> deps = meta.getDependencies();
+                    DependencyRole role = determineRole(deps != null ? deps : new HashSet<>());
+                    meta.setRole(role);
+                    Log.info("[DI-ROLE] Assigned role " + role + " to " + meta.getDependencyClass().getSimpleName());
+                }
+            }
+        }
+    }
+
+    /**
+     * Phase 3: Register all dependencies in the dependency graph with their roles.
+     * This must complete before injection begins.
+     */
+    private void registerDependenciesInGraph() {
+        for (IDependencyMetaData meta : dependencyMap.getDependencyMapValues()) {
+            if (meta != null && meta.getDependencyClass() != null) {
+                Class<?> clazz = meta.getDependencyClass();
+                if (!dependencyGraph.containsKey(clazz)) {
+                    dependencyGraph.registerDependencyToGraph(clazz);
+                    // Copy metadata to graph
+                    IDependencyMetaData graphMeta = dependencyGraph.get(clazz);
+                    if (graphMeta != null) {
+                        graphMeta.setRole(meta.getRole());
+                        graphMeta.setDependencies(meta.getDependencies());
+                        graphMeta.setDepth(meta.getDepth());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper method to determine role based on dependency count.
+     */
+    public DependencyRole determineRole(Set<Class<?>> dependencies) {
+        if (dependencies.isEmpty()) return DependencyRole.BASE;
+        if (dependencies.size() <= 2) return DependencyRole.INTERMEDIATE;
+        return DependencyRole.ISOLATED;
     }
 
     /**
