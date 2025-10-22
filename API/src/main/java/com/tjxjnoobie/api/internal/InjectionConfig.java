@@ -352,11 +352,16 @@ public interface InjectionConfig {
         excludePackage("jdk.");
         excludePackage("com.sun.");
         
-        // Common third-party libraries
+        // Common third-party libraries - Bukkit/Spigot
         excludePackage("org.bukkit.");
         excludePackage("org.spigotmc.");
         excludePackage("net.md_5.");
         excludePackage("io.papermc.");
+        
+        // Velocity proxy server
+        excludePackage("com.velocitypowered.");
+        
+        // Common libraries
         excludePackage("com.google.");
         excludePackage("org.apache.");
         excludePackage("org.slf4j.");
