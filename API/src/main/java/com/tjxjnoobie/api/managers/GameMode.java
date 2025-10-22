@@ -2,7 +2,9 @@ package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.interfaces.IGameMode;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 
+@Injectable("Manages game mode state")
 public class GameMode implements IGameMode {
 
     private GameModeEnum currentGameMode;
