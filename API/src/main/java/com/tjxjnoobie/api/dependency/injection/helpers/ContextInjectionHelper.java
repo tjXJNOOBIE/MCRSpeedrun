@@ -10,6 +10,7 @@
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -40,8 +41,8 @@ import java.util.Set;
  */
 public class ContextInjectionHelper implements IContextInjectionHelper, IDependencyMap, IDependencyGraphMap {
 
-
-
+    //TODO: Remove concrete delegation
+    IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
 
     /**
      * Injects all dependencies from all registered contexts with full initialization.
@@ -62,7 +63,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         for (IContext<?> context : contextRegistry) {
             if (context != null) {
                 Log.info("[DI] AutoBinding context: " + context.getClass().getSimpleName());
-                autoBind(context);
+                dependencyInjectorHelper.autoBind(context);
             }
         }
         Log.info("[DI] AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
@@ -79,7 +80,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             // Inject from all contexts
             for (IContext<?> context : contextRegistry) {
                 if (context != null) { //TODO: Verify method implementation
-                    injectAndRecordMetaData(target);
+                    dependencyInjectorHelper.injectAndRecordMetaData(target);
                 }
             }
         }
@@ -89,7 +90,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // Step 4: Inject static fields for critical classes
         //TODO: Automate this process
         Log.info("[DI] --- Step 4: Static field injection ---");
-        injectStaticFields(InterfaceManager.class); //TODO: Add
+        dependencyInjectorHelper.injectStaticFields(InterfaceManager.class); //TODO: Add
 
         generateInjectableReport();
     }
@@ -130,7 +131,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             if (meta != null && meta.getRole() == DependencyRole.BASE) {
                 Object inst = meta.ensureAndGetInstance(meta);
                 if (inst != null) {
-                    injectAndRecordMetaData(inst);
+                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
                     wave1.add(inst);
                     Log.info("[DI-WAVE] Wave 1 injected: " + inst.getClass().getSimpleName() + " (BASE)");
                 }
@@ -145,7 +146,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             if (meta != null && meta.getRole() != DependencyRole.BASE) {
                 Object inst = meta.ensureAndGetInstance(meta);
                 if (inst != null && !wave1.contains(inst)) {
-                    injectAndRecordMetaData(inst);
+                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
                     wave2Count++;
                     Log.info("[DI-WAVE] Wave 2 injected: " + inst.getClass().getSimpleName() + " (" + meta.getRole() + ")");
                 }
