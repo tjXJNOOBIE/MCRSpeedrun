@@ -9,7 +9,6 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -25,7 +24,7 @@ import java.util.function.Supplier;
  * implementations must define the actual behavior of registering, retrieving,
  * checking, and managing dependencies.
  */
-public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData, IContextInjectionHelper {
+public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData {
     IDependencyMap dependencyMap = new DependencyMap();
     List<IContext<?>> contextRegistry = new ArrayList<>(); //TODO: Move into a interface within the registry system (undone)
 
