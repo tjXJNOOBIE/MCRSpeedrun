@@ -36,6 +36,7 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
 
     public DependencyGraphMap() {
         super();
+        initializeDependencyGraph();
         Log.info("[GraphMap] Initialized DependencyGraphMap");
     }
 
