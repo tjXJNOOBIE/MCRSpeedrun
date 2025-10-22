@@ -15,6 +15,7 @@ import com.tjxjnoobie.api.listeners.CoreQuitListener;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.managers.FairFight;
@@ -39,7 +40,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 
-
+@Injectable("Main class for Minecraft Speerun Module")
 public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
 
 
