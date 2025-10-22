@@ -95,12 +95,19 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
     @Override
     public void onEnable() {
         plugin = this;
+        
+        // ===== PHASE 1: Pre-DI Setup (No dependencies needed) =====
+        Log.info("[Main] ===== Phase 1: Pre-DI Setup =====");
         Config.createConfig();
         Config.loadConfig();
         MySQL.connect();
         ReflectUtil.loadLibs();
+        
+        // ===== PHASE 2: DI Initialization =====
+        Log.info("[Main] ===== Phase 2: DI Initialization =====");
         iGlobalContext = new GlobalContext();
         iSpeedContext = new SpeedRunContext();
+        
         // Register Plugin in both contexts so it's available everywhere
         iGlobalContext.getContext().setPlugin(this);
         iSpeedContext.getContext().setPlugin(this);
@@ -109,16 +116,19 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
             // Use the concrete ContextInjectionHelper implementation
             IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
             injectionHelper.injectAllContextsGlobally(this);
-
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
 
         //TODO: Update logging to use entire context register size instead of one context
         Log.info("[Main] Registered contexts: " + iGlobalContext.getAllContexts().size());
-
+        Log.success("[Main] ===== DI Initialization Complete =====");
+        
+        // ===== PHASE 3: Post-DI Setup (Dependencies now available) =====
+        Log.info("[Main] ===== Phase 3: Post-DI Setup =====");
+        
+        // Interface Manager setup
         InterfaceManager.setMainInterFace(this);
-
         mainInterFace = InterfaceManager.getMainInterFace();
 
         try {
@@ -127,14 +137,16 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
             InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.ChatEvent","ChatHandler");
             InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreJoin","CoreJoinHandler");
             InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreQuit","CoreQuitHandler");
-
-
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
                  IllegalAccessException e) {
             Log.exception(e);
         }
+        
+        // Game setup (uses injected dependencies)
+        Log.info("[Main] Setting up game systems...");
         gameMode.setGameMode(GameModeEnum.NORMAL);
         retentionManager.loadMockPlayers(10);
+        
         new BukkitRunnable() {
             public void run() {
                 try {
@@ -144,23 +156,30 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
                 }
             }
         }.runTaskLater(this, 20 * 10);
+        
         debugger.loadDebuggersCache();
         gameManager.runCheckers();
+        
+        // Server setup
+        Log.info("[Main] Setting up server metadata...");
         createServerID();
         createGameID(globalContext);
         String gameID = getGameID();
         String serverID = getServerID();
+        
         SpeedRunMobKill.blockDragonDeathSound(this);
         getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
         getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
+        
         try {
             gameType.setGameType(GameTypeEnum.SPEED_RUN, serverID);
             gameState.createServerID(serverID, gameID, "servers", "SPEEDRUN");
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+        // Register events and commands
+        Log.info("[Main] Registering events and commands...");
         registerEvents();
         registerCommand("debug", new Debug());
         registerCommand("addplayer", new AddPlayer(globalContext,speedRunContext));
@@ -175,14 +194,14 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         registerCommand("v", new Vote(speedRunContext));
         registerCommand("fireevent", new FireEvent());
 
-
-
+        // Set initial game state
         try {
             getGameState().setGameState(GameStateEnum.STARTUP, serverID);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
+        
+        Log.success("[Main] ===== Plugin Enabled Successfully =====");
     }
 
 
