@@ -30,20 +30,18 @@ import java.util.Set;
 public interface IDependencyInjectorHelper extends InjectionConfig {
 
 
-
-
     /**
      * Registers an instance as a key component with a specified priority for dependency injection.
-     *
+     * <p>
      * This method allows registering a specific class and its instance into the dependency injection system,
      * where the registration is given a priority level. Components registered with higher priorities are processed
      * earlier in the injection lifecycle, which can be useful when dependencies have ordering requirements.
      *
-     * @param clazz the class type of the component to register (used for type-level binding)
+     * @param clazz    the class type of the component to register (used for type-level binding)
      * @param instance the actual instance of the component to inject dependencies into
      * @param priority the priority level for this registration; higher values indicate earlier processing in the injection sequence
      */
-    default void registerImportant(Class<?> clazz, Object instance, int priority){
+    default void registerImportant(Class<?> clazz, Object instance, int priority) {
 
     }
 
@@ -51,7 +49,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * Initializes the dependency injection system.
      * This method builds the dependency graph, computes depth levels,
      * performs injection, and processes any retry queues.
-     * 
+     *
      * @throws Exception if initialization fails
      */
     default void initialize() throws Exception {
@@ -61,7 +59,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     /**
      * Automatically binds dependencies for the given target.
      * Handles both type-level binding (for Class<?>) and instance-level binding.
-     * 
+     *
      * @param target the target object or class to bind dependencies for
      */
     default void autoBind(Object target) {
@@ -70,8 +68,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Determines if a field should be injected based on annotations.
-     * 
-     * @param field the field to check
+     *
+     * @param field      the field to check
      * @param autoInject whether auto-injection is enabled
      * @return true if the field should be injected
      */
@@ -82,8 +80,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Determines if a method should be injected based on annotations.
-     * 
-     * @param method the method to check
+     *
+     * @param method     the method to check
      * @param autoInject whether auto-injection is enabled
      * @return true if the method should be injected
      */
@@ -94,14 +92,14 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Injects a value into a field with error handling.
-     * 
-     * @param target the target object
-     * @param field the field to inject into
-     * @param value the value to inject
+     *
+     * @param target   the target object
+     * @param field    the field to inject into
+     * @param value    the value to inject
      * @param optional whether the dependency is optional
      * @param isStatic whether the field is static
      * @param depClass the dependency class
-     * @param clazz the declaring class
+     * @param clazz    the declaring class
      */
     default void injectFieldValue(Object target, Field field, Object value,
                                   boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
@@ -110,13 +108,13 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Injects a value via method invocation with error handling.
-     * 
-     * @param target the target object
-     * @param method the method to invoke
-     * @param value the value to inject
+     *
+     * @param target   the target object
+     * @param method   the method to invoke
+     * @param value    the value to inject
      * @param optional whether the dependency is optional
      * @param depClass the dependency class
-     * @param clazz the declaring class
+     * @param clazz    the declaring class
      */
     default void injectMethodValue(Object target, Method method, Object value,
                                    boolean optional, Class<?> depClass, Class<?> clazz) {
@@ -125,10 +123,10 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Executes a lifecycle method (PreConstruct or PostConstruct) with error handling.
-     * 
-     * @param method the lifecycle method to execute
-     * @param target the target object
-     * @param clazz the class containing the method
+     *
+     * @param method        the lifecycle method to execute
+     * @param target        the target object
+     * @param clazz         the class containing the method
      * @param lifecycleType the type of lifecycle method (e.g., "PreConstruct", "PostConstruct")
      */
     default void executeLifecycleMethod(Method method, Object target,
@@ -138,8 +136,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Finds a field in a target class that matches the dependency class.
-     * 
-     * @param target the target class to search
+     *
+     * @param target   the target class to search
      * @param depClass the dependency class to find
      * @return the matching field, or null if not found
      */
@@ -150,8 +148,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Calculates the depth of a class based on its dependencies.
-     * 
-     * @param clazz the class to calculate depth for
+     *
+     * @param clazz        the class to calculate depth for
      * @param dependencies the set of dependencies
      * @return the calculated depth level
      */
@@ -162,7 +160,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Determines the role of a component based on its dependencies.
-     * 
+     *
      * @param dependencies the set of dependencies
      * @return the determined role
      */
@@ -187,10 +185,10 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Computes the depth for a specific class recursively.
-     * 
-     * @param clazz the class to compute depth for
+     *
+     * @param clazz   the class to compute depth for
      * @param visited set of already visited classes
-     * @param stack current recursion stack for cycle detection
+     * @param stack   current recursion stack for cycle detection
      * @return the computed depth
      */
     default int computeDepthFor(Class<?> clazz, Set<Class<?>> visited,
@@ -201,7 +199,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Injects all dependencies for all injectable classes.
-     * 
+     *
      * @throws IllegalAccessException if field access fails
      */
     default void injectAll() throws IllegalAccessException {
@@ -210,7 +208,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Unified injection and metadata population for any target.
-     * 
+     *
      * @param target the target object to inject and record
      */
     default void injectAndRecordMetaData(Object target) {
@@ -219,7 +217,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Resolves a dependency by class type.
-     * 
+     *
      * @param depClass the dependency class to resolve
      * @return the resolved dependency instance, or null if not found
      */
@@ -230,7 +228,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Processes the PreConstruct retry queue for failed initializations.
-     * 
+     *
      * @throws InterruptedException if the thread is interrupted during retry
      */
     default void processPreConstructRetryQueue() throws InterruptedException {
@@ -239,7 +237,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Binds a type-level dependency (for Class<?> objects).
-     * 
+     *
      * @param type the type to bind
      * @throws Exception if binding fails
      */
@@ -249,9 +247,9 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Binds a field-level dependency for an instance.
-     * 
+     *
      * @param target the target object
-     * @param field the field to bind
+     * @param field  the field to bind
      */
     default void bindField(Object target, java.lang.reflect.Field field) {
         // Default no-op implementation - override in concrete class
@@ -259,7 +257,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Creates a self-proxy for an interface with default methods.
-     * 
+     *
      * @param iface the interface to create a proxy for
      * @return the created proxy instance
      * @throws Exception if proxy creation fails
@@ -271,7 +269,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Creates a placeholder proxy for an unimplemented interface.
-     * 
+     *
      * @param iface the interface to create a placeholder for
      * @return the created placeholder proxy
      */
@@ -283,9 +281,9 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Finds implementations of an interface in the specified package.
-     * 
+     *
      * @param interfaceType the interface to find implementations for
-     * @param basePackage the base package to search in
+     * @param basePackage   the base package to search in
      * @return set of implementation classes
      */
     default Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
@@ -296,7 +294,7 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     /**
      * Gets the dependency map for direct access.
-     * 
+     *
      * @return map of registered dependencies
      */
     default IDependencyMap getDependencyMap() {
@@ -304,19 +302,17 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
         return new DependencyMap();
     }
 
-   default void injectStaticFields(Class<?> clazz){
+    /**
+     * Injects static fields for the specified class by resolving and setting their values based on registered dependencies.
+     *
+     * This method processes all static fields in the given class to determine if they should be injected,
+     * resolves the appropriate dependency instances, and sets them into the field. It is typically called
+     * after building the dependency graph and during initialization when static field injection is required.
+     *
+     * @param clazz the class whose static fields are to be injected
+     */
+    default void injectStaticFields(Class<?> clazz) {
 
-   }
+    }
 
-//    /**
-//     * Gets a dependency by its class type.
-//     *
-//     * @param clazz the class type to retrieve
-//     * @param <U> the type parameter
-//     * @return the dependency instance, or null if not found
-//     */
-//    default <U> U get(Class<U> clazz) {
-//        // Default no-op implementation - override in concrete class
-//        return null;
-//    }
 }
