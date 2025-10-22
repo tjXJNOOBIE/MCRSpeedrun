@@ -767,6 +767,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     /**
      * Recursively walks directory to find injectable classes.
+     * TODO: Wire all DI classes with @Injectable annotation before re-enabling the annotation check
+     * Currently discovers ALL classes and interfaces in the project package
      */
     private void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results) {
         File[] files = dir.listFiles();
@@ -779,9 +781,19 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 String className = packageName + '.' + file.getName().replace(".class", "");
                 try {
                     Class<?> clazz = Class.forName(className);
-                    // Register if it's injectable or an interface with implementations
-                    if (clazz.isAnnotationPresent(Injectable.class) || 
-                        (clazz.isInterface() && !clazz.getName().startsWith("java."))) {
+                    // TODO: Re-enable @Injectable check after all classes are properly annotated
+                    // TODO: Remove multiple checks of Injectable.java in multiple methods
+                    // Currently accepting ALL classes and interfaces in project packages
+                    // if (clazz.isAnnotationPresent(Injectable.class) || 
+                    //     (clazz.isInterface() && !clazz.getName().startsWith("java."))) {
+                    //     results.add(clazz);
+                    // }
+                    
+                    // Temporary: Accept all non-java classes
+                    if (!clazz.getName().startsWith("java.") && 
+                        !clazz.getName().startsWith("javax.") &&
+                        !clazz.getName().startsWith("org.bukkit.") &&
+                        !clazz.getName().startsWith("sun.")) {
                         results.add(clazz);
                     }
                 } catch (Throwable ignored) {
