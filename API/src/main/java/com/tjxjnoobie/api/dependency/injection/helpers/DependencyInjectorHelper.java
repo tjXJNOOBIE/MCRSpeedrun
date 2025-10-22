@@ -901,7 +901,8 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             dependencyMap.registerDependency((Class<Object>) fieldType, placeholder);
 
         } catch (InaccessibleObjectException ignored) {
-            Log.info("Skipping inaccessible field: " + field.getName());
+            //TODO: Add 'verbose' logging option
+           // Log.info("Skipping inaccessible field: " + field.getName());
         } catch (Exception e) {
             Log.error("Error binding field " + field.getName() + ": " + e.getMessage());
         }
