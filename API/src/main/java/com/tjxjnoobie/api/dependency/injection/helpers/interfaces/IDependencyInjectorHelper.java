@@ -304,6 +304,10 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
         return new DependencyMap();
     }
 
+   default void injectStaticFields(Class<?> clazz){
+
+   }
+
 //    /**
 //     * Gets a dependency by its class type.
 //     *
