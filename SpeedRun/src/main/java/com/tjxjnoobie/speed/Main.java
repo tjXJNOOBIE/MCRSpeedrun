@@ -2,7 +2,9 @@ package com.tjxjnoobie.speed;
 
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -43,6 +45,8 @@ import java.util.Objects;
 @Injectable("Main class for Minecraft Speedrun Module")
 public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
 
+    private IContext<IGlobalContext> iGlobalContext;
+    private IContext<ISpeedRunContext> iSpeedContext;
 
      @Inject private IGameState gameState;
      @Inject private IGameMode gameMode;
@@ -85,17 +89,30 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
      @Inject private IPunishLog punishLog;
      @Inject private FireEvent fireEvent;
      @Inject private ILocalServerMetaData localServerMetaData;
-     private IContext<IGlobalContext> iGlobalContext;
-     private IContext<ISpeedRunContext> iSpeedContext;
      private Plugin plugin;
      private static Main instance;
      private static final String CHANNEL = "factions:sync";
-
+     //TODO: Use injection helper classes thru implementations instead of instancing
+     private IDependencyInjectorHelper dependencyInjectorHelper;
 
 
     @Override
     public void onEnable() {
         plugin = this;
+        //TODO: Delegate this temp fix to a helper method
+        dependencyInjectorHelper = new DependencyInjectorHelper();
+        // ===== PHASE 0: AutoBind Main class FIRST (before anything else) =====
+        Log.info("[Main] ===== Phase 0: Pre-AutoBind Main Class =====");
+        // This ensures Main's fields are scanned and registered before contexts are created
+        // We create a temporary helper just to run autoBind on Main
+        try {
+            // AutoBind Main class to scan its fields and prepare for injection
+            dependencyInjectorHelper.autoBind(this);
+            Log.info("[Main] Main class autoBind complete");
+        } catch (Exception e) {
+            Log.error("[Main] Failed to autoBind Main class: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
         
         // ===== PHASE 1: Pre-DI Setup (No dependencies needed) =====
         Log.info("[Main] ===== Phase 1: Pre-DI Setup =====");
@@ -114,6 +131,8 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         iSpeedContext.getContext().setPlugin(this);
 
         try {
+            //TODO: Use injection helper classes thru implementations instead of instancing
+
             // Use the concrete ContextInjectionHelper implementation
             IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
             injectionHelper.injectAllContextsGlobally(this);
