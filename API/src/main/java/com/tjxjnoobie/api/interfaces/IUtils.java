@@ -1,9 +1,9 @@
 package com.tjxjnoobie.api.interfaces;
 
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import org.bukkit.Bukkit;
 
 import java.security.SecureRandom;
@@ -20,7 +20,8 @@ import java.util.Map;
  * @param <T> The type of context this utility interface works with
  */
 
-public interface IUtils<T>  {
+public interface IUtils<T> {
+
     String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     String prefix = "§6§lNovus§8§l »»§f ";
     String staffPrefix = "��4§lNovus §8§l»»§c ";
@@ -35,8 +36,19 @@ public interface IUtils<T>  {
      * 
      * @return The context instance
      */
-    @Inject
-    default IGlobalContext getGlobalContext(){
+
+    default IGlobalContext getGlobalContext() {
+        //TODO: Remove concrete class from here
+
+        IGlobalContext globalContext = new GlobalContext();
+
+        // Type-safe cast only if T matches the actual context type
+            if (globalContext != null) {
+                return globalContext;
+            }
+
+
+        Log.warn("[IUtils] Failed to resolve IContext<T> for generic type T.");
         return null;
     }
     
