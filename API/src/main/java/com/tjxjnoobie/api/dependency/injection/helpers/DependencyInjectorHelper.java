@@ -515,17 +515,106 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 Class<?> targetClass = target.getClass();
                 Log.info("[AUTO-BIND] Starting autoBind for: " + targetClass.getSimpleName());
                 
-                // First, scan and register all injectable classes at runtime
+                // STEP 1: Scan and register all injectable classes at runtime
+                Log.info("[AUTO-BIND] Step 1: Scanning and registering all classes...");
                 scanAndRegisterInjectableClasses(targetClass);
+                Log.info("[AUTO-BIND] Step 1 complete. Total registered: " + dependencyMap.getDependencyMapSize());
                 
-                // Then bind fields from the now-populated dependencyMap
-                // The actual injection methods will check @Injectable eligibility
+                // STEP 2: Inject fields for ALL registered classes from DependencyMap
+                Log.info("[AUTO-BIND] Step 2: Injecting fields for all registered classes...");
+                injectAllRegisteredClasses();
+                Log.info("[AUTO-BIND] Step 2 complete");
+                
+                // STEP 3: Bind fields from target specifically
+                Log.info("[AUTO-BIND] Step 3: Binding target fields...");
                 bindFieldsFromTarget(target, targetClass);
                 
                 Log.info("[AUTO-BIND] AutoBind completed for: " + targetClass.getSimpleName());
             }
         } catch (Exception e) {
             Log.exception(e);
+        }
+    }
+
+    /**
+     * Injects fields for ALL registered classes in the DependencyMap.
+     * This ensures every class gets its dependencies injected from the map.
+     */
+    private void injectAllRegisteredClasses() {
+        // Get all registered metadata
+        Collection<IDependencyMetaData> allMetadata = dependencyMap.getDependencyMapValues();
+        
+        Log.info("[AUTO-BIND] Injecting fields for " + allMetadata.size() + " registered classes");
+        
+        for (IDependencyMetaData meta : allMetadata) {
+            if (meta == null || meta.getDependencyClass() == null) {
+                continue;
+            }
+            
+            Class<?> clazz = meta.getDependencyClass();
+            Object instance = meta.ensureAndGetInstance(meta);
+            
+            if (instance == null) {
+                Log.warn("[AUTO-BIND] No instance available for: " + clazz.getSimpleName());
+                continue;
+            }
+            
+            // Inject fields for this instance
+            injectFieldsForInstance(instance, clazz);
+        }
+    }
+
+    /**
+     * Injects all @Inject fields for a specific instance using the DependencyMap.
+     */
+    private void injectFieldsForInstance(Object instance, Class<?> clazz) {
+        Class<?> currentClass = clazz;
+        
+        while (currentClass != null && currentClass != Object.class) {
+            for (Field field : currentClass.getDeclaredFields()) {
+                if (!field.isAnnotationPresent(Inject.class)) {
+                    continue;
+                }
+                
+                // Skip static fields (handled separately)
+                if (Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+                
+                Class<?> fieldType = field.getType();
+                
+                // Try to get instance from DependencyMap
+                Object value = dependencyMap.getDependencyInstance(fieldType);
+                
+                if (value == null) {
+                    // Try to find by assignable type
+                    IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(fieldType);
+                    if (compatibleMeta != null) {
+                        value = compatibleMeta.ensureAndGetInstance(compatibleMeta);
+                    }
+                }
+                
+                if (value != null) {
+                    try {
+                        field.setAccessible(true);
+                        field.set(instance, value);
+                        Log.info("[AUTO-BIND] Injected " + fieldType.getSimpleName() + 
+                                " into " + clazz.getSimpleName() + "." + field.getName());
+                    } catch (Exception e) {
+                        Log.error("[AUTO-BIND] Failed to inject " + fieldType.getSimpleName() + 
+                                " into " + clazz.getSimpleName() + "." + field.getName() + ": " + e.getMessage());
+                    }
+                } else {
+                    Inject inject = field.getAnnotation(Inject.class);
+                    boolean optional = inject != null && inject.optional();
+                    if (!optional) {
+                        Log.warn("[AUTO-BIND] No instance found for required field: " + 
+                                clazz.getSimpleName() + "." + field.getName() + " (" + fieldType.getSimpleName() + ")");
+                    }
+                }
+            }
+            
+            currentClass = currentClass.getSuperclass();
         }
     }
 
