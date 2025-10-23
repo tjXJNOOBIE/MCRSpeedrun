@@ -428,16 +428,18 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     /**
      * Unified injection + metadata population for any target.
+     * This method performs injection on the target's fields.
+     * If called during Phase 1 (AutoBind), it will scan and register.
+     * If called during Phase 4+ (Wave injection), dependencies should already be registered.
      */
     @SuppressWarnings("unchecked")
     public void injectAndRecordMetaData(Object target) {
         if (target == null || target instanceof Class) return;
 
         Class<?> rootClass = target.getClass();
-        autoBind(target); // existing registration logic
 
         boolean auto = rootClass.isAnnotationPresent(AutoInjectAll.class);
-        // Get metadata for this class (already registered by autoBind)
+        // Get metadata for this class
         IDependencyMetaData meta = dependencyMap.getDependency(rootClass);
         if (meta == null) {
             // Fallback: create metadata if not found
@@ -789,6 +791,15 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                     //     results.add(clazz);
                     // }
                     
+                    // Temporary: Accept all non-java/third-party classes
+                    if (!clazz.getName().startsWith("java.") && 
+                        !clazz.getName().startsWith("javax.") &&
+                        !clazz.getName().startsWith("org.bukkit.") &&
+                        !clazz.getName().startsWith("com.velocitypowered.") &&
+                        !clazz.getName().startsWith("org.slf4j.") &&
+                        !clazz.getName().startsWith("sun.")) {
+                        results.add(clazz);
+                    }
 
                 } catch (Throwable ignored) {
                     // Skip classes that can't be loaded
