@@ -15,7 +15,7 @@ import org.bukkit.plugin.Plugin;
 
 
 public class GlobalContext extends AbstractContext<IGlobalContext> implements IGlobalContext, IContext<IGlobalContext>, IAbstractClassMetaData<IGlobalContext> {
-
+    //TODO: Update class meta data system to integrate better with having to implement a interface
     // Core dependencies using interfaces
     private IGameState gameState;
     private IGameMode gameMode;
@@ -47,7 +47,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private ITimeUtils timeUtils;
     private IUtils<IGlobalContext> utils;
     private IAbstractClassMetaData<GlobalContext> classMeta;
-
 
 
     
