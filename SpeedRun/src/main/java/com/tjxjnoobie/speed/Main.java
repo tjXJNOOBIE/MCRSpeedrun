@@ -92,15 +92,15 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
      private Plugin plugin;
      private static Main instance;
      private static final String CHANNEL = "factions:sync";
-     //TODO: Use injection helper classes thru implementations instead of instancing
-     private IDependencyInjectorHelper dependencyInjectorHelper;
-
 
     @Override
     public void onEnable() {
         plugin = this;
+        IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
+
         //TODO: Delegate this temp fix to a helper method
-        dependencyInjectorHelper = new DependencyInjectorHelper();
+        //TODO: Use injection helper classes thru implementations instead of instancing
+        IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
         // ===== PHASE 0: AutoBind Main class FIRST (before anything else) =====
         Log.info("[Main] ===== Phase 0: Pre-AutoBind Main Class =====");
         // This ensures Main's fields are scanned and registered before contexts are created
@@ -134,7 +134,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
             //TODO: Use injection helper classes thru implementations instead of instancing
 
             // Use the concrete ContextInjectionHelper implementation
-            IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
             injectionHelper.injectAllContextsGlobally(this);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -183,7 +182,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // Server setup
         Log.info("[Main] Setting up server metadata...");
         createServerID();
-        createGameID(globalContext);
+        createGameID();
         String gameID = getGameID();
         String serverID = getServerID();
         
