@@ -4,7 +4,7 @@ import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 
 public class LocalServerMetaData implements ILocalServerMetaData {
 
-    public String serverID;
+    public String serverID = "DEV";
     public String gameID;
 
     @Override
