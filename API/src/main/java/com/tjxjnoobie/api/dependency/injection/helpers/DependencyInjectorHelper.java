@@ -505,7 +505,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             // Thread.sleep(10); // TODO: Add proper loop
         }
     }
-
+    @Override
     public void autoBind(Object target) {
         try {
             // Determine if we're binding a type or an instance
