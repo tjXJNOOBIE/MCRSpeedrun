@@ -1,11 +1,10 @@
 package com.tjxjnoobie.api.internal.utils;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.IGameType;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 
 import java.io.File;
 import java.sql.SQLException;
@@ -16,14 +15,14 @@ import java.util.Map;
 import java.util.TimeZone;
 
 
-public class Utils implements IUtils {
+public class Utils implements IUtils<IGlobalContext> {
 
     public final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     public String prefix ="§6§lNovus§8§l »»§f ";
     public String staffPrefix = "§4§lNovus §8§l»»§c ";
     public String serverID;
     public String gameID;
-    @Inject private GlobalContext globalContext;
+    @Inject private IGlobalContext globalContext;
 
 
 
@@ -34,8 +33,10 @@ public class Utils implements IUtils {
 
 
 
-
-
+    @Override
+    public IGlobalContext getGlobalContext(){
+        return globalContext;
+    }
 
 
 
