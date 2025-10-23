@@ -62,11 +62,35 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
             IDependencyMetaData metaData = new DependencyMetaData(clazz);
             
             if (instance != null) {
-                Log.info("[DependencyMap] Setting instance for " + clazz.getSimpleName() + 
-                        " -> " + instance.getClass().getSimpleName());
+                // Get detailed instance information
+                String instanceClassName = instance.getClass().getName();
+                String instanceSimpleName = instance.getClass().getSimpleName();
+                boolean isProxy = instanceClassName.contains("$Proxy");
+                
+                // Build detailed log message
+                StringBuilder logMsg = new StringBuilder();
+                logMsg.append("[DependencyMap] Setting instance for ").append(clazz.getSimpleName());
+                logMsg.append(" -> ").append(instanceClassName);
+                
+                if (isProxy) {
+                    // For proxies, also show the interfaces they implement
+                    Class<?>[] interfaces = instance.getClass().getInterfaces();
+                    if (interfaces.length > 0) {
+                        logMsg.append(" (Proxy implementing: ");
+                        for (int i = 0; i < interfaces.length; i++) {
+                            logMsg.append(interfaces[i].getSimpleName());
+                            if (i < interfaces.length - 1) logMsg.append(", ");
+                        }
+                        logMsg.append(")");
+                    } else {
+                        logMsg.append(" (Proxy)");
+                    }
+                }
+                
+                Log.info(logMsg.toString());
                 metaData.setInstance(instance);
                 
-                Log.info("[DependencyMap] Populating metadata from instance class: " + instance.getClass().getName());
+                Log.info("[DependencyMap] Populating metadata from instance class: " + instanceClassName);
                 metaData.populateMetaData(instance.getClass());
                 Log.info("[DependencyMap] Metadata population completed for: " + clazz.getSimpleName());
             } else {
