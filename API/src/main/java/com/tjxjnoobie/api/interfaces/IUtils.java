@@ -1,12 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
 
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
-import com.tjxjnoobie.api.platform.global.console.Log;
-import org.bukkit.Bukkit;
 
-import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
@@ -19,40 +15,23 @@ import java.util.Map;
  * 
  * @param <T> The type of context this utility interface works with
  */
-
+//TODO: Remove type T
 public interface IUtils<T> {
 
     String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     String prefix = "§6§lNovus§8§l »»§f ";
-    String staffPrefix = "��4§lNovus §8§l»»§c ";
+    String staffPrefix = "§4§lNovus §8§l»»§c ";
     String serverID = null;
     String gameID = "";
 
-    //TODO Update methods to not use globalContext in methods
-
     /**
      * Gets the context instance
-     * Uses the default implementation from ContextAccess with a fallback
      * 
      * @return The context instance
      */
-
     default IGlobalContext getGlobalContext() {
-        //TODO: Remove concrete class from here
-
-        IGlobalContext globalContext = new GlobalContext();
-
-        // Type-safe cast only if T matches the actual context type
-            if (globalContext != null) {
-                return globalContext;
-            }
-
-
-        Log.warn("[IUtils] Failed to resolve IContext<T> for generic type T.");
         return null;
     }
-    
-
 
     /**
      * Gets the server prefix for messages
@@ -74,8 +53,12 @@ public interface IUtils<T> {
         return staffPrefix;
     }
 
+    /**
+     * Gets the game ID from the local server metadata
+     * @return The game ID string
+     */
     default String getGameID() {
-        return getGlobalContext().getLocalServerMetaData().getGameID();
+        return "";
     }
 
     /**
@@ -85,91 +68,145 @@ public interface IUtils<T> {
      * @return The server ID string, typically a randomly generated alphanumeric code
      */
     default String getServerID() {
-        String serverID = getGlobalContext().getLocalServerMetaData().getServerID();
-    Log.info("[ID] Retrieving server ID... " + serverID);
-
-        return serverID;
-
+        return "";
     }
-
-    default void createServerID() {
-        Log.info("[ID] Creating new server ID...");
-        getGlobalContext().getLocalServerMetaData().setServerID(generateRandomID(5));
-    }
-
-    default void createGameID(IGlobalContext globalContext) {
-       globalContext.getLocalServerMetaData().setGameID(generateRandomID(6));
-    }
-
-    default String generateRandomID(int length) {
-        SecureRandom secureRandom = new SecureRandom();
-        StringBuilder id = new StringBuilder();
-
-        for (int i = 0; i < length; i++) {
-            int index = secureRandom.nextInt(CHARACTERS.length());
-            id.append(CHARACTERS.charAt(index));
-        }
-        Log.info("[ID] Generated ID: " + id.toString());
-
-
-        return id.toString();
-    }
-
-    default boolean parseBoolean(String value) {
-        if (value.equalsIgnoreCase("true")) {
-            return true;
-        } else if (value.equalsIgnoreCase("false")) {
-            return false;
-        } else {
-            return false;
-        }
-    }
-    default String formatTimestamp(Timestamp timestamp, DateTimeFormatter formatter) {
-        return (timestamp != null) ? timestamp.toLocalDateTime().format(formatter) : null;
-    }
-    default String formatTime(long milliseconds) {
-        long hours = milliseconds / (1000 * 60 * 60);
-        long minutes = (milliseconds / (1000 * 60)) % 60;
-        long seconds = (milliseconds / 1000) % 60;
-        long millis = milliseconds % 1000;
-
-        if (hours > 0) {
-            return String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
-        } else {
-            return String.format("%02d:%02d.%03d", minutes, seconds, millis);
-        }
-    }
-
-    default Map<String, Object> getConfigValues(IGlobalContext globalContext) {
-        return globalContext.getUtils().getConfigValues(globalContext);
-    }
-
-    default void broadcastMessage(IGlobalContext globalContext, String message) {
-        globalContext.getUtils().broadcastMessage(globalContext, message);
-        if (message != null && !message.trim().isEmpty()) {
-            Bukkit.broadcastMessage(prefix + message);
-        }
-    }
-
 
     /**
-     * Gets a configuration value
+     * Creates a new server ID and stores it in the local server metadata
+     */
+    default void createServerID() {
+        // Default empty implementation - override in concrete class
+    }
+
+    /**
+     * Creates a new game ID and stores it in the local server metadata
+     */
+    default void createGameID() {
+        // Default empty implementation - override in concrete class
+    }
+
+    /**
+     * Generates a random ID of the specified length
+     * @param length The length of the ID to generate
+     * @return A randomly generated alphanumeric ID
+     */
+    default String generateRandomID(int length) {
+        return "";
+    }
+
+    /**
+     * Gets configuration values map
+     * @return Map of configuration values
+     */
+    default Map<String, Object> getConfigValues() {
+        return new java.util.HashMap<>();
+    }
+
+    /**
+     * Sets the game type based on the current directory
+     * @throws SQLException if database operation fails
+     */
+    default void setGameType() throws SQLException {
+        // Default empty implementation - override in concrete class
+    }
+
+    /**
+     * Gets the current time in format "dd.MM HH:mm"
+     * @return Formatted time string
+     */
+    default String getTime() {
+        return "";
+    }
+
+    /**
+     * Gets the current date in format "d MMM yyyy"
+     * @return Formatted date string
+     */
+    default String getDate() {
+        return "";
+    }
+
+    /**
+     * Gets the advanced time with timezone information
+     * @return Formatted time with timezone
+     */
+    default String getAdvancedTime() {
+        return "";
+    }
+
+    /**
+     * Parses a string value to boolean
+     * @param value The string value to parse
+     * @return The parsed boolean value
+     */
+    default boolean parseBoolean(String value) {
+        return false;
+    }
+
+    /**
+     * Formats a timestamp with the given formatter
+     * @param timestamp The timestamp to format
+     * @param formatter The date time formatter
+     * @return The formatted timestamp string
+     */
+    default String formatTimestamp(Timestamp timestamp, DateTimeFormatter formatter) {
+        return "";
+    }
+
+    /**
+     * Formats milliseconds into a time string
+     * @param milliseconds The milliseconds to format
+     * @return The formatted time string
+     */
+    default String formatTime(long milliseconds) {
+        return "";
+    }
+
+    /**
+     * Gets configuration values from the global context
+     * @param globalContext The global context
+     * @return Map of configuration values
+     */
+    default Map<String, Object> getConfigValues(IGlobalContext globalContext) {
+        return new java.util.HashMap<>();
+    }
+
+    /**
+     * Broadcasts a message to all players
+     * @param globalContext The global context
+     * @param message The message to broadcast
+     */
+    default void broadcastMessage(IGlobalContext globalContext, String message) {
+        // Default empty implementation - override in concrete class
+    }
+
+    /**
+     * Gets a configuration value by key
+     * @param globalContext The global context
      * @param key The configuration key
      * @return The configuration value
      */
-
     default Object getConfigValue(IGlobalContext globalContext, String key) {
-        if (key == null || key.trim().isEmpty()) {
-            return null;
-        }
-        return globalContext.getUtils().getConfigValues(globalContext).get(key);
+        return null;
     }
+
+    /**
+     * Sets the game type for the server
+     * @param globalContext The global context
+     * @param gameTypeEnum The game type to set
+     * @throws SQLException if database operation fails
+     */
     default void setGameType(IGlobalContext globalContext, GameTypeEnum gameTypeEnum) throws SQLException {
-        globalContext.getGameType().setGameType(gameTypeEnum, serverID);
+        // Default empty implementation - override in concrete class
     }
 
-
+    /**
+     * Sets a configuration value
+     * @param key The configuration key
+     * @param value The value to set
+     * @param globalContext The global context
+     */
     default void setConfigValue(String key, Object value, IGlobalContext globalContext){
-
+        // Default empty implementation - override in concrete class
     }
 }
