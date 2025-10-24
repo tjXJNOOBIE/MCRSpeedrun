@@ -1,10 +1,7 @@
 package com.tjxjnoobie.api.interfaces;
 
 import com.tjxjnoobie.api.enums.GameTypeEnum;
-import com.tjxjnoobie.api.managers.MySQL;
-import org.bukkit.Bukkit;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,7 +16,9 @@ public interface IGameType {
      * Override this to provide custom storage
      * @return HashMap for game type tracking
      */
-    default HashMap<String, Boolean> getGameTypeHash() {}
+    default HashMap<String, Boolean> getGameTypeHash() {
+        return new HashMap<>();
+    }
 
 
     /**
@@ -27,7 +26,9 @@ public interface IGameType {
      * Override this to provide custom storage
      * @return The current game type enum
      */
-    default GameTypeEnum getGameTypeEnum() {}
+    default GameTypeEnum getGameTypeEnum() {
+        return null;
+    }
 
 
     /**
@@ -42,7 +43,9 @@ public interface IGameType {
      * Gets the current game type
      * @return The current game type enum
      */
-    default GameTypeEnum getGameType() {}
+    default GameTypeEnum getGameType() {
+        return null;
+    }
 
 
     /**
@@ -67,12 +70,16 @@ public interface IGameType {
      * @param database The database name (unused in current implementation)
      * @return The game type as a string
      */
-    default String getType(String serverid, String database) {}
+    default String getType(String serverid, String database) {
+        return "";
+    }
 
 
     /**
      * Gets all game types from the database
      * @return ArrayList of game type strings
      */
-    default ArrayList<String> getGameTypes() {}
+    default ArrayList<String> getGameTypes() {
+        return new ArrayList<>();
+    }
 }
