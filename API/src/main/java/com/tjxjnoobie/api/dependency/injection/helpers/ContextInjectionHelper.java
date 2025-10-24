@@ -64,7 +64,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
         for (Class<?> allClasses : getDependencyMap().getDependencies()) {
             if (allClasses != null) {
-                Log.info("[DI] AutoBinding context: " + allClasses.getSimpleName());
+                Log.info("[DI] AutoBinding from DependencyMap: " + allClasses.getSimpleName());
                 dependencyInjectorHelper.autoBind(allClasses);
                 // WAIT: autoBind must complete for this context before moving to next
             }
@@ -91,7 +91,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             Log.info("[DI] Target: " + target.getClass().getSimpleName());
 
             // Inject from all contexts
-            for (IContext<?> context : contextRegistry) {
+            for (Class<?> context : getDependencyMap().getDependencies()) {
                 if (context != null) {
                     dependencyInjectorHelper.injectAndRecordMetaData(target);
                 }
@@ -102,6 +102,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         // ===== PHASE 6: Static field injection =====
         Log.info("[DI] --- Phase 6: Static field injection ---");
+        //TODO: Automate finding classes with static fields
         dependencyInjectorHelper.injectStaticFields(InterfaceManager.class);
 
         generateInjectableReport();
