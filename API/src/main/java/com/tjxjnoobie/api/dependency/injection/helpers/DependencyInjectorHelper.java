@@ -14,11 +14,9 @@ import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
-import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.annotations.AutoInjectAll;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.annotations.PreConstruct;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
@@ -41,7 +39,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper {
 
 
-    private final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
+    public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
 
     /**
@@ -352,7 +350,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     /**
      * Common field injection routine used by both static and instance injection paths.
      */
-    private void injectFieldsForClass(Object target, Class<?> clazz, boolean autoInject,
+    public void injectFieldsForClass(Object target, Class<?> clazz, boolean autoInject,
                                       boolean includeStatic, boolean includeInstance,
                                       Set<Class<?>> dependencies) {
         if (clazz == null) return;
@@ -376,7 +374,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     }
 
     // Method injection helper for a single class
-    private void injectMethodsForClass(Object target, Class<?> clazz, boolean autoInject, Set<Class<?>> dependencies) {
+    public void injectMethodsForClass(Object target, Class<?> clazz, boolean autoInject, Set<Class<?>> dependencies) {
         if (clazz == null) return;
         for (Method method : clazz.getDeclaredMethods()) {
             if (!shouldInjectMethod(method, autoInject)) continue;
@@ -513,23 +511,24 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 bindType((Class<?>) target);
             } else {
                 Class<?> targetClass = target.getClass();
-                Log.info("[AUTO-BIND] Starting autoBind for: " + targetClass.getSimpleName());
-                
-                // STEP 1: Scan and register all injectable classes at runtime
-                Log.info("[AUTO-BIND] Step 1: Scanning and registering all classes...");
-                scanAndRegisterInjectableClasses(targetClass);
-                Log.info("[AUTO-BIND] Step 1 complete. Total registered: " + dependencyMap.getDependencyMapSize());
-                
-                // STEP 2: Inject fields for ALL registered classes from DependencyMap
-                Log.info("[AUTO-BIND] Step 2: Injecting fields for all registered classes...");
+
+                // Step 1: Full project-wide class scan and registration
+                Log.info("[AUTO-BIND] Starting full project scan to register all injectable classes...");
+                String basePackage = "com.tjxjnoobie.api"; // Adjust based on actual project root
+                scanAndRegisterInjectableClasses(basePackage);
+
+                // Step 2: Inject dependencies for all registered classes (even if already in map)
+                Log.info("[AUTO-BIND] Injecting fields into all registered classes...");
                 injectAllRegisteredClasses();
-                Log.info("[AUTO-BIND] Step 2 complete");
-                
-                // STEP 3: Bind fields from target specifically
-                Log.info("[AUTO-BIND] Step 3: Binding target fields...");
-                bindFieldsFromTarget(target, targetClass);
-                
-                Log.info("[AUTO-BIND] AutoBind completed for: " + targetClass.getSimpleName());
+
+                // Step 3: Bind target-specific fields (if provided)
+                if (target != null) {
+                    Log.info("[AUTO-BIND] Binding fields from target object: " + targetClass.getSimpleName());
+                    bindFieldsFromTarget(target, targetClass);
+                }
+
+                Log.info("[AUTO-BIND] AutoBind completed successfully. Total classes scanned and bound: " + 
+                        dependencyMap.getDependencyMapSize());
             }
         } catch (Exception e) {
             Log.exception(e);
@@ -537,10 +536,96 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     }
 
     /**
+     * Scans the entire project for injectable classes and registers them in the dependency map.
+     * This scan runs regardless of whether dependencies are already registered — it ensures full coverage.
+     *
+     * @param basePackage The root package to begin scanning (e.g., com.tjxjnoobie.api)
+     */
+    public void scanAndRegisterInjectableClasses(String basePackage) {
+        Log.info("[AUTO-BIND] Scanning classpath for injectable classes in package: " + basePackage);
+
+        try {
+            Set<Class<?>> allClasses = findInjectableClasses(basePackage);
+
+            if (allClasses.isEmpty()) {
+                Log.warn("[AUTO-BIND] No injectable classes found in package: " + basePackage);
+                return;
+            }
+
+            for (Class<?> clazz : allClasses) {
+                if (!clazz.isInterface() && !dependencyMap.isRegistered(clazz)) {
+                    try {
+                        // Instantiate the class to register
+                        Object instance = clazz.getDeclaredConstructor().newInstance();
+
+                        // Register with dependency map
+                        dependencyMap.registerDependency(clazz, instance);
+
+                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName());
+
+                        // Optionally assign role based on dependencies
+                        Set<Class<?>> deps = analyzeClassDependencies(clazz);
+                        DependencyRole role = determineRoleFromDependencies(deps);
+                        IDependencyMetaData meta = dependencyMap.getDependency(clazz);
+                        if (meta != null) {
+                            meta.setRole(role);
+                            meta.setDependencies(deps);
+                            Log.info("[AUTO-BIND] Assigned role " + role + " to " + clazz.getSimpleName());
+                        }
+                    } catch (Exception e) {
+                        Log.warn("[AUTO-BIND] Could not instantiate class: " + clazz.getSimpleName() + 
+                                " - Error: " + e.getMessage());
+                    }
+                } else {
+                    Log.warn("[AUTO-BIND] Skipping already registered class: " + clazz.getSimpleName());
+                }
+            }
+
+        } catch (Exception e) {
+            Log.error("[AUTO-BIND] Failed to scan or register classes in package " + basePackage + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Finds all classes in a given package that are potential candidates for dependency injection.
+     * This includes classes with @Inject fields, methods, or interfaces.
+     *
+     * @param basePackage The root package to search (e.g., com.tjxjnoobie.api)
+     * @return A set of classes found
+     */
+    //THIS ONE
+    public Set<Class<?>> findInjectableClasses(String basePackage) {
+        Set<Class<?>> results = new HashSet<>();
+        String path = basePackage.replace('.', '/');
+
+        try {
+            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
+            while (resources.hasMoreElements()) {
+                URL resource = resources.nextElement();
+                File dir = new File(resource.getFile());
+                if (dir.exists() && dir.isDirectory()) {
+                    walkDirectoryForInjectables(dir, basePackage, results);
+                }
+            }
+        } catch (IOException e) {
+            Log.warn("[AUTO-BIND] Failed to access package " + path + ": " + e.getMessage());
+        }
+
+        return results;
+    }
+
+
+
+
+
+
+
+
+    /**
      * Injects fields for ALL registered classes in the DependencyMap.
      * This ensures every class gets its dependencies injected from the map.
      */
-    private void injectAllRegisteredClasses() {
+    public void injectAllRegisteredClasses() {
         // Get all registered metadata
         Collection<IDependencyMetaData> allMetadata = dependencyMap.getDependencyMapValues();
         
@@ -567,7 +652,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     /**
      * Injects all @Inject fields for a specific instance using the DependencyMap.
      */
-    private void injectFieldsForInstance(Object instance, Class<?> clazz) {
+    public void injectFieldsForInstance(Object instance, Class<?> clazz) {
         Class<?> currentClass = clazz;
         
         while (currentClass != null && currentClass != Object.class) {
@@ -623,7 +708,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * This ensures the dependency map is populated before field binding occurs.
      * Also discovers and registers implementations for interfaces.
      */
-    private void scanAndRegisterInjectableClasses(Class<?> targetClass) {
+    public void scanAndRegisterInjectableClasses(Class<?> targetClass) {
         Log.info("[AUTO-BIND] Scanning classpath for injectable classes...");
         String basePackage = targetClass.getPackage() != null ? targetClass.getPackage().getName() : "";
         
@@ -652,7 +737,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * Analyzes all injectable classes and assigns roles based on their dependencies.
      * Returns a map of class to assigned role for use in registration.
      */
-    private Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses) {
+    public Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses) {
         Map<Class<?>, DependencyRole> roleMap = new HashMap<>();
         
         for (Class<?> clazz : injectableClasses) {
@@ -671,7 +756,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     /**
      * Registers all concrete classes with their pre-assigned roles.
      */
-    private void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap) {
+    public void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap) {
         for (Class<?> clazz : injectableClasses) {
             if (!clazz.isInterface() && !dependencyMap.isRegistered(clazz)) {
                 try {
@@ -701,7 +786,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * This allows a single DI class to register the entire system.
      * Also automatically determines and assigns roles based on dependencies.
      */
-    private void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses) {
+    public void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses) {
         Set<Class<?>> interfaces = new HashSet<>();
         Set<Class<?>> implementations = new HashSet<>();
         
@@ -765,7 +850,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * - INTERMEDIATE: 1-2 @Inject fields (depends on a few things)
      * - ISOLATED: 3+ @Inject fields (complex dependencies)
      */
-    private void assignRolesToClasses(Set<Class<?>> implementations) {
+    public void assignRolesToClasses(Set<Class<?>> implementations) {
         for (Class<?> clazz : implementations) {
             try {
                 Set<Class<?>> dependencies = analyzeClassDependencies(clazz);
@@ -789,7 +874,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * Analyzes a class to find all its @Inject dependencies.
      * Walks the class hierarchy to find all injected fields.
      */
-    private Set<Class<?>> analyzeClassDependencies(Class<?> clazz) {
+    public Set<Class<?>> analyzeClassDependencies(Class<?> clazz) {
         Set<Class<?>> dependencies = new HashSet<>();
         
         Class<?> current = clazz;
@@ -820,7 +905,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * - INTERMEDIATE: 1-2 dependencies (simple dependencies)
      * - ISOLATED: 3+ dependencies (complex dependencies)
      */
-    private DependencyRole determineRoleFromDependencies(Set<Class<?>> dependencies) {
+    public DependencyRole determineRoleFromDependencies(Set<Class<?>> dependencies) {
         int depCount = dependencies.size();
         
         if (depCount == 0) {
@@ -832,36 +917,14 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
     }
 
-    /**
-     * Finds all injectable classes in the given package.
-     * Looks for classes with @Injectable annotation or interface implementations.
-     */
-    private Set<Class<?>> findInjectableClasses(String basePackage) {
-        Set<Class<?>> injectableClasses = new HashSet<>();
-        String path = basePackage.replace('.', '/');
 
-        try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
-            while (resources.hasMoreElements()) {
-                URL resource = resources.nextElement();
-                File dir = new File(resource.getFile());
-                if (dir.exists() && dir.isDirectory()) {
-                    walkDirectoryForInjectables(dir, basePackage, injectableClasses);
-                }
-            }
-        } catch (IOException e) {
-            Log.warn("[AUTO-BIND] Failed to scan package " + basePackage + ": " + e.getMessage());
-        }
-        
-        return injectableClasses;
-    }
 
     /**
      * Recursively walks directory to find injectable classes.
      * TODO: Wire all DI classes with @Injectable annotation before re-enabling the annotation check
      * Currently discovers ALL classes and interfaces in the project package
      */
-    private void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results) {
+    public void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results) {
         File[] files = dir.listFiles();
         if (files == null) return;
 
@@ -900,7 +963,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     /**
      * Binds fields from the target object using the now-populated dependency map.
      */
-    private void bindFieldsFromTarget(Object target, Class<?> targetClass) {
+    public void bindFieldsFromTarget(Object target, Class<?> targetClass) {
         Log.info("[AUTO-BIND] Binding fields for: " + targetClass.getSimpleName());
         
         Class<?> clazz = targetClass;
