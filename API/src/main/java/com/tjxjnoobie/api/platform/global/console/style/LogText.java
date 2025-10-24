@@ -35,12 +35,11 @@ public final class LogText {
     }
 
     public LogText append(LogColor color, String text) {
-        builder.append(color.code());
-        if (text != null) {
-            builder.append(text);
-        }
-        if (!color.isReset()) {
-            builder.append(LogColor.RESET.code());
+        if (text != null && !text.isEmpty()) {
+            builder.append(color.code()).append(text);
+            if (!color.isReset()) {
+                builder.append(LogColor.RESET.code());
+            }
         }
         return this;
     }
