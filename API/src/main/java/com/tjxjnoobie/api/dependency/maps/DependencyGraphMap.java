@@ -113,13 +113,6 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
 
 
     /**
-     * Delegates building of dependency graph to the injector helper.
-     */
-    public void buildDependencyGraph() {
-        buildDependencyGraph();
-
-    }
-    /**
      * Delegates dependency resolution to the injector helper.
      * 
      * @param depClass the dependency class to resolve
