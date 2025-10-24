@@ -62,10 +62,10 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
         Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
-        for (IContext<?> context : contextRegistry) {
-            if (context != null) {
-                Log.info("[DI] AutoBinding context: " + context.getClass().getSimpleName());
-                dependencyInjectorHelper.autoBind(context);
+        for (Class<?> allClasses : getDependencyMap().getDependencies()) {
+            if (allClasses != null) {
+                Log.info("[DI] AutoBinding context: " + allClasses.getSimpleName());
+                dependencyInjectorHelper.autoBind(allClasses);
                 // WAIT: autoBind must complete for this context before moving to next
             }
         }
