@@ -45,7 +45,7 @@ public class Log extends AbstractLogMetaData<Log> {
     }
 
     public static void info(String msg) {
-        log("[INFO] ", LogColors.GREEN, msg);
+        log("[INFO] ", LogColors.WHITE, msg);
     }
 
     public static void warn(String msg) {
