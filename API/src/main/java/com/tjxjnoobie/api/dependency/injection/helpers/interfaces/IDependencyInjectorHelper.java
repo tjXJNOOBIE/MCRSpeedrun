@@ -249,13 +249,32 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     default void processPreConstructRetryQueue() throws InterruptedException {
     }
 
-    void scanAndRegisterInjectableClasses(String basePackage);
+    /**
+     * Scans the package hierarchy starting from the specified base package and registers all classes that are eligible for dependency injection.
+     *
+     * @param basePackage the base package path to start scanning; must not be null or empty. Classes within this package and its subpackages will be considered for registration.
+     */
+    default void scanAndRegisterInjectableClasses(String basePackage){
 
-    //THIS ONE
-    Set<Class<?>> findInjectableClasses(String basePackage);
+    }
 
     /**
+     * Searches for classes within the specified base package that are eligible for injection.
      *
+     * @param basePackage the base package path to scan for injectable classes, e.g., "com.example.service"
+     *
+     * @return a set of Class objects representing the identified injectable classes within the specified package scope
+     */
+    default Set<Class<?>> findInjectableClasses(String basePackage){
+        return new HashSet<>();
+    }
+
+
+    /**
+     * Injects instances of all registered classes into the current context.
+     * This method is designed to automatically process and inject dependencies from any class that has been previously registered in the system.
+     * It ensures that each registered class receives appropriate lifecycle management and dependency injection based on configuration rules.
+     * The actual behavior depends on the implementation of the injecting framework or container.
      */
     default void injectAllRegisteredClasses() {
     }
