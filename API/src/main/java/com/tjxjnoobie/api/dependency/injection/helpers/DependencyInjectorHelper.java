@@ -1015,12 +1015,15 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 new Class<?>[]{iface},
                 (proxyObj, method, args) -> {
                     if (method.isDefault()) {
-                        Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
-                        ctor.setAccessible(true);
-                        return ctor.newInstance(iface, MethodHandles.Lookup.PRIVATE)
-                                .unreflectSpecial(method, iface)
-                                .bindTo(proxyObj)
-                                .invokeWithArguments(args);
+                        try {
+                            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(iface, MethodHandles.lookup());
+                            return lookup.unreflectSpecial(method, iface)
+                                    .bindTo(proxyObj)
+                                    .invokeWithArguments(args);
+                        } catch (Throwable t) {
+                            Log.error("Failed to invoke default method " + method.getName() + " on " + iface.getSimpleName() + ": " + t.getMessage());
+                            throw t;
+                        }
                     }
                     Log.warn("Unimplemented interface call: " + method.getName() + " in " + iface.getSimpleName());
                     return null;
