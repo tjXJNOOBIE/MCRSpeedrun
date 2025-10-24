@@ -239,7 +239,29 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     @SuppressWarnings("unchecked")
     @Override
     public IDependencyMetaData findByAssignableType(Class<?> clazz) {
-        return getDependency(clazz);
+        if (clazz == null) {
+            return null;
+        }
+
+        IDependencyMetaData direct = getDependency(clazz);
+        if (direct != null) {
+            return direct;
+        }
+
+        for (Map.Entry<Class<?>, IDependencyMetaData> entry : entrySet()) {
+            Class<?> registeredType = entry.getKey();
+            IDependencyMetaData meta = entry.getValue();
+            if (registeredType != null && clazz.isAssignableFrom(registeredType)) {
+                return meta;
+            }
+
+            Object instance = ensureAndGetInstance(meta);
+            if (instance != null && clazz.isInstance(instance)) {
+                return meta;
+            }
+        }
+
+        return null;
     }
 
 

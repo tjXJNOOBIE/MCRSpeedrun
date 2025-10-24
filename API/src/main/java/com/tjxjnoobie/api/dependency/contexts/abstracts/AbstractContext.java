@@ -13,6 +13,7 @@ import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMeta
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 /**
@@ -29,6 +30,8 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     private final Set<String> allowedPackages = new HashSet<>();
     private final Set<String> excludedPackages = new ConcurrentSkipListSet<>();
     private final HashMap<Class<?>, Boolean> eligibilityCache = new HashMap<>();
+
+    private static final AtomicBoolean DEFAULT_PACKAGE_LOGGED = new AtomicBoolean(false);
     
     private T context;
     
@@ -59,14 +62,17 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
     public void initializeDefaults() {
         // Add default allowed packages
         allowedPackages.add("com.tjxjnoobie");
-        
-        // Add default excluded packages  
+
+        // Add default excluded packages
         excludedPackages.add("java.");
         excludedPackages.add("javax.");
         excludedPackages.add("sun.");
         excludedPackages.add("com.sun.");
-        Log.info("[PackageExclusion] Allow packages: " + allowedPackages.size()
-        + " Excluded Packages: " + excludedPackages.size());
+
+        if (DEFAULT_PACKAGE_LOGGED.compareAndSet(false, true)) {
+            Log.info("[PackageExclusion] Allowed prefixes=" + allowedPackages
+                    + " | Excluded prefixes=" + excludedPackages);
+        }
 
     }
 
@@ -82,27 +88,25 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
      */
     @Override
     public Object resolveDependency(Class<?> dependencyClass) {
-        // Use custom map's getInstance method
-        Object instance = getDependency(dependencyClass);
+        if (dependencyClass == null) {
+            return null;
+        }
+
+        IDependencyMetaData metaData = dependencyMap.getDependency(dependencyClass);
+        Object instance = metaData != null ? dependencyMap.ensureAndGetInstance(metaData) : null;
+
         if (instance != null) {
             return instance;
         }
-        
-        // Check if there's metadata with a factory
-        IDependencyMetaData metaData = getDependency(dependencyClass);
-        if (metaData != null && metaData.getFactory() != null) {
-            Object created = metaData.getFactory().get();
-            if (created != null) {
-                return created;
+
+        IDependencyMetaData compatible = dependencyMap.findByAssignableType(dependencyClass);
+        if (compatible != null) {
+            instance = dependencyMap.ensureAndGetInstance(compatible);
+            if (instance != null) {
+                return instance;
             }
         }
-        
-        // Try to find by assignable type
-        Object assignable = findByAssignableType(dependencyClass);
-        if (assignable != null) {
-            return assignable;
-        }
-        
+
         return null;
     }
 
@@ -223,6 +227,24 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
      */
     public IDependencyMap getDependencyMap() {
         return dependencyMap;
+    }
+
+    /**
+     * Provides read access to the configured allowed package prefixes.
+     *
+     * @return live set of allowed package prefixes
+     */
+    protected Set<String> getAllowedPackagePrefixes() {
+        return allowedPackages;
+    }
+
+    /**
+     * Provides read access to the configured excluded package prefixes.
+     *
+     * @return live set of excluded package prefixes
+     */
+    protected Set<String> getExcludedPackagePrefixes() {
+        return excludedPackages;
     }
 
     /**

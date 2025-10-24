@@ -27,6 +27,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -38,9 +39,67 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper {
 
+    private static final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
+    private static final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
 
     public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
+
+    private Set<String> collectPackages(Class<?> targetClass) {
+        LinkedHashSet<String> packages = new LinkedHashSet<>();
+        if (targetClass != null && targetClass.getPackage() != null) {
+            String pkg = targetClass.getPackage().getName();
+            while (pkg != null && !pkg.isEmpty()) {
+                packages.add(pkg);
+                int lastDot = pkg.lastIndexOf('.');
+                if (lastDot < 0) {
+                    break;
+                }
+                pkg = pkg.substring(0, lastDot);
+            }
+        }
+
+        packages.addAll(getAllowedPackagePrefixes());
+        return packages;
+    }
+
+    private boolean ensurePackagesScanned(Set<String> packagesToScan) {
+        boolean scannedNew = false;
+        for (String pkg : packagesToScan) {
+            if (pkg == null || pkg.isBlank()) {
+                continue;
+            }
+            if (SCANNED_PACKAGES.add(pkg)) {
+                Log.info("[AUTO-BIND] » scanning package: " + pkg);
+                scanAndRegisterInjectableClasses(pkg);
+                scannedNew = true;
+            }
+        }
+        return scannedNew;
+    }
+
+    private void logTypeBinding(Class<?> contract, Object resolved, String origin) {
+        String resolvedName = resolved != null ? resolved.getClass().getSimpleName() : "<null>";
+        Log.info("[AUTO-BIND] Bound " + contract.getSimpleName() + " -> " + resolvedName + " (" + origin + ")");
+    }
+
+    private void assignFieldValue(Object target, Field field, Object value, String sourceDescription) throws IllegalAccessException {
+        boolean isStatic = Modifier.isStatic(field.getModifiers());
+        field.setAccessible(true);
+        if (isStatic) {
+            field.set(null, value);
+        } else {
+            field.set(target, value);
+        }
+
+        String owner = isStatic
+                ? field.getDeclaringClass().getSimpleName()
+                : (target != null ? target.getClass().getSimpleName() : field.getDeclaringClass().getSimpleName());
+        String contract = field.getType().getSimpleName();
+        String resolvedName = value != null ? value.getClass().getSimpleName() : "<null>";
+        Log.info("[AUTO-BIND] Bound " + contract + " -> " + resolvedName + " for "
+                + owner + "." + field.getName() + " (" + sourceDescription + ")");
+    }
 
     /**
      * Gets all instances from the map.
@@ -514,29 +573,39 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     @Override
     public void autoBind(Object target) {
         try {
-            // Determine if we're binding a type or an instance
-            if (target instanceof Class<?>) {
-                bindType((Class<?>) target);
-            } else {
-                Class<?> targetClass = target.getClass();
-
-                // Step 1: Full project-wide class scan and registration
-                Log.info("[AUTO-BIND] Starting full project scan to register all injectable classes...");
-                String basePackage = "com.tjxjnoobie.api"; // Adjust based on actual project root
-                scanAndRegisterInjectableClasses(basePackage);
-
-                // Step 2: Inject dependencies for all registered classes (even if already in map)
-                Log.info("[AUTO-BIND] Injecting fields into all registered classes...");
-                injectAllRegisteredClasses();
-
-                // Step 3: Bind target-specific fields (if provided)
-                if (target != null) {
-                    Log.info("[AUTO-BIND] Binding fields from target object: " + targetClass.getSimpleName());
-                    bindFieldsFromTarget(target, targetClass);
-                }
-
-                Log.info("[AUTO-BIND] AutoBind completed successfully. Total classes scanned and bound: " + dependencyMap.getDependencyMapSize());
+            if (target == null) {
+                return;
             }
+
+            if (target instanceof Class<?>) {
+                Class<?> type = (Class<?>) target;
+                if (!AUTO_BOUND_TARGETS.add(type)) {
+                    Log.info("[AUTO-BIND] Skipping duplicate type autoBind: " + type.getSimpleName());
+                    return;
+                }
+                bindTypeInternal(type, "type-level request");
+                return;
+            }
+
+            Class<?> targetClass = target.getClass();
+            if (!AUTO_BOUND_TARGETS.add(targetClass)) {
+                Log.info("[AUTO-BIND] Skipping duplicate autoBind for " + targetClass.getSimpleName());
+                return;
+            }
+
+            Set<String> packagesToScan = collectPackages(targetClass);
+            boolean scannedNew = ensurePackagesScanned(packagesToScan);
+
+            if (scannedNew) {
+                Log.info("[AUTO-BIND] Injecting registered classes after package scan (" + dependencyMap.getDependencyMapSize() + " entries)");
+                injectAllRegisteredClasses();
+            }
+
+            Log.info("[AUTO-BIND] Binding fields from target object: " + targetClass.getSimpleName());
+            bindFieldsFromTarget(target, targetClass);
+
+            Log.info("[AUTO-BIND] AutoBind complete for " + targetClass.getSimpleName()
+                    + ". Registered dependencies: " + dependencyMap.getDependencyMapSize());
         } catch (Exception e) {
             Log.exception(e);
         }
@@ -556,7 +625,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Set<Class<?>> allClasses = findInjectableClasses(basePackage);
 
             if (allClasses.isEmpty()) {
-                Log.warn("[AUTO-BIND] No injectable classes found in package: " + basePackage);
+                Log.info("[AUTO-BIND] No injectable classes discovered in package: " + basePackage);
                 return;
             }
 
@@ -829,7 +898,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                     if (instance != null) {
                         // Register the interface to point to the implementation instance
                         dependencyMap.registerDependency((Class<Object>) interfaceClass, instance);
-                        Log.info("[AUTO-BIND] Bound interface " + interfaceClass.getSimpleName() + " -> " + defaultImpl.getSimpleName());
+                        Log.info("[AUTO-BIND] Bound interface " + interfaceClass.getSimpleName() + " -> " + defaultImpl.getSimpleName() + " (global registry)");
 
                         // Log all implementations found
                         if (interfaceImpls.size() > 1) {
@@ -973,50 +1042,66 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
     }
 
-    // --- Type-level binding (Class<?>) ---
-    @Override
-    public void bindType(Class<?> type) throws Exception {
-        if (!type.isInterface() || !isEligibleForInjection(type)) {
-            Log.info("[AUTO-BIND] Skipping ineligible or non-interface type: " + type.getName());
+    private void bindTypeInternal(Class<?> type, String origin) throws Exception {
+        if (type == null) {
             return;
         }
 
-        // 1️⃣ Already registered
-        if (dependencyMap.isRegistered(type)) {
-            Log.info("[AUTO-BIND] Skipping exact dependency registration for " + type.getSimpleName());
+        if (!isEligibleForInjection(type)) {
+            Log.info("[AUTO-BIND] Skipping ineligible type: " + type.getName());
             return;
         }
 
-        // 2️⃣ Compatible registered implementation
-        Object compat = dependencyMap.findByAssignableType(type);
-        if (compat != null && !dependencyMap.isRegistered(type)) {
-            dependencyMap.registerDependency((Class<Object>) type, compat);
-            Log.info("[AUTO-BIND] Auto-bound " + type.getSimpleName() + " to existing compatible dependency " + compat.getClass().getSimpleName());
+        IDependencyMetaData existingMeta = dependencyMap.getDependency(type);
+        Object existingInstance = existingMeta != null ? dependencyMap.ensureAndGetInstance(existingMeta) : null;
+        if (existingInstance != null) {
+            logTypeBinding(type, existingInstance, origin + ", already registered");
             return;
         }
 
-        // 3️⃣ Default methods -> self-proxy
+        IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(type);
+        Object compatibleInstance = compatibleMeta != null ? dependencyMap.ensureAndGetInstance(compatibleMeta) : null;
+        if (compatibleInstance != null && !dependencyMap.isRegistered(type)) {
+            dependencyMap.registerDependency((Class<Object>) type, compatibleInstance);
+            String source = compatibleMeta.getDependencyClass() != null
+                    ? compatibleMeta.getDependencyClass().getSimpleName()
+                    : compatibleInstance.getClass().getSimpleName();
+            logTypeBinding(type, compatibleInstance, origin + ", matched " + source);
+            return;
+        }
+
+        if (!type.isInterface()) {
+            Object instance = type.getDeclaredConstructor().newInstance();
+            dependencyMap.registerDependency((Class<Object>) type, instance);
+            logTypeBinding(type, instance, origin + ", instantiated concrete type");
+            return;
+        }
+
         if (Arrays.stream(type.getMethods()).anyMatch(Method::isDefault)) {
             Object proxy = createSelfProxy(type);
             dependencyMap.registerDependency((Class<Object>) type, proxy);
-            Log.info("[AUTO-BIND] Bound " + type.getSimpleName() + " to self via proxy instance.");
+            logTypeBinding(type, proxy, origin + ", self proxy");
             return;
         }
 
-        // 4️⃣ Discover implementation in same package tree
         Set<Class<?>> impls = findImplementations(type, type.getPackage() != null ? type.getPackage().getName() : "");
         if (!impls.isEmpty()) {
             Class<?> implClass = impls.iterator().next();
             Object instance = implClass.getDeclaredConstructor().newInstance();
             dependencyMap.registerDependency((Class<Object>) type, instance);
-            Log.info("[AUTO-BIND] Discovered and registered concrete class for " + type.getSimpleName() + " -> " + implClass.getSimpleName());
+            logTypeBinding(type, instance, origin + ", discovered " + implClass.getSimpleName());
             return;
         }
 
-        // 5️⃣ Fallback placeholder proxy
         Object placeholder = createPlaceholderProxy(type);
         dependencyMap.registerDependency((Class<Object>) type, placeholder);
-        Log.warn("[AUTO-BIND] Bound " + type.getSimpleName() + " to fallback placeholder.");
+        logTypeBinding(type, placeholder, origin + ", placeholder proxy");
+    }
+
+    // --- Type-level binding (Class<?>) ---
+    @Override
+    public void bindType(Class<?> type) throws Exception {
+        bindTypeInternal(type, "manual bind request");
     }
 
     // --- Field-level binding (instance) ---
@@ -1026,47 +1111,62 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             field.setAccessible(true);
             Class<?> fieldType = field.getType();
 
-            if (!fieldType.isInterface() || !isEligibleForInjection(fieldType)) return;
-            if (field.get(target) != null) return;
-
-            // 1️⃣ Exact match
-            if (dependencyMap.isRegistered(fieldType)) {
-                Object existing = dependencyMap.getDependencyInstance(fieldType);
-                field.set(target, existing);
+            if (!isEligibleForInjection(fieldType)) {
                 return;
             }
 
-            // 2️⃣ Compatible implementation
-            Object compat = dependencyMap.findByAssignableType(fieldType);
-            if (compat != null) {
-                field.set(target, compat);
-                dependencyMap.registerDependency((Class<Object>) fieldType, compat);
+            boolean isStatic = Modifier.isStatic(field.getModifiers());
+            Object currentValue = isStatic ? field.get(null) : field.get(target);
+            if (currentValue != null) {
                 return;
             }
 
-            // 3️⃣ Default method interface -> self proxy
+            IDependencyMetaData exactMeta = dependencyMap.getDependency(fieldType);
+            Object existingInstance = exactMeta != null ? dependencyMap.ensureAndGetInstance(exactMeta) : null;
+            if (existingInstance != null) {
+                assignFieldValue(target, field, existingInstance, "existing registration");
+                return;
+            }
+
+            IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(fieldType);
+            Object compatibleInstance = compatibleMeta != null ? dependencyMap.ensureAndGetInstance(compatibleMeta) : null;
+            if (compatibleInstance != null) {
+                if (!dependencyMap.isRegistered(fieldType)) {
+                    dependencyMap.registerDependency((Class<Object>) fieldType, compatibleInstance);
+                }
+                String source = compatibleMeta.getDependencyClass() != null
+                        ? compatibleMeta.getDependencyClass().getSimpleName()
+                        : compatibleInstance.getClass().getSimpleName();
+                assignFieldValue(target, field, compatibleInstance, "matched " + source);
+                return;
+            }
+
+            if (!fieldType.isInterface()) {
+                Object instance = fieldType.getDeclaredConstructor().newInstance();
+                dependencyMap.registerDependency((Class<Object>) fieldType, instance);
+                assignFieldValue(target, field, instance, "instantiated " + fieldType.getSimpleName());
+                return;
+            }
+
             if (Arrays.stream(fieldType.getMethods()).anyMatch(Method::isDefault)) {
                 Object proxy = createSelfProxy(fieldType);
-                field.set(target, proxy);
                 dependencyMap.registerDependency((Class<Object>) fieldType, proxy);
+                assignFieldValue(target, field, proxy, "self proxy");
                 return;
             }
 
-            // 4️⃣ Discover implementation
             Set<Class<?>> impls = findImplementations(fieldType, fieldType.getPackage() != null ? fieldType.getPackage().getName() : "");
             if (!impls.isEmpty()) {
                 Class<?> implClass = impls.iterator().next();
                 Object instance = implClass.getDeclaredConstructor().newInstance();
-                field.set(target, instance);
                 dependencyMap.registerDependency((Class<Object>) fieldType, instance);
+                assignFieldValue(target, field, instance, "discovered " + implClass.getSimpleName());
                 return;
             }
 
-            // 5️⃣ Placeholder fallback
             Object placeholder = createPlaceholderProxy(fieldType);
-            field.set(target, placeholder);
             dependencyMap.registerDependency((Class<Object>) fieldType, placeholder);
-
+            assignFieldValue(target, field, placeholder, "placeholder proxy");
         } catch (InaccessibleObjectException ignored) {
             //TODO: Add 'verbose' logging option
             // Log.info("Skipping inaccessible field: " + field.getName());
