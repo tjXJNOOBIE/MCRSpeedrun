@@ -9,6 +9,13 @@
 
 package com.tjxjnoobie.api.platform.global.console.style;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LogColors {
     public static final String RESET = "\u001B[0m";
 
@@ -71,4 +78,65 @@ public class LogColors {
     public static String boldGreen(String msg) { return BOLD + GREEN + msg + RESET; }
     public static String boldYellow(String msg){ return BOLD + YELLOW + msg + RESET; }
     public static String underlineRed(String msg) { return UNDERLINE + RED + msg + RESET; }
+
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("%([a-zA-Z_]+)%");
+    private static final Map<String, String> PLACEHOLDERS;
+
+    static {
+        Map<String, String> map = new HashMap<>();
+        map.put("RESET", RESET);
+        map.put("BLACK", BLACK);
+        map.put("RED", RED);
+        map.put("GREEN", GREEN);
+        map.put("YELLOW", YELLOW);
+        map.put("BLUE", BLUE);
+        map.put("PURPLE", PURPLE);
+        map.put("CYAN", CYAN);
+        map.put("WHITE", WHITE);
+        map.put("GRAY", GRAY);
+        map.put("BOLD", BOLD);
+        map.put("UNDERLINE", UNDERLINE);
+        map.put("REVERSED", REVERSED);
+        map.put("BG_BLACK", BG_BLACK);
+        map.put("BG_RED", BG_RED);
+        map.put("BG_GREEN", BG_GREEN);
+        map.put("BG_YELLOW", BG_YELLOW);
+        map.put("BG_BLUE", BG_BLUE);
+        map.put("BG_PURPLE", BG_PURPLE);
+        map.put("BG_CYAN", BG_CYAN);
+        map.put("BG_WHITE", BG_WHITE);
+        map.put("BG_GRAY", BG_GRAY);
+        PLACEHOLDERS = Collections.unmodifiableMap(map);
+    }
+
+    /**
+     * Replaces placeholder tokens (e.g. {@code %yellow%}) with their ANSI counterparts.
+     * Unknown tokens are left untouched to avoid corrupting the message.
+     */
+    public static String applyPlaceholders(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(message);
+        StringBuilder sb = new StringBuilder(message.length());
+        int last = 0;
+        while (matcher.find()) {
+            sb.append(message, last, matcher.start());
+            String placeholder = matcher.group(1);
+            String code = PLACEHOLDERS.get(placeholder.toUpperCase(Locale.ROOT));
+            if (code != null) {
+                sb.append(code);
+            } else {
+                sb.append(matcher.group());
+            }
+            last = matcher.end();
+        }
+        sb.append(message, last, message.length());
+        return sb.toString();
+    }
+
+    public static Map<String, String> getPlaceholders() {
+        return PLACEHOLDERS;
+    }
 }
