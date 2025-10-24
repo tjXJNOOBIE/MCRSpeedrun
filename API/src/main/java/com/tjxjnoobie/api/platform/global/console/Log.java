@@ -21,7 +21,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Log extends AbstractLogMetaData<Log> {
-
+    //TODO: Remove/finish testing of AbstractLogMetaData system
     @Inject
     private IGlobalContext globalContext;
     private static final BlockingQueue<String> asyncQueue = new LinkedBlockingQueue<>();
@@ -195,7 +195,7 @@ public class Log extends AbstractLogMetaData<Log> {
         }
         return cur;
     }
-
+    //TODO: Move method logic to concerned location
     /**
      * Print a summary of class metadata.
      */
@@ -244,7 +244,7 @@ public class Log extends AbstractLogMetaData<Log> {
         info("Strict Validation: " + isDependencyValidationStrict());
         info("Performance Monitoring: " + isPerformanceMonitoring());
     }
-
+    //TODO: Move method logic to concerned location
     /**
      * Print statistics about class loading and metadata tracking.
      */
