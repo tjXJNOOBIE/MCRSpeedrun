@@ -11,6 +11,7 @@ package com.tjxjnoobie.api.platform.global.console;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.style.LogColors;
+import com.tjxjnoobie.api.platform.global.console.style.LogText;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.platform.global.metadata.AbstractLogMetaData;
 
@@ -44,24 +45,49 @@ public class Log extends AbstractLogMetaData<Log> {
         log("[SUCCESS] ", LogColors.GREEN, msg);
     }
 
+    public static void success(LogText text) {
+        success(text.build());
+    }
+
     public static void info(String msg) {
         log("[INFO] ", LogColors.WHITE, msg);
+    }
+
+    public static void info(LogText text) {
+        info(text.build());
     }
 
     public static void warn(String msg) {
         log("[WARN] ", LogColors.YELLOW, msg);
     }
 
+    public static void warn(LogText text) {
+        warn(text.build());
+    }
+
     public static void error(String msg) {
         log("[ERROR] ", LogColors.RED, msg);
+    }
+
+    public static void error(LogText text) {
+        error(text.build());
     }
 
     public static void critical(String msg) {
         log("[CRITICAL] ", LogColors.WHITE, LogColors.bgRed(msg));
     }
 
+    public static void critical(LogText text) {
+        critical(text.build());
+    }
+
+    public static LogText text() {
+        return LogText.create();
+    }
+
     private static void log(String level, String color, String msg) {
-        String output = color + level + " " + msg + LogColors.RESET;
+        String processed = LogColors.applyPlaceholders(msg);
+        String output = color + level + " " + processed + LogColors.RESET;
         asyncQueue.offer(output);
     }
 
