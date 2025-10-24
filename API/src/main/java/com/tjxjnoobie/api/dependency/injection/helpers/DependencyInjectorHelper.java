@@ -205,7 +205,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
         return null;
     }
-
+    //TODO: Compare usage with calculateDepthFor in this class
     /**
      * Calculates the depth of a class based on its dependencies.
      */
