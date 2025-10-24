@@ -79,7 +79,7 @@ public class LogColors {
     public static String boldYellow(String msg){ return BOLD + YELLOW + msg + RESET; }
     public static String underlineRed(String msg) { return UNDERLINE + RED + msg + RESET; }
 
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("%([a-zA-Z_]+)%");
+    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("%([a-zA-Z_]+)%", Pattern.CASE_INSENSITIVE);
     private static final Map<String, String> PLACEHOLDERS;
 
     static {
