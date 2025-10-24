@@ -1061,7 +1061,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
         IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(type);
         Object compatibleInstance = compatibleMeta != null ? dependencyMap.ensureAndGetInstance(compatibleMeta) : null;
-        if (compatibleInstance != null && !dependencyMap.isRegistered(type)) {
+        if (compatibleInstance != null) {
             dependencyMap.registerDependency((Class<Object>) type, compatibleInstance);
             String source = compatibleMeta.getDependencyClass() != null
                     ? compatibleMeta.getDependencyClass().getSimpleName()
