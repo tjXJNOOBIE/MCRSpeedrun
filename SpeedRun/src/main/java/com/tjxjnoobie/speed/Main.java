@@ -268,7 +268,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Bukkit.getPluginManager().registerEvents(new SpeedRunDropEvent(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryMove(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryClick(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunLoginEvent(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunLoginEvent(), this);
         Bukkit.getPluginManager().registerEvents(new CoreJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new CoreQuitListener(), this);
         Bukkit.getPluginManager().registerEvents(new BlockPlaceListener(blockPlaceHandler), this);
