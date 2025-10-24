@@ -25,7 +25,8 @@ import java.util.function.Supplier;
  * checking, and managing dependencies.
  */
 public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData {
-    IDependencyMap dependencyMap = new DependencyMap();
+    IDependencyMap dependencyMap = new DependencyMap(); //TODO: Replace usages with getDependencyMap()
+
     List<IContext<?>> contextRegistry = new ArrayList<>(); //TODO: Move into a interface within the registry system (undone)
 
     /**
