@@ -19,55 +19,38 @@ public interface IGameType {
      * Override this to provide custom storage
      * @return HashMap for game type tracking
      */
-    default HashMap<String, Boolean> getGameTypeHash() {
-        // Default implementation - can be overridden for custom storage
-        return new HashMap<>();
-    }
-    
+    default HashMap<String, Boolean> getGameTypeHash() {}
+
+
     /**
      * Gets the current game type enum
      * Override this to provide custom storage
      * @return The current game type enum
      */
-    default GameTypeEnum getGameTypeEnum() {
-        // Default to LOBBY - override for custom behavior
-        return GameTypeEnum.LOBBY;
-    }
-    
+    default GameTypeEnum getGameTypeEnum() {}
+
+
     /**
      * Sets the game type enum internally
      * Override this to provide custom storage
      * @param gameType The game type to set
      */
-    default void setGameTypeEnum(GameTypeEnum gameType) {
-        // Default implementation does nothing - override for custom storage
-        // This is intentionally empty as it's meant to be overridden
-    }
+    default void setGameTypeEnum(GameTypeEnum gameType) {}
 
-    /**
-     * Initializes the game type to LOBBY
-     * @deprecated Use setGameTypeEnum directly
-     */
-    @Deprecated
-    default void GameTypEnum() {
-        setGameTypeEnum(GameTypeEnum.LOBBY);
-    }
-    
+
     /**
      * Gets the current game type
      * @return The current game type enum
      */
-    default GameTypeEnum getGameType() {
-        return getGameTypeEnum();
-    }
+    default GameTypeEnum getGameType() {}
+
 
     /**
      * Sets the game type locally
      * @param gametype The game type to set
      */
-    default void setType(GameTypeEnum gametype) {
-        setGameTypeEnum(gametype);
-    }
+    default void setType(GameTypeEnum gametype) {}
+
 
     /**
      * Sets the game type in the database and locally
@@ -75,11 +58,8 @@ public interface IGameType {
      * @param serverid The server ID
      * @throws SQLException if database error occurs
      */
-    default void setGameType(GameTypeEnum gameType, String serverid) throws SQLException {
-        MySQL.executePreparedStatement("UPDATE servers SET GAMETYPE= ? WHERE SERVERID= ?", gameType.name(), serverid);
-        Bukkit.getLogger().info("Game Type set to " + gameType);
-        setType(gameType);
-    }
+    default void setGameType(GameTypeEnum gameType, String serverid) throws SQLException {}
+
 
     /**
      * Gets the game type from the database for a specific server
@@ -87,35 +67,12 @@ public interface IGameType {
      * @param database The database name (unused in current implementation)
      * @return The game type as a string
      */
-    default String getType(String serverid, String database) {
-        String gametype = "";
-        try {
-            ResultSet rs = MySQL.getResult("SELECT * FROM servers WHERE SERVERID= ?", serverid);
-            if (rs.next()) {
-                gametype = rs.getString("GAMETYPE");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return gametype;
-    }
+    default String getType(String serverid, String database) {}
+
 
     /**
      * Gets all game types from the database
      * @return ArrayList of game type strings
      */
-    default ArrayList<String> getGameTypes() {
-        ArrayList<String> gameTypes = new ArrayList<>();
-        String query = "SELECT GAMETYPE FROM servers";
-        ResultSet rs = MySQL.getResult(query);
-        try {
-            while (rs.next()) {
-                String type = rs.getString("GAMETYPE");
-                gameTypes.add(type);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return gameTypes;
-    }
+    default ArrayList<String> getGameTypes() {}
 }
