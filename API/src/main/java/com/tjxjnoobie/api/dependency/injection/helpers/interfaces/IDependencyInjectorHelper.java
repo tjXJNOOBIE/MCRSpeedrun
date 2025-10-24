@@ -9,14 +9,17 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers.interfaces;
 
+import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.internal.InjectionConfig;
+import com.tjxjnoobie.api.platform.global.annotations.PreConstruct;
+import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Interface for dependency injection helper functionality.
@@ -28,6 +31,24 @@ import java.util.Set;
  * @since 10/12/2025
  */
 public interface IDependencyInjectorHelper extends InjectionConfig {
+
+
+    @PreConstruct(priority = 0)
+    default void initializeDependencySystem(){
+
+    }
+
+
+    /**
+     * Initializes the dependency injection system.
+     * This method builds the dependency graph, computes depth levels,
+     * performs injection, and processes any retry queues.
+     *
+     * @throws Exception if initialization fails
+     */
+    default void initialize() throws Exception {
+        // Default no-op implementation - override in concrete class
+    }
 
 
     /**
@@ -42,28 +63,21 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param priority the priority level for this registration; higher values indicate earlier processing in the injection sequence
      */
     default void registerImportant(Class<?> clazz, Object instance, int priority) {
-
     }
 
-    /**
-     * Initializes the dependency injection system.
-     * This method builds the dependency graph, computes depth levels,
-     * performs injection, and processes any retry queues.
-     *
-     * @throws Exception if initialization fails
-     */
-    default void initialize() throws Exception {
-        // Default no-op implementation - override in concrete class
-    }
 
     /**
-     * Automatically binds dependencies for the given target.
-     * Handles both type-level binding (for Class<?>) and instance-level binding.
+     * Automatically binds dependencies for all classes in the project, including type-level and instance-level bindings.
+     * Scans every class to detect fields and methods with dependency annotations (e.g., @Inject), and injects them.
+     * This method does not stop or fail if the dependency map already contains entries — it processes all classes regardless.
      *
-     * @param target the target object or class to bind dependencies for
+     * @param target the target object or class to bind dependencies for (optional; can be null to scan entire project)
      */
     default void autoBind(Object target) {
-        // Default no-op implementation - override in concrete class
+    }
+
+    default boolean hasInjectableFields(Object obj){
+        return false;
     }
 
     /**
@@ -74,7 +88,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return true if the field should be injected
      */
     default boolean shouldInjectField(java.lang.reflect.Field field, boolean autoInject) {
-        // Default no-op implementation - override in concrete class
         return false;
     }
 
@@ -86,7 +99,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return true if the method should be injected
      */
     default boolean shouldInjectMethod(java.lang.reflect.Method method, boolean autoInject) {
-        // Default no-op implementation - override in concrete class
         return false;
     }
 
@@ -103,7 +115,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      */
     default void injectFieldValue(Object target, Field field, Object value,
                                   boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -118,7 +129,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      */
     default void injectMethodValue(Object target, Method method, Object value,
                                    boolean optional, Class<?> depClass, Class<?> clazz) {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -131,7 +141,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      */
     default void executeLifecycleMethod(Method method, Object target,
                                         Class<?> clazz, String lifecycleType) {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -142,7 +151,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return the matching field, or null if not found
      */
     default Field findField(Class<?> target, Class<?> depClass) {
-        // Default no-op implementation - override in concrete class
         return null;
     }
 
@@ -154,7 +162,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return the calculated depth level
      */
     default int calculateDepth(Class<?> clazz, Set<Class<?>> dependencies) {
-        // Default no-op implementation - override in concrete class
         return 0;
     }
 
@@ -165,7 +172,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return the determined role
      */
     default Object determineRole(Set<Class<?>> dependencies) {
-        // Default no-op implementation - override in concrete class
         return null;
     }
 
@@ -173,14 +179,12 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * Builds the dependency graph for all injectable classes.
      */
     default void buildDependencyGraph() {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
      * Computes depth levels for all classes in the dependency graph.
      */
     default void computeDepthLevels() {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -193,8 +197,22 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      */
     default int computeDepthFor(Class<?> clazz, Set<Class<?>> visited,
                                 Set<Class<?>> stack) {
-        // Default no-op implementation - override in concrete class
         return 0;
+    }
+
+    default void injectFieldsForClass(Object target, Class<?> clazz, boolean autoInject,
+                              boolean includeStatic, boolean includeInstance,
+                              Set<Class<?>> dependencies){
+
+    }
+
+    // Method injection helper for a single class
+    default void injectMethodsForClass(Object target, Class<?> clazz, boolean autoInject, Set<Class<?>> dependencies){
+
+    }
+
+    default EnumMap<LifecycleType, Method> detectLifecycleForClass(Class<?> clazz){
+        return new EnumMap<>(LifecycleType.class);
     }
 
     /**
@@ -203,7 +221,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @throws IllegalAccessException if field access fails
      */
     default void injectAll() throws IllegalAccessException {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -212,7 +229,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param target the target object to inject and record
      */
     default void injectAndRecordMetaData(Object target) {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -222,7 +238,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return the resolved dependency instance, or null if not found
      */
     default Object resolveDependency(Class<?> depClass) {
-        // Default no-op implementation - override in concrete class
         return null;
     }
 
@@ -232,7 +247,118 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @throws InterruptedException if the thread is interrupted during retry
      */
     default void processPreConstructRetryQueue() throws InterruptedException {
-        // Default no-op implementation - override in concrete class
+    }
+
+    void scanAndRegisterInjectableClasses(String basePackage);
+
+    //THIS ONE
+    Set<Class<?>> findInjectableClasses(String basePackage);
+
+    /**
+     *
+     */
+    default void injectAllRegisteredClasses() {
+    }
+
+    /**
+     * Injects field values into the given instance based on the specified class definition.
+     * This method is typically used to populate object fields with default or computed values
+     * during instantiation, using metadata derived from the class structure.
+     *
+     * @param instance the target object whose fields are to be injected
+     * @param clazz the class of the instance, used to determine field injection logic
+     */
+    default void injectFieldsForInstance(Object instance, Class<?> clazz){
+
+    }
+
+    /**
+     * Scans the class hierarchy starting from the given target class and registers all identified injectable classes
+     * into the injection framework. This method performs a recursive search to locate candidate classes that are
+     * annotated with injection annotations (such as @Inject, @Component, etc.) and makes them available for dependency
+     * injection purposes.
+     *
+     * @param targetClass the root class to start the scanning hierarchy from; typically a configuration or main entry point class
+     */
+    default void scanAndRegisterInjectableClasses(Class<?> targetClass){
+
+    }
+
+    /**
+     * Analyzes a set of injectable classes to determine their appropriate dependency roles and assigns those roles based on class hierarchy, dependencies, and other contextual rules
+     * .
+     *
+     * @param injectableClasses A set of Class objects representing types that can be injected into components. These are typically service or component classes used in dependency
+     *  injection frameworks.
+     * @return A map where keys are the analyzed classes and values are their assigned DependencyRole instances, indicating how each class should be treated in the dependency graph
+     *  (e.g., provider, consumer, bridge).
+     */
+    default Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses){
+        return new HashMap<>();
+    }
+
+    /**
+     * Registers a set of injectable classes with their corresponding dependency roles.
+     *
+     * @param injectableClasses a set of class types that are to be injected into the system; each class in this set may have a specific role assigned
+     * @param roleMap a map associating each class type with its intended dependency role, defining how and where the class should be used or resolved within the injection context
+     *
+     */
+    default void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap){
+
+    }
+
+    /**
+     * Registers a set of implementable classes under a specified base package to enable interface implementation registration.
+     *
+     * @param basePackage the base package path where interfaces and their implementations are expected to reside (e.g., "com.example.api")
+     * @param injectableClasses a set of class types that represent concrete implementations of interfaces within the specified package
+     */
+    default void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses){
+
+    }
+
+    /**
+     * Assigns roles to a set of class implementations. This method is intended to map each provided class
+     * to a specific role, typically used in dependency injection or component registration scenarios
+     * where classes are grouped by functionality or interface they implement.
+     *
+     * @param implementations a set of Class objects representing the implementation classes to which roles should be assigned
+     */
+    default void assignRolesToClasses(Set<Class<?>> implementations){
+
+    }
+
+    /**
+     * Analyzes the class dependencies of the given class by identifying all classes that it directly or indirectly depends on.
+     * This includes classes referenced through fields, methods, or annotations, depending on the implementation logic.
+     *
+     * @param clazz the class to analyze for dependencies
+     * @return a set of Class objects representing the dependent classes; returns an empty set if no dependencies are found or if the input is null
+     */
+    default Set<Class<?>> analyzeClassDependencies(Class<?> clazz){
+        return new HashSet<>();
+    }
+
+    /**
+     * Determines the role of a class based on its dependencies.
+     *
+     * @param dependencies a set of classes that are directly or indirectly depended upon by this class
+     * @return the role assigned to this class based on the provided dependency set; defaults to ISOLATED if no specific role can be determined
+     */
+    default DependencyRole determineRoleFromDependencies(Set<Class<?>> dependencies){
+        return DependencyRole.ISOLATED;
+    }
+
+    /**
+     * Recursively traverses the specified directory to locate Java class files that are eligible for injection.
+     *
+     * @param dir the root directory to search within; must not be null
+     * @param packageName the base package name to match against found classes; used to construct fully qualified class names
+     * @param results a mutable set to collect discovered injectable classes; modifications to this set are performed during traversal
+     */
+    default void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results){
+
     }
 
     /**
@@ -242,7 +368,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @throws Exception if binding fails
      */
     default void bindType(Class<?> type) throws Exception {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -252,7 +377,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param field  the field to bind
      */
     default void bindField(Object target, java.lang.reflect.Field field) {
-        // Default no-op implementation - override in concrete class
     }
 
     /**
@@ -263,7 +387,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @throws Exception if proxy creation fails
      */
     default Object createSelfProxy(Class<?> iface) throws Exception {
-        // Default no-op implementation - override in concrete class
         return null;
     }
 
@@ -274,10 +397,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return the created placeholder proxy
      */
     default Object createPlaceholderProxy(Class<?> iface) {
-        // Default no-op implementation - override in concrete class
         return null;
     }
-
 
     /**
      * Finds implementations of an interface in the specified package.
@@ -287,10 +408,8 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return set of implementation classes
      */
     default Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
-        // Default no-op implementation - override in concrete class
         return new HashSet<>();
     }
-
 
     /**
      * Gets the dependency map for direct access.
@@ -298,7 +417,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @return map of registered dependencies
      */
     default IDependencyMap getDependencyMap() {
-        // Default no-op implementation - override in concrete class
         return new DependencyMap();
     }
 
@@ -312,7 +430,9 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
      * @param clazz the class whose static fields are to be injected
      */
     default void injectStaticFields(Class<?> clazz) {
-
     }
 
+    default void walkDirectory(Class<?> interfaceType, File dir, String packageName, Set<Class<?>> results){
+
+    }
 }
