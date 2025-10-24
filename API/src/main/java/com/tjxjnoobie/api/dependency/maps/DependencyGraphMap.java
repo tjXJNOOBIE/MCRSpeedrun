@@ -81,7 +81,7 @@ public class DependencyGraphMap extends ConcurrentHashMap<Class<?>, IDependencyM
 
     @Override
     public void registerDependencyToGraph(Class<?> clazz) {
-        computeIfAbsent(clazz, c -> {
+            computeIfAbsent(clazz, c -> {
             IDependencyMetaData meta = new DependencyMetaData(c);
             Log.info("[GraphMap] Registered dependency: " + c.getSimpleName());
             return meta;
