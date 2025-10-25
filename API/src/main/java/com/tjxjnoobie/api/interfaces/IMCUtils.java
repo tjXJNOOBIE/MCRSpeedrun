@@ -21,7 +21,6 @@ public interface IMCUtils {
     //TODO: Replace class methods parameters for custom DI system
 
 
-
     /**
      * Plays a dramatic boom effect
      *
@@ -36,6 +35,7 @@ public interface IMCUtils {
         Bukkit.getScheduler().runTaskLater(plugin,
                 () -> player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.6f), 30L);
     }
+
     /**
      * Hides a player from all other players
      *
@@ -54,24 +54,27 @@ public interface IMCUtils {
             player.sendMessage(utils.getStaffPrefix() + message);
         }
     }
+
     default void hidePlayerFromAll(Player toHide, ISpeedRunContext speedRunContext) {
         Plugin plugin = speedRunContext.getPlugin();
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             viewer.hidePlayer(plugin, toHide);
         }
     }
-    default String getMinecraftPrefix(){
-        return "";
-    }
-    default String getMinecraftStaffPrefix(){
+
+    default String getMinecraftPrefix() {
         return "";
     }
 
-   default ISpeedRunContext getSpeedRunContext(){
+    default String getMinecraftStaffPrefix() {
+        return "";
+    }
+
+    default ISpeedRunContext getSpeedRunContext() {
         return null;
-   }
+    }
 
-    default String getServerID(){
+    default String getServerID() {
         return "";
     }
 
@@ -79,7 +82,7 @@ public interface IMCUtils {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
                 return ap;
-            } else{
+            } else {
                 System.out.println("Can't get All Players, No players online");
             }
         }
@@ -99,14 +102,12 @@ public interface IMCUtils {
     }
 
 
-
     default void cancelTask(BukkitTask task) {
         if (task != null && !task.isCancelled()) {
             task.cancel();
             Bukkit.getLogger().info(task.toString() + " Task has been cancelled.");
         }
     }
-
 
 
     /**
