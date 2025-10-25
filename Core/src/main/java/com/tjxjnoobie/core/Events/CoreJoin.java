@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class CoreJoin implements Listener, CoreJoinHandler, IUtils<IGlobalContext> {
+public class CoreJoin implements Listener, CoreJoinHandler, IMCUtils {
 
 
     @Inject private IGlobalContext globalContext;
@@ -41,7 +41,7 @@ public class CoreJoin implements Listener, CoreJoinHandler, IUtils<IGlobalContex
         rankMC.setDisplayName(player);
         if(debugger.isDebuggerSQL(uuid)){
             debugger.setDebuggerHash(uuid,name);
-            player.sendMessage(getStaffPrefix()+"You currently server debugging");
+            player.sendMessage(getMinecraftStaffPrefix()+"You currently server debugging");
         }
 
 
