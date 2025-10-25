@@ -24,7 +24,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunMobKill implements Listener, IUtils<ISpeedRunContext>, IMCUtils {
+public class SpeedRunMobKill implements Listener, IMCUtils {
 
 
     @Inject
@@ -85,19 +85,19 @@ public class SpeedRunMobKill implements Listener, IUtils<ISpeedRunContext>, IMCU
             }
             if (currentMode == GameModeEnum.SOLO) {
                 srStatsCache.addBestTime(uuid, finalTime);
-                killer.sendMessage(prefix + "You have killed the §cEnder Dragon§f!");
-                killer.sendMessage(prefix + "Final Time: " + finalTime);
+                killer.sendMessage(getMinecraftPrefix() + "You have killed the §cEnder Dragon§f!");
+                killer.sendMessage(getMinecraftPrefix() + "Final Time: " + finalTime);
                 gameManager.stopGame();
             }
             soundManager.playVictoryWithDragonDeath(killer);
             gameManager.setFinalTime(uuid);
             killedEnderDragon = true;
-            Bukkit.broadcastMessage(prefix + displayName + " §b§lHAS KILLED THE §c§lENDER DRAGON§b§l!");
-            Bukkit.broadcastMessage(prefix + displayName + "'s Final Time: " + finalTime);
+            Bukkit.broadcastMessage(getMinecraftPrefix() + displayName + " §b§lHAS KILLED THE §c§lENDER DRAGON§b§l!");
+            Bukkit.broadcastMessage(getMinecraftPrefix() + displayName + "'s Final Time: " + finalTime);
             gameManager.addFinished();
             gameManager.addFinishedPlayer(uuid);
             gameManager.setWinner(killer);
-            gameManager.getWinner().sendMessage(prefix + "§a§lCongratulations! §cYou have won!");
+            gameManager.getWinner().sendMessage(getMinecraftPrefix() + "§a§lCongratulations! §cYou have won!");
             sendEnderDragonBossBarMessage(allPlayers, 20 * 7);
 
         } else if (killedEnderDragon) {
@@ -108,8 +108,8 @@ public class SpeedRunMobKill implements Listener, IUtils<ISpeedRunContext>, IMCU
             gameManager.addFinishedPlayer(uuid);
             gameManager.setFinalTime(uuid);
             srStatsCache.addBestTime(uuid, finalTime);
-            killer.sendMessage(prefix + "Your final time is " + gameManager.getFinalTimeString(uuid));
-            Bukkit.broadcastMessage(prefix + displayName + " has killed the §cEnder Dragon" + "§7(" + currentTime + ")");
+            killer.sendMessage(getMinecraftPrefix() + "Your final time is " + gameManager.getFinalTimeString(uuid));
+            Bukkit.broadcastMessage(getMinecraftPrefix() + displayName + " has killed the §cEnder Dragon" + "§7(" + currentTime + ")");
             new BukkitRunnable() {
                 @Override
                 public void run() {
