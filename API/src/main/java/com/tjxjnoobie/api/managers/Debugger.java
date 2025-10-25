@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.interfaces.IDebugger;
+import com.tjxjnoobie.api.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,7 +15,7 @@ import java.util.UUID;
 import static com.tjxjnoobie.api.managers.MySQL.executePreparedStatement;
 import static com.tjxjnoobie.api.managers.MySQL.getResult;
 
-public class Debugger implements IDebugger {
+public class Debugger implements IDebugger, IMCUtils {
 
     public Map<String, String> debuggers = new HashMap<>();
 
@@ -108,16 +109,15 @@ public class Debugger implements IDebugger {
         if (playerId != null && speedRunContext != null) {
             boolean isDebugger = speedRunContext.getDebugger().isDebugger(playerId);
             if (isDebugger) {
-                String staffPrefix = speedRunContext.getUtils().getStaffPrefix();
 
                 // Now you need a way to get a Player from the UUID (platform dependent)
                 // For Bukkit:
                 Player player = Bukkit.getPlayer(playerId);
                 if (player != null) {
-                    player.sendMessage(staffPrefix + "§c" + message);
+                    player.sendMessage(getMinecraftStaffInGamePrefix() + "§c" + message);
                 } else {
                     // Player not online, fallback or log
-                    System.out.println(staffPrefix + "§c[Debug] " + message);
+                    System.out.println(getMinecraftStaffInGamePrefix() + "§c[Debug] " + message);
                 }
             }
         } else{
@@ -137,8 +137,7 @@ public class Debugger implements IDebugger {
         if (player != null && speedRunContext != null) {
             boolean isDebugger = speedRunContext.getDebugger().isDebugger(player.getUniqueId());
             if (isDebugger) {
-                String staffPrefix = speedRunContext.getUtils().getStaffPrefix();
-                player.sendMessage(staffPrefix + "§c" + prefix + " " + message);
+                player.sendMessage(getMinecraftStaffInGamePrefix() + "§c" + prefix + " " + message);
             }
         }
     }
