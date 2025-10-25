@@ -21,7 +21,7 @@ public interface IMCUtils extends ILocalServerMetaData {
         return null;
     }
 
-    
+
     /**
      * Hides a specified player from all other players in the game. This method ensures that the given player is no longer visible to any other active players, typically used for
      *  privacy or security purposes during gameplay.

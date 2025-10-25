@@ -41,7 +41,7 @@ public class CoreJoin implements Listener, CoreJoinHandler, IMCUtils {
         rankMC.setDisplayName(player);
         if(debugger.isDebuggerSQL(uuid)){
             debugger.setDebuggerHash(uuid,name);
-            player.sendMessage(getMinecraftStaffPrefix()+"You currently server debugging");
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"You currently server debugging");
         }
 
 

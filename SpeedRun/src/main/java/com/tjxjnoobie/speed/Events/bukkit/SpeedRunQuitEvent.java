@@ -49,14 +49,14 @@ public class SpeedRunQuitEvent implements Listener, IUtils {
             //TODO Re-add bossbar cancel timer for speedrun lobby
             bossBarManager.removePlayer(player);
             bossBarManager.removePlayer(player);
-            Bukkit.broadcastMessage(prefix+displayName+ " has left (§c"+playerCount+"§7/§c"+maxPlayers+"§7)");
+            Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left (§c"+playerCount+"§7/§c"+maxPlayers+"§7)");
 
 
         }else if(currentState == GameStateEnum.INGAME || currentState == GameStateEnum.PREGAME){
 
             if(InGamePlayer) {
                 // Assign player to Quit Player
-                Bukkit.broadcastMessage(prefix+displayName+ " has left. They have 5 minutes to rejoin");
+                Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left. They have 5 minutes to rejoin");
                 gameManager.getQuitPlayers().put(uuid, name);
                 gameManager.QuitLocation().put(uuid, quitLocation);
                 gameManager.getPlaying().remove(uuid);
@@ -65,7 +65,7 @@ public class SpeedRunQuitEvent implements Listener, IUtils {
                 // Player is spectating
                 gameManager.getWatching().remove(uuid);
                 gameManager.getAllPlayersHash().remove(uuid);
-                Bukkit.broadcastMessage(prefix+displayName+ " has left");
+                Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left");
 
 
             }
@@ -73,7 +73,7 @@ public class SpeedRunQuitEvent implements Listener, IUtils {
 
             }else{
             //Handle End game condition
-            Bukkit.broadcastMessage(prefix+displayName+ " has left");
+            Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left");
             gameManager.getWatching().remove(uuid);
             gameManager.getAllPlayersHash().remove(uuid);
             gameManager.getPlaying().remove(uuid);

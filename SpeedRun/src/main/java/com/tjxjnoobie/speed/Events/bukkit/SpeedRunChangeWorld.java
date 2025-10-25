@@ -2,6 +2,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -16,7 +17,7 @@ import java.util.UUID;
 
 public class SpeedRunChangeWorld implements Listener, IMCUtils {
 
-    private final ISpeedRunContext speedRunContext;
+    @Inject private ISpeedRunContext speedRunContext;
 
     public SpeedRunChangeWorld( ISpeedRunContext speedRunContext) {
         this.speedRunContext = speedRunContext;
