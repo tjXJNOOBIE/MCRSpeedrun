@@ -1,6 +1,7 @@
 package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.interfaces.IWorldManager;
 import org.bukkit.command.Command;
@@ -8,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class Seed implements CommandExecutor, IUtils {
+public class Seed implements CommandExecutor, IMCUtils {
 
 
     private final IGlobalContext globalContext;
