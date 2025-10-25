@@ -27,16 +27,23 @@ public class MCUtils implements IMCUtils {
     }
 
     @Override
-    public String getServerID(){
+    public String getMinecraftPrefix(){
         return localServerMetaData.getServerID();
     }
 
+    @Override
+    public String getMinecraftStaffPrefix(){
+        return localServerMetaData.getMinecraftStaffInGamePrefix();
+    }
+
+    @Override
     public void hidePlayerFromAll(Player toHide) {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             viewer.hidePlayer(toHide);
         }
     }
 
+    @Override
     public Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
@@ -49,6 +56,7 @@ public class MCUtils implements IMCUtils {
 
     }
 
+    @Override
     public void playSoundForAll(Location location, Sound sound, float v, float v1) {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             ap.playSound(location, sound, v, v1);
@@ -56,12 +64,14 @@ public class MCUtils implements IMCUtils {
         }
     }
 
+    @Override
     public void sendMessageToAll(String message) {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             ap.sendMessage(message);
         }
     }
 
+    @Override
     public void playDramaticBoom(Player player) {
         player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 0.5f); // Low-pitched cave sound
         Bukkit.getScheduler().runTaskLater(plugin, () ->
@@ -71,14 +81,14 @@ public class MCUtils implements IMCUtils {
         Bukkit.getScheduler().runTaskLater(plugin, () ->
                 player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.6f), 30L); // Explosion after 30 ticks
     }
-
-    public void cancelTask(BukkitTask task) {
+    @Override
+    public void cancelBukkitTask(BukkitTask task) {
         if (task != null && !task.isCancelled()) {
             task.cancel();
             Bukkit.getLogger().info(task.toString() + " Task has been cancelled.");
         }
     }
-
+    @Override
     public void sendDebugMessage(Player player, String message) {
         //TODO: Move depends to field injection
         IRankCache rankCache = speedRunContext.getRankCache();
@@ -93,6 +103,7 @@ public class MCUtils implements IMCUtils {
     }
 
 
+    @Override
     public boolean isDebugger(String name) {
         return debuggers.contains(name);
     }
