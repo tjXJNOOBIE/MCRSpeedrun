@@ -22,13 +22,11 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private ILocalServerMetaData localServerMetaData;
     private ISpeedrunStatsCache statsCache;
     private IWorldManager<ISpeedRunContext> worldManager;
-    private IMCUtils mcUtils;
     private IRatingCache ratingCache;
     private IRating rating;
     private IRatingAPI ratingAPI;
     private IPlayerProfile playerProfile;
     private IRank rank;
-
     private ISoundManager soundManager;
     private IRankCache rankCache;
     private IRetentionManager retentionManager;
@@ -40,8 +38,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private ISpeedrunStatsCache speedrunStatsCache;
     private IPunishManager punishManager;
     private IPunishLog punishLog;
-    private IInventoryManager inventoryManager;
-    private IInventoryBuilder inventoryBuilder;
     private IConfigUtils configUtils;
     private ITimeUtils timeUtils;
     private IUtils<IGlobalContext> utils;
@@ -73,7 +69,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
      * Constructor with all dependencies
      */
     public GlobalContext(IGameMode gameMode, IUtils<IGlobalContext> utils, ISpeedrunStatsCache statsCache, IGameState gameState,
-                         IMCUtils mcUtils, IWorldManager<ISpeedRunContext> worldManager, IRatingCache ratingCache,
+                         IWorldManager<ISpeedRunContext> worldManager, IRatingCache ratingCache,
                          IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, 
                          ISoundManager soundManager, IRankCache rankCache,
                          IRetentionManager retentionManager, IRedis redis, IGameType gameType, 
@@ -85,7 +81,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         this.utils = utils;
         this.statsCache = statsCache;
         this.gameState = gameState;
-        this.mcUtils = mcUtils;
         this.worldManager = worldManager;
         this.ratingCache = ratingCache;
         this.rating = rating;
@@ -103,8 +98,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         this.speedrunStatsCache = speedrunStatsCache;
         this.punishManager = punishManager;
         this.punishLog = punishLog;
-        this.inventoryManager = inventoryManager;
-        this.inventoryBuilder = inventoryBuilder;
         this.localServerMetaData = localServerMetaData;
         this.globalContext = globalContext;
 
@@ -137,8 +130,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         registerDependency(ISpeedrunStatsCache.class, speedrunStatsCache, this::getSRStatsCache, this);
         registerDependency(IPunishManager.class, punishManager, this::getPunishManager, this);
         registerDependency(IPunishLog.class, punishLog, this::getPunishLog, this);
-        registerDependency(IInventoryBuilder.class, inventoryBuilder, this::getInventoryBuilder, this);
-        registerDependency(IInventoryManager.class, inventoryManager, this::getInventoryManager, this);
         registerDependency(InterfaceManager.class, interfaceManager, this::getInterfaceManager, this);
         registerDependency(ILocalServerMetaData.class, localServerMetaData, this::getLocalServerMetaData, this);
         System.out.println("---------------------------------------");
@@ -268,17 +259,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     public IPunishLog getPunishLog() {
         return punishLog;
     }
-
-     
-    public IInventoryBuilder getInventoryBuilder() {
-        return inventoryBuilder;
-    }
-
-     
-    public IInventoryManager getInventoryManager() {
-        return inventoryManager;
-    }
-
 
      
     public IConfigUtils getConfigUtils() {
@@ -458,20 +438,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return this;
     }
 
-     
-    public IGlobalContext setInventoryManager(IInventoryManager inventoryManager) {
-        this.inventoryManager = inventoryManager;
-        if(inventoryManager != null) registerDependency(IInventoryManager.class, inventoryManager, this::getInventoryManager, this);
-        return this;
-    }
-
-
-     
-    public IGlobalContext setInventoryBuilder(IInventoryBuilder inventoryBuilder) {
-        this.inventoryBuilder = inventoryBuilder;
-        if(inventoryBuilder != null) registerDependency(IInventoryBuilder.class, inventoryBuilder, this::getInventoryBuilder, this);
-        return this;
-    }
 
 
      
@@ -535,11 +501,9 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
                 setUtils(utils).
                 setWorldManager(worldManager).
                 setPlayerProfile(playerProfile).
-                setInventoryManager(inventoryManager).
                 setSoundManager(soundManager).
                 setPunishManager(punishManager).
                 setPunishLog(punishLog).
-                setInventoryBuilder(inventoryBuilder).
                 setRetentionManager(retentionManager).
                 setStatsCache(statsCache).
                 setGameState(gameState).
@@ -633,7 +597,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         if (gameMode == null) missing.append("gameMode, ");
         if (gameState == null) missing.append("gameState, ");
         if (utils == null) missing.append("utils, ");
-        if (mcUtils == null) missing.append("mcUtils, ");
 
         if (!missing.isEmpty()) {
             missing.setLength(missing.length() - 2); // Remove last comma and space
@@ -653,7 +616,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         summary.append("- GameMode: ").append(gameMode != null ? "✓" : "✗").append("\n");
         summary.append("- GameState: ").append(gameState != null ? "✓" : "✗").append("\n");
         summary.append("- Utils: ").append(utils != null ? "✓" : "✗").append("\n");
-        summary.append("- MCUtils: ").append(mcUtils != null ? "✓" : "✗").append("\n");
         summary.append("- WorldManager: ").append(worldManager != null ? "✓" : "✗").append("\n");
         summary.append("- Redis: ").append(redis != null ? "✓" : "✗").append("\n");
         summary.append("- StatsCache: ").append(statsCache != null ? "✓" : "✗").append("\n");
