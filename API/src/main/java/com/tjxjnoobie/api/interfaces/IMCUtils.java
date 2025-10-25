@@ -60,7 +60,9 @@ public interface IMCUtils {
             viewer.hidePlayer(plugin, toHide);
         }
     }
-
+    default String getPrefix(){
+        return "";
+    }
 
    default ISpeedRunContext getSpeedRunContext(){
         return null;
