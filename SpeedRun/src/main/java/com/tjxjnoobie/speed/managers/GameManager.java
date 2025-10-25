@@ -691,7 +691,8 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
             player.teleport(spawn);
         }
     }
-        //TODO: Update game loop to abstract
+    //TODO: Update game loop to use AbstractGameManager
+    //TODO: Fill out loop logic in AbstractGameManager
     @Override
     protected void onLobbyStart() {
 
