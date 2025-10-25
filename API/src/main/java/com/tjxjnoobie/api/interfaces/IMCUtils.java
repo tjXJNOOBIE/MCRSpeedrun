@@ -62,6 +62,10 @@ public interface IMCUtils {
     }
 
 
+   default ISpeedRunContext getSpeedRunContext(){
+        return null;
+   }
+
     default Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
