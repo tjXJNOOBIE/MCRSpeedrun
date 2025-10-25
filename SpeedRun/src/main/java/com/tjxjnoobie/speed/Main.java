@@ -200,7 +200,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Log.info("[Main] Registering events and commands...");
         registerEvents();
         registerCommand("debug", new Debug());
-        registerCommand("addplayer", new AddPlayer(globalContext,speedRunContext));
+        registerCommand("addplayer", new AddPlayer());
         registerCommand("createworld", new CreateWorld(globalContext));
         registerCommand("changeworld", new ChangeWorldCMD());
         registerCommand("world", new LoadWorld(globalContext));
