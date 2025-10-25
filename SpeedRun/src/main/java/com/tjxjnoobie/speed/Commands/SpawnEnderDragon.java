@@ -3,6 +3,7 @@ package com.tjxjnoobie.speed.Commands;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -19,11 +20,9 @@ import java.util.UUID;
 public class SpawnEnderDragon implements CommandExecutor, IUtils {
 
 
-    private final IGlobalContext globalContext;
+   @Inject
+   private IGlobalContext globalContext;
 
-    public SpawnEnderDragon(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
 
     @Override
     public boolean onCommand (CommandSender sender,  Command command, String label, String [] args) {
@@ -36,11 +35,11 @@ public class SpawnEnderDragon implements CommandExecutor, IUtils {
             if(rankCache.getPowerLevel(uuid) <= 10000 ||
                 rankCache.hasPermission(uuid,"speedrun.spawndragon")) {
                 spawnStationaryEnderDragon(world, location);
-                player.sendMessage(staffPrefix + " Ender dragon spawned");
+                player.sendMessage(getMinecraftStaffInGamePrefix() + " Ender dragon spawned");
                 player.getInventory().addItem(new ItemStack(Material.DIAMOND_SWORD,1));
                 return true;
             } else {
-                player.sendMessage(prefix+ "§cNo Permission.");
+                player.sendMessage(getMinecraftPrefix()+ "§cNo Permission.");
             }
         }else{
             sender.sendMessage("Only a player may issue this command");
