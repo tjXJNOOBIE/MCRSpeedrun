@@ -254,9 +254,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
     // getContext() is now provided by ContextAccess default implementation
     // It automatically finds the @Inject IGlobalContext globalContext field
 
-    public static Main getInstance() {
-        return instance;
-    }
 
     public void registerEvents() {
         Bukkit.getPluginManager().registerEvents(this, this);
