@@ -19,20 +19,8 @@ public interface IMCUtils {
 
 
     //TODO: Replace class methods parameters for custom DI system
-    /**
-     * Gets all online players
-     *
-     * @return A player representing all online players (for bulk operations)
-     */
 
-    /**
-     * Plays a sound for all online players
-     *
-     * @param location The location to play the sound
-     * @param sound    The sound to play
-     * @param volume   The volume level
-     * @param pitch    The pitch level
-     */
+
 
     /**
      * Plays a dramatic boom effect
@@ -72,6 +60,7 @@ public interface IMCUtils {
             viewer.hidePlayer(plugin, toHide);
         }
     }
+
 
     default Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
