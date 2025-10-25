@@ -18,17 +18,7 @@ import java.sql.SQLException;
 public interface IWorldManager {
 
 
-    ;
 
-    /**
-     * Gets the global context for this world manager
-     *
-     * @return The global context
-     */
-
-    default ISpeedRunContext getSpeedRunContext() {
-        return null;
-    }
 
 
     // Override this in implementations that need context
