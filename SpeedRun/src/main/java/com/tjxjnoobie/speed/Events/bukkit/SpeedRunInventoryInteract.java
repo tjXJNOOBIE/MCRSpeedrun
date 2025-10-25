@@ -3,6 +3,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IInventoryManager;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,17 +14,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class SpeedRunInventoryInteract implements Listener {
 
-    private final ISpeedRunContext speedRunContext;
-    private final IGlobalContext globalContext;
+    @Inject private ISpeedRunContext speedRunContext;
+    @Inject private IGlobalContext globalContext;
+    @Inject private IInventoryManager inventoryManager;
 
-    public SpeedRunInventoryInteract(ISpeedRunContext speedRunContext, IGlobalContext globalContext) {
-        this.speedRunContext = speedRunContext;
-        this.globalContext = globalContext;
-    }
 
     @EventHandler
     public void onInteract(InventoryInteractEvent e) {
-        IInventoryManager inventoryManager = globalContext.getInventoryManager();
         Player player = (Player) e.getWhoClicked();
         ItemStack handItem = player.getInventory().getItemInMainHand();
         ItemMeta handMeta = handItem.getItemMeta();
