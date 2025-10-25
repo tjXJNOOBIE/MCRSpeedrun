@@ -51,7 +51,7 @@ public class Debug implements CommandExecutor, IUtils, IDebug {
             retentionManager.calculate30DayRetention();
 
         }else{
-            player.sendMessage(getStaffPrefix()+"Usage: /debug");
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"Usage: /debug");
         }
         return false;
     }
