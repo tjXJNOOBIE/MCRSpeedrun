@@ -1227,7 +1227,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 continue;
             }
 
-            String className = name.replace('/', '.').replace(".class", \"\");
+            String className = name.replace('/', '.').replace(".class", "");
             handleDiscoveredClass(className, results, loader);
         }
     }
