@@ -1,7 +1,13 @@
 package com.tjxjnoobie.proxy;
 
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
+import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
+import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.Redis;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.Config;
@@ -44,26 +50,31 @@ public class VelocityMain  {
 
     @Subscribe
     public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException {
-        registerCommand("sim", new Sim());
-
+        //TODO: Add main method logging
+        //TODO: Remove from main method
+        IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
+        IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
+        dependencyInjectorHelper.autoBind(this);
+        //TODO: Remove concrete call in favor of DI
+        globalContext = new GlobalContext();
         ReflectUtil.loadLibs();
         Config.createConfig();
         Config.loadConfig();
         globalContext.setProxyUtils(proxyUtils);
-//        MySQL.connect();
-//
-//        globalContext.setRank(rank).
-//                setProxyUtils(proxyUtils).
-//                setPlayerProfile(playerProfile).
-//                setUtils(utils).
-//                setPunishManager(punishManager).
-//                setRankCache(rankCache).
-//                setPunishLog(punishLog).
-//                setRedis(redis);
-//        redis.connectToRedis();
+
+        MySQL.connect();
+        globalContext.setRank(rank).
+                setProxyUtils(proxyUtils).
+                setPlayerProfile(playerProfile).
+                setUtils(utils).
+                setPunishManager(punishManager).
+                setRankCache(rankCache).
+                setPunishLog(punishLog).
+                setRedis(redis);
+        redis.connectToRedis();
 
 
-
+        registerCommand("sim", new Sim());
         registerCommand("rank", new RankCMD(globalContext));
         registerCommand("ban", new Ban(globalContext,proxyServer));
         registerCommand("kick", new Kick(globalContext,proxyServer));
