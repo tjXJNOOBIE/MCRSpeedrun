@@ -3,7 +3,6 @@ package com.tjxjnoobie.api.interfaces;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -77,38 +76,75 @@ public interface IMCUtils {
 
 
 
+    /**
+     * Retrieves the unique identifier for the server.
+     *
+     * @return A string representing the server's unique ID, used to identify and differentiate between servers in distributed or multi-server environments.
+     */
     default String getServerID() {
         return "";
     }
 
+    /**
+     * Hides a specified player from all other players in the game. This method ensures that the given player is no longer visible to any other active players, typically used for
+     *  privacy or security purposes during gameplay.
+     *
+     * @param toHide The player entity to hide from all other players
+     */
     default void hidePlayerFromAll(Player toHide){
 
     }
 
+    /**
+     * Retrieves a list of all players currently in the game.
+     * This method returns a Player object representing the collection of all active players.
+     *
+     * @return A Player instance containing all current players in the game
+     */
     default Player getAllPlayers() {
-        for (Player ap : Bukkit.getOnlinePlayers()) {
-            if (ap != null) {
-                return ap;
-            } else {
-                System.out.println("Can't get All Players, No players online");
-            }
-        }
         return null;
     }
 
+    /**
+     * Plays a specified sound at a given location for all connected players in the game.
+     * The sound is played with the specified volume and pitch settings, ensuring consistent audio experience across all players.
+     *
+     * @param location The location in the world where the sound should be played
+     * @param sound The type of sound to play (e.g., SFX.BLOCK_BREAK, SFX.ENTITY_PLAYER_STEP)
+     * @param volume The volume level of the sound, ranging from 0.0 (silent) to 1.0 (max volume)
+     * @param pitch The pitch level of the sound, affecting its tone; values below 1.0 make it higher-pitched and above 1.0 lower-pitched
+     */
     default void playSoundForAll(Location location, Sound sound, float volume, float pitch) {
 
     }
 
+    /**
+     * Broadcasts a message to all connected players in the game.
+     * This method sends the specified message to every active player using the Adventure API, ensuring visibility across the entire server.
+     *
+     * @param message The text message to be sent to all players
+     */
     default void sendMessageToAll(String message) {
 
     }
 
 
+    /**
+     * Plays a dramatic boom effect for the specified player.
+     * This method triggers a visual and auditory effect to simulate a dramatic explosion or boom, typically used for game events such as major milestones or in-game victories.
+     *
+     * @param player The player to play the dramatic boom effect for
+     */
     default void playDramaticBoom(Player player){
 
     }
 
+    /**
+     * Cancels a Bukkit task associated with the provided task object.
+     * This method is used to stop an ongoing background task scheduled by Bukkit, preventing further execution of the task's logic.
+     *
+     * @param task The BukkitTask instance representing the task to be cancelled
+     */
     default void cancelBukkitTask(BukkitTask task) {
 
     }
