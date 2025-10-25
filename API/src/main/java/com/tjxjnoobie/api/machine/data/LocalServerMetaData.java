@@ -6,8 +6,8 @@ public class LocalServerMetaData implements ILocalServerMetaData {
 
     public String serverID = "DEV";
     public String gameID;
-    public String minecraftInGamePrefix = "";
-    public String minecraftStaffInGamePrefix = "";
+    public String minecraftInGamePrefix = "§6§lNovus§8§l »»§f ";
+    public String minecraftStaffInGamePrefix = "§4§lNovus §8§l»»§c ";
 
 
     @Override
@@ -15,7 +15,7 @@ public class LocalServerMetaData implements ILocalServerMetaData {
         return serverID;
     }
     @Override
-    public String getMinecraftInGamePrefix(){
+    public String getMinecraftPrefix(){
         return minecraftInGamePrefix;
     }
     @Override
