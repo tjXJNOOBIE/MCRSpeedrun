@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager<ISpeedRunContext>, IMCUtils {
+public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager, IMCUtils {
 
     public HashMap<Long, Location> spawn = new HashMap<>();
     public HashMap<UUID, String> ingame = new HashMap<>();
@@ -381,7 +381,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                         soloMessage--;
                         if(soloMessage == 30)
                         canSolo = true;
-                        Bukkit.broadcastMessage(getStaffPrefix() + "You can play SOLO! Just type /solo");
+                        Bukkit.broadcastMessage(getMinecraftStaffPrefix() + "You can play SOLO! Just type /solo");
                           playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
                         if(soloMessage == 0) {
                             soloMessage = 30;
@@ -393,7 +393,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     if (ingameSize == minPlayers) {
                         Player allPlayers =   getAllPlayers();
                         Location pLocation = allPlayers.getLocation();
-                        Bukkit.broadcastMessage(getStaffPrefix() + "Minimum number of players reached! Starting match...");
+                        Bukkit.broadcastMessage(getMinecraftStaffPrefix() + "Minimum number of players reached! Starting match...");
 
                         lobbyCountdown = 11;
                         startLobbyCountdown();
@@ -444,7 +444,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                             return;
                         }
                         Location plocation = players.getLocation();
-                        Bukkit.broadcastMessage(getPrefix() + "§c" + startPlayers + " §fMore player(s) are needed to start ");
+                        Bukkit.broadcastMessage(getMinecraftPrefix() + "§c" + startPlayers + " §fMore player(s) are needed to start ");
                           playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
                         players.playSound(plocation,Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
                     }else{
@@ -482,7 +482,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
                 if (preGameCount == 0) {
                     cancel();
-                    Bukkit.broadcastMessage(getPrefix()+ "Match has started!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "Match has started!");
                     playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Final title update before match starts
@@ -504,7 +504,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 }
 
                 if (preGameCount == 60 || preGameCount == 30 || (preGameCount <= 10 && preGameCount > 0)) {
-                    Bukkit.broadcastMessage(getPrefix()+ "Match starting in §c" + preGameCount + " §fseconds!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "Match starting in §c" + preGameCount + " §fseconds!");
                     playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 10 seconds
@@ -537,7 +537,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 Bukkit.broadcastMessage("Running Lobby countdown");
 
                 if (lobbyCountdown == 60 || lobbyCountdown == 30 || (lobbyCountdown <= 10 && lobbyCountdown > 0)) {
-                    Bukkit.broadcastMessage(getPrefix()+ lobbyCountdown + " seconds until the match starts!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix()+ lobbyCountdown + " seconds until the match starts!");
                       playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 60 seconds
@@ -552,7 +552,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 if (lobbyCountdown == 0) {
                     voting.calculateAndAnnounceWinner();
                     cancel();
-                    Bukkit.broadcastMessage(getPrefix()+ "§cMatch is starting!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "§cMatch is starting!");
                     canMove =false;
                       playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
@@ -662,7 +662,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public void createWorlds(World.Environment environment){
         IWorldManager worldManager = speedRunContext.getWorldManager();
           
-        Bukkit.broadcastMessage(getStaffPrefix()+" §cLoading Worlds...");
+        Bukkit.broadcastMessage(getMinecraftStaffPrefix()+" §cLoading Worlds...");
             for (UUID ingame_uuid : ingame.keySet()) {
                 Player player = Bukkit.getPlayer(ingame_uuid);
                 System.out.print("Creating world " + ingame_uuid.toString());
@@ -672,7 +672,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
     public void createWorldsWithSeed(World.Environment environment, Long seed){
           
-        Bukkit.broadcastMessage(getPrefix()+" §cLoading Worlds...");
+        Bukkit.broadcastMessage(getMinecraftPrefix()+" §cLoading Worlds...");
 
         for(UUID ingame_uuid : ingame.keySet()) {
             IWorldManager worldManager = speedRunContext.getWorldManager();
