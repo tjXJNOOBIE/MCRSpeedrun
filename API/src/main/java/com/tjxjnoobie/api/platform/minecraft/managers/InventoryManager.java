@@ -480,8 +480,5 @@ public  class InventoryManager implements IInventoryManager, Debuggable, IUtils<
 
     // TODO: Try to inject default methods in impled interfaces
     //  instead of Overriding in a weird place
-    @Override
-    public IGlobalContext getGlobalContext() {
-        return globalContext;
-    }
+
 }
