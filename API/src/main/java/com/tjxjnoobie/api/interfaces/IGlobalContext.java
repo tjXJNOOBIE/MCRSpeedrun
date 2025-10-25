@@ -22,9 +22,7 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     // Core getters using interfaces
     IGameMode getGameMode();
     IGameState getGameState();
-    IUtils getUtils();
     ISpeedrunStatsCache getSpeedrunStatsCache();
-    IWorldManager getWorldManager();
     IRatingCache getRatingCache();
     IRating getRating();
     IRatingAPI getRatingAPI();
@@ -55,10 +53,8 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext setGameMode(IGameMode gameMode);
     IGlobalContext setGameState(IGameState gameState);
 
-    IGlobalContext setUtils(IUtils utils);
     IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache);
 
-    IGlobalContext setWorldManager(IWorldManager worldManager);
     IGlobalContext setRatingCache(IRatingCache ratingCache);
     IGlobalContext setRating(IRating rating);
     IGlobalContext setRatingAPI(IRatingAPI ratingAPI);
