@@ -49,7 +49,7 @@ public class VelocityMain  {
 
 
     @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException {
+    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException {
         //TODO: Add main method logging
         //TODO: Remove from main method
         IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
@@ -60,17 +60,9 @@ public class VelocityMain  {
         ReflectUtil.loadLibs();
         Config.createConfig();
         Config.loadConfig();
-        globalContext.setProxyUtils(proxyUtils);
+        injectionHelper.injectAllContextsGlobally(this);
 
         MySQL.connect();
-        globalContext.setRank(rank).
-                setProxyUtils(proxyUtils).
-                setPlayerProfile(playerProfile).
-                setUtils(utils).
-                setPunishManager(punishManager).
-                setRankCache(rankCache).
-                setPunishLog(punishLog).
-                setRedis(redis);
         redis.connectToRedis();
 
 
