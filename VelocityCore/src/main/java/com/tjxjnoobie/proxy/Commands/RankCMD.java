@@ -1,6 +1,7 @@
 package com.tjxjnoobie.proxy.Commands;
 
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
@@ -12,13 +13,10 @@ import java.util.UUID;
 
 public class RankCMD implements SimpleCommand, IUtils {
 
-    private final IGlobalContext globalContext;
+    @Inject private IGlobalContext globalContext;
 
 
-    public RankCMD(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-
-    }
+    
 
     @Override
     public void execute(Invocation invocation) {
