@@ -30,9 +30,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IRating getRating();
     IRatingAPI getRatingAPI();
     IPlayerProfile getPlayerProfile();
-
-    IMCUtils getMCUtils();
-
     IRank getRank();
     IDebugger getDebugger();
     ISoundManager getSoundManager();
@@ -63,7 +60,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
 
     IGlobalContext setUtils(IUtils<IGlobalContext> utils);
     IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache);
-    IGlobalContext setMcUtils(IMCUtils mcUtils);
 
     IGlobalContext setWorldManager(IWorldManager<ISpeedRunContext> worldManager);
     IGlobalContext setRankMC(IRankMC rankMC);
