@@ -30,7 +30,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IRatingAPI getRatingAPI();
     IPlayerProfile getPlayerProfile();
     IRank getRank();
-    IDebugger getDebugger();
     ISoundManager getSoundManager();
     IRankCache getRankCache();
     IRetentionManager getRetentionManager();
@@ -66,7 +65,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext setRatingAPI(IRatingAPI ratingAPI);
     IGlobalContext setPlayerProfile(IPlayerProfile playerProfile);
     IGlobalContext setRank(IRank rank);
-    IGlobalContext setDebugger(IDebugger debugger);
     IGlobalContext setSoundManager(ISoundManager soundManager);
     IGlobalContext setRankCache(IRankCache rankCache);
     IGlobalContext setRetentionManager(IRetentionManager retentionManager);
