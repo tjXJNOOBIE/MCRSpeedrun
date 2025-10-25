@@ -204,8 +204,8 @@ public class Utils implements IUtils<IGlobalContext> {
         }
         if (key == null || key.trim().isEmpty()) {
             return null;
-        }
-        return globalContext.getUtils().getConfigValues(globalContext).get(key);
+        } 
+        return getConfigValues(globalContext).get(key);
     }
 
     @Override
