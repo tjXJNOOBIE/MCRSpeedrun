@@ -1,6 +1,5 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import org.bukkit.entity.Player;
 
 import java.util.Map;
@@ -42,7 +41,7 @@ public interface IDebugger {
     void loadDebuggersCache();
 
 
-    void sendDebugMessage(UUID playerId, GlobalContext globalContext, String message);
+    void sendDebugMessage(UUID playerId, ISpeedRunContext globalContext, String message);
 
-    void sendDebugMessage(Player player, GlobalContext globalContext, String prefix, String message);
+    void sendDebugMessage(Player player, ISpeedRunContext globalContext, String prefix, String message);
 }
