@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-public class Voting implements IVoting, IUtils {
+public class Voting implements IVoting, IMCUtils {
 
     private boolean isComplete = false;
 
