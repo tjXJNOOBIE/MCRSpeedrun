@@ -1,9 +1,7 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.interfaces.IUtils;
-import com.tjxjnoobie.api.interfaces.IWorldManager;
+import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,13 +9,14 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class LoadWorld implements CommandExecutor, IUtils {
+public class LoadWorld implements CommandExecutor, IMCUtils, IUtils {
 
-    private final IGlobalContext globalContext;
-
-    public LoadWorld(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
+    @Inject
+    private IGlobalContext globalContext;
+    @Inject
+    private IRankCache rankCache;
+    @Inject
+    private IWorldManager worldManager;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
@@ -25,12 +24,11 @@ public class LoadWorld implements CommandExecutor, IUtils {
         String cmdName = command.getName();
         Player player = (Player) commandSender;
         UUID uuid = player.getUniqueId();
-        IRankCache rankCache = globalContext.getRankCache();
-        IWorldManager worldManager = globalContext.getWorldManager();
+
         if (rankCache.getPowerLevel(uuid) >= 10000||
            rankCache.hasPermission(uuid,"server.command.world")) {
             if (length <= 1) {
-                player.sendMessage(staffPrefix + "Usage: /world <load/unload> <worldname> [true/false]");
+                player.sendMessage(getMinecraftPrefix() + "Usage: /world <load/unload> <worldname> [true/false]");
                 return false;
             }
             String action = args[0].toLowerCase();
@@ -48,7 +46,7 @@ public class LoadWorld implements CommandExecutor, IUtils {
 
 
         }else{
-            player.sendMessage(prefix+"§cNo Permission.");
+            player.sendMessage(getMinecraftPrefix()+"§cNo Permission.");
         }
         return true;
     }
