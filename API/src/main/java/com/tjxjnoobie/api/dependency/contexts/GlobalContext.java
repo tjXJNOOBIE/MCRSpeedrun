@@ -21,7 +21,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private IGameMode gameMode;
     private ILocalServerMetaData localServerMetaData;
     private ISpeedrunStatsCache statsCache;
-    private IWorldManager<ISpeedRunContext> worldManager;
+    private IWorldManager worldManager;
     private IRatingCache ratingCache;
     private IRating rating;
     private IRatingAPI ratingAPI;
@@ -40,7 +40,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private IPunishLog punishLog;
     private IConfigUtils configUtils;
     private ITimeUtils timeUtils;
-    private IUtils<IGlobalContext> utils;
+    private IUtils utils;
     private IAbstractClassMetaData<GlobalContext> classMeta;
 
 
@@ -68,8 +68,8 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     /**
      * Constructor with all dependencies
      */
-    public GlobalContext(IGameMode gameMode, IUtils<IGlobalContext> utils, ISpeedrunStatsCache statsCache, IGameState gameState,
-                         IWorldManager<ISpeedRunContext> worldManager, IRatingCache ratingCache,
+    public GlobalContext(IGameMode gameMode, IUtils utils, ISpeedrunStatsCache statsCache, IGameState gameState,
+                         IWorldManager worldManager, IRatingCache ratingCache,
                          IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, 
                          ISoundManager soundManager, IRankCache rankCache,
                          IRetentionManager retentionManager, IRedis redis, IGameType gameType, 
