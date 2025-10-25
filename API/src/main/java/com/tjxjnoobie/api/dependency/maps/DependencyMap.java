@@ -229,6 +229,29 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Object ensureAndGetInstance(IDependencyMetaData metaData) {
+        if (metaData == null) {
+            return null;
+        }
+
+        Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
+        if (instance != null) {
+            return instance;
+        }
+
+        Supplier<?> factory = metaData.getFactory();
+        if (factory != null) {
+            Object created = factory.get();
+            if (created != null) {
+                metaData.setInstance(created);
+                return created;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Finds a dependency by assignable type.
      * Searches for a registered class that is assignable from the given class.
@@ -262,6 +285,24 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         }
 
         return null;
+    }
+
+    @Override
+    public Object getDependencyInstance(Class<?> clazz) {
+        if (clazz == null) {
+            return null;
+        }
+
+        IDependencyMetaData direct = get(clazz);
+        if (direct != null) {
+            Object instance = ensureAndGetInstance(direct);
+            if (instance != null) {
+                return instance;
+            }
+        }
+
+        IDependencyMetaData compatible = findByAssignableType(clazz);
+        return compatible != null ? ensureAndGetInstance(compatible) : null;
     }
 
 
