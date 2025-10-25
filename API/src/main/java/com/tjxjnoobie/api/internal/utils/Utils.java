@@ -203,6 +203,7 @@ public class Utils implements IUtils<IGlobalContext> {
             return null;
         }
         if (key == null || key.trim().isEmpty()) {
+            Log.error("[Config] Failed to get key: key is null or key map is empty");
             return null;
         } 
         return getConfigValues(globalContext).get(key);
