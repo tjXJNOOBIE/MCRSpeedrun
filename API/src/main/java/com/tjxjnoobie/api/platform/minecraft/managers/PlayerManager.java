@@ -41,10 +41,10 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
             gameManager.addWatching(uuid, name);
             player.setGameMode(GameMode.SPECTATOR);
             
-            sendDebugMessage(globalContext,player, "[PLAYER MANAGER] "+ "Player " + name + " is now spectating");
+            sendDebugMessage(speedRunContext,player, "[PLAYER MANAGER] "+ "Player " + name + " is now spectating");
             
         } catch (Exception e) {
-            sendDebugMessage(globalContext, player, "[PLAYER_MANAGER] "+ "Error making player spectator: " + e.getMessage());
+            sendDebugMessage(speedRunContext, player, "[PLAYER_MANAGER] "+ "Error making player spectator: " + e.getMessage());
             throw new RuntimeException("Failed to make player spectator", e);
         }
     }
@@ -60,10 +60,10 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
             makeSpectator(uuid, name, player);
             player.sendMessage(getPrefix() + "§cYou were eliminated!");
             
-            sendDebugMessage(globalContext,player, "[PLAYER_MANAGER] "+ "player " + name + " was eliminated");
+            sendDebugMessage(speedRunContext,player, "[PLAYER_MANAGER] "+ "player " + name + " was eliminated");
             
         } catch (Exception e) {
-            sendDebugMessage(globalContext,player, "[PLAYER_MANAGER] "+ "Error eliminating player: " +name + e.getMessage());
+            sendDebugMessage(speedRunContext,player, "[PLAYER_MANAGER] "+ "Error eliminating player: " +name + e.getMessage());
             throw new RuntimeException("Failed to eliminate player", e);
         }
     }
