@@ -14,22 +14,21 @@ public class Seed implements CommandExecutor, IMCUtils {
 
     @Inject
     private IGlobalContext globalContext;
-
+    @Inject IWorldManager worldManager;
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
         int length = args.length;
         Player player = (Player) commandSender;
-        IWorldManager worldManager = globalContext.getWorldManager();
         //TODO Add Permissions Check
         if(length <1 && player.isOp()){
-            player.sendMessage(staffPrefix+"Usage: /loadseed <name> <seed>");
+            player.sendMessage(getMinecraftStaffPrefix()+"Usage: /loadseed <name> <seed>");
         }
         if(length == 2){
             String worldname = args[0];
             long seed = Long.parseLong(args[1]);
             worldManager.loadWorldFromSeed(worldname,seed);
-            player.sendMessage(staffPrefix+"Loading world " + worldname+" from seed " +seed);
+            player.sendMessage(getMinecraftStaffPrefix()+"Loading world " + worldname+" from seed " +seed);
         }
 
 
