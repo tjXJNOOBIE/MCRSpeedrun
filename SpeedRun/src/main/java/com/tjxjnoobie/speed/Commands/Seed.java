@@ -2,8 +2,8 @@ package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IMCUtils;
-import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.interfaces.IWorldManager;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -12,11 +12,9 @@ import org.bukkit.entity.Player;
 public class Seed implements CommandExecutor, IMCUtils {
 
 
-    private final IGlobalContext globalContext;
+    @Inject
+    private IGlobalContext globalContext;
 
-    public Seed(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
