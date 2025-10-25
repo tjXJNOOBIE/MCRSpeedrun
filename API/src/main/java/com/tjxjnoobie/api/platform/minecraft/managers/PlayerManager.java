@@ -40,8 +40,7 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
             player.setCanPickupItems(false);
             gameManager.addWatching(uuid, name);
             player.setGameMode(GameMode.SPECTATOR);
-            
-            sendDebugMessage(speedRunContext,player, "[PLAYER MANAGER] "+ "Player " + name + " is now spectating");
+            sendDebugMessage(player, "[PLAYER MANAGER] "+ "Player " + name + " is now spectating");
             
         } catch (Exception e) {
             sendDebugMessage(speedRunContext, player, "[PLAYER_MANAGER] "+ "Error making player spectator: " + e.getMessage());
