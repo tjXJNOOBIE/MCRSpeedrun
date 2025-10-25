@@ -2,7 +2,7 @@ package com.tjxjnoobie.api.builders;
 
 import com.tjxjnoobie.api.enums.InventoryType;
 import com.tjxjnoobie.api.exceptions.*;
-import com.tjxjnoobie.api.interfaces.Debuggable;
+import com.tjxjnoobie.api.interfaces.IMinecraftDebuggable;
 import com.tjxjnoobie.api.interfaces.IInventoryBuilder;
 import com.tjxjnoobie.api.platform.minecraft.inventory.InventoryHistory;
 import com.tjxjnoobie.api.platform.minecraft.managers.InventoryManager;
@@ -16,7 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Arrays;
 import java.util.List;
 
-public class InventoryBuilder implements IInventoryBuilder, Debuggable {
+public class InventoryBuilder implements IInventoryBuilder, IMinecraftDebuggable {
     
     private Player player;
     private InventoryManager inventoryManager;
