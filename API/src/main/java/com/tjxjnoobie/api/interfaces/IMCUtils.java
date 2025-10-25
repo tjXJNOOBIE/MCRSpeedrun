@@ -30,13 +30,6 @@ public interface IMCUtils {
      * @param player The player to play the effect for
      */
     default void playDramaticBoom(Player player, Plugin plugin) {
-        player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 0.5f); // Low-pitched cave sound
-        Bukkit.getScheduler().runTaskLater(plugin,
-                () -> player.playSound(player.getLocation(), Sound.BLOCK_PORTAL_TRIGGER, 1.0f, 0.8f), 10L);
-        Bukkit.getScheduler().runTaskLater(plugin,
-                () -> player.playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f), 20L);
-        Bukkit.getScheduler().runTaskLater(plugin,
-                () -> player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.6f), 30L);
     }
 
     /**
