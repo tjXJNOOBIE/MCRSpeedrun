@@ -7,7 +7,6 @@ import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.IConfigUtils;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.ITimeUtils;
-import org.bukkit.plugin.Plugin;
 
 /**
  * Interface for GlobalContext to provide dependency injection capabilities and metadata operations.
@@ -25,7 +24,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGameState getGameState();
     IUtils<IGlobalContext> getUtils();
     ISpeedrunStatsCache getSpeedrunStatsCache();
-    IMCUtils getMcUtils();
     IWorldManager<ISpeedRunContext> getWorldManager();
     IRankMC getRankMC();
     IRatingCache getRatingCache();
