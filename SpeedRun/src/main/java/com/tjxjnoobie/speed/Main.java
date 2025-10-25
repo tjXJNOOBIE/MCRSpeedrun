@@ -206,7 +206,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         registerCommand("world", new LoadWorld());
         registerCommand("loadseed", new Seed());
         registerCommand("setspawn", new SetSpawns(speedRunContext));
-        registerCommand("spawndragon", new SpawnEnderDragon(globalContext));
+        registerCommand("spawndragon", new SpawnEnderDragon());
         registerCommand("debugger", new DebuggerCMD());
         registerCommand("vote", new Vote());
         registerCommand("v", new Vote());
@@ -263,7 +263,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryInteract(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunDropEvent(speedRunContext), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryMove(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryClick(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunLoginEvent(), this);
         Bukkit.getPluginManager().registerEvents(new CoreJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new CoreQuitListener(), this);
