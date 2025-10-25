@@ -72,7 +72,7 @@ public abstract class AbstractCommand<T extends IGlobalContext> implements Comma
         } catch (Exception e) {
             sender.sendMessage("§cAn error occurred while executing the command.");
             if (sender instanceof Player) {
-                sendDebugMessage(context,(Player) sender, "[COMMAND] Error in " + commandName + ": " + e.getMessage());
+                sendDebugMessage((Player) sender, "[COMMAND] Error in " + commandName + ": " + e.getMessage());
             }
             e.printStackTrace();
             return true;
@@ -87,7 +87,7 @@ public abstract class AbstractCommand<T extends IGlobalContext> implements Comma
             
         } catch (Exception e) {
             if (sender instanceof Player) {
-                sendDebugMessage(context, (Player) sender, "[COMMAND] Tab completion error in " + commandName + ": " + e.getMessage());
+                sendDebugMessage((Player) sender, "[COMMAND] Tab completion error in " + commandName + ": " + e.getMessage());
             }
             return new ArrayList<>();
         }
