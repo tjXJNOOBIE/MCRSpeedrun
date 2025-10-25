@@ -41,8 +41,7 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     ISpeedrunStatsCache getSRStatsCache();
     IPunishManager getPunishManager();
     IPunishLog getPunishLog();
-    IInventoryBuilder getInventoryBuilder();
-    IInventoryManager getInventoryManager();
+
     IConfigUtils getConfigUtils();
     ITimeUtils getTimeUtils();
     ILocalServerMetaData getLocalServerMetaData();
@@ -76,8 +75,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext setSpeedrunStatsCache(ISpeedrunStatsCache speedrunStatsCache);
     IGlobalContext setPunishManager(IPunishManager punishManager);
     IGlobalContext setPunishLog(IPunishLog punishLog);
-    IGlobalContext setInventoryManager(IInventoryManager inventoryManager);
-    IGlobalContext setInventoryBuilder(IInventoryBuilder inventoryBuilder);
     IGlobalContext setConfigUtils(IConfigUtils configUtils);
     IGlobalContext setTimeUtils(ITimeUtils timeUtils);
     IGlobalContext setLocalServerMetaData(ILocalServerMetaData localServerMetaData);
