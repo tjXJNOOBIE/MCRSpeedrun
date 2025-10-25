@@ -1,10 +1,8 @@
 package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
-import com.tjxjnoobie.api.interfaces.IGameState;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
-import com.tjxjnoobie.api.interfaces.IUtils;
-import com.tjxjnoobie.api.interfaces.IVoting;
+import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,21 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class Vote implements CommandExecutor, IUtils {
+public class Vote implements CommandExecutor, IMCUtils {
 
-    private final ISpeedRunContext speedRunContext;
+    @Inject private ISpeedRunContext speedRunContext;
+    @Inject private IVoting voting;
+    @Inject private IGameState gameState;
 
-
-    public Vote(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
-        IVoting voting = speedRunContext.getVoting();
-        IGameState gameState = speedRunContext.getGameState();
+
         int length = args.length;
         int choice = 0;
         if(length != 1){
