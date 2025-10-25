@@ -14,8 +14,7 @@ import java.sql.SQLException;
 
 public class Solo implements CommandExecutor {
 
-    private final Utils utils;
-    private final GameManager gameManager;
+    @Inject private GameManager gameManager; 
     public Solo(Utils utils, GameManager gameManager) {
         this.utils = utils;
         this.gameManager = gameManager;
