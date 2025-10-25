@@ -16,11 +16,9 @@ import java.util.UUID;
 
 public class ChangeWorldCMD implements CommandExecutor, IUtils {
 
-    private final IGlobalContext globalContext;
-    public ChangeWorldCMD(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
-
+   @Inject
+   private IGlobalContext globalContext;
+    
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
