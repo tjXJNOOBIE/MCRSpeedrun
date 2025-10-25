@@ -2,6 +2,7 @@ package com.tjxjnoobie.api.interfaces;
 
 
 import com.tjxjnoobie.api.enums.GameTypeEnum;
+import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -14,7 +15,7 @@ import java.util.Map;
  * time formatting, and configuration handling.
  * 
  */
-public interface IUtils {
+public interface IUtils extends ILocalServerMetaData {
 
 
 
@@ -33,19 +34,9 @@ public interface IUtils {
      *
      * @return The server prefix string with color codes (default: "§6§lNovus »§c ")
      */
-    default String getPrefix() {
-        return " ";
-    }
-
-    /**
-     * Gets the staff prefix for messages
-     * This prefix is used for staff-related messages and announcements
-     *
-     * @return The staff prefix string with color codes (default: "§4§lNovus »§c ")
-     */
-    default String getStaffPrefix() {
-        return " ";
-    }
+//    default String getMinecraftPrefix() {
+//        return " ";
+//    }
 
     /**
      * Gets the game ID from the local server metadata
