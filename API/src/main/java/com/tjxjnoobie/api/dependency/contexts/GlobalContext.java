@@ -122,7 +122,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         registerDependency(IUtils.class, utils, this::getUtils, this);
         registerDependency(ISpeedrunStatsCache.class, statsCache, this::getSpeedrunStatsCache, this);
         registerDependency(IGameState.class, gameState, this::getGameState, this);
-        registerDependency(IMCUtils.class, mcUtils, this::getMCUtils, this);
         registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
         registerDependency(IRankMC.class, rankMC, this::getRankMC, this);
         registerDependency(IRatingCache.class, ratingCache, this::getRatingCache, this);
@@ -181,10 +180,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return statsCache;
     }
 
-     
-    public IMCUtils getMcUtils() {
-        return mcUtils;
-    }
+
 
      
     public IWorldManager<ISpeedRunContext> getWorldManager() {
@@ -216,10 +212,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return playerProfile;
     }
 
-     
-    public IMCUtils getMCUtils(){
-        return mcUtils;
-    }
+
 
      
     public IRank getRank() {
@@ -348,11 +341,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     }
 
      
-    public IGlobalContext setMcUtils(IMCUtils mcUtils) {
-        this.mcUtils = mcUtils;
-        if (mcUtils != null) registerDependency(IMCUtils.class, mcUtils, this::getMCUtils, this);
-        return this;
-    }
+
 
     @Override
     public IGlobalContext setWorldManager(IWorldManager<ISpeedRunContext> worldManager) {
@@ -569,7 +558,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
                 setPlayerProfile(playerProfile).
                 setInventoryManager(inventoryManager).
                 setSoundManager(soundManager).
-                setMcUtils(mcUtils).
                 setRankMC(rankMC).
                 setPunishManager(punishManager).
                 setPunishLog(punishLog).
