@@ -25,7 +25,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IUtils<IGlobalContext> getUtils();
     ISpeedrunStatsCache getSpeedrunStatsCache();
     IWorldManager<ISpeedRunContext> getWorldManager();
-    IRankMC getRankMC();
     IRatingCache getRatingCache();
     IRating getRating();
     IRatingAPI getRatingAPI();
@@ -62,7 +61,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache);
 
     IGlobalContext setWorldManager(IWorldManager<ISpeedRunContext> worldManager);
-    IGlobalContext setRankMC(IRankMC rankMC);
     IGlobalContext setRatingCache(IRatingCache ratingCache);
     IGlobalContext setRating(IRating rating);
     IGlobalContext setRatingAPI(IRatingAPI ratingAPI);
