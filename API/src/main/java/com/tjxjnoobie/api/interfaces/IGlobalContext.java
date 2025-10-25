@@ -95,7 +95,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext setInterfaceManager(InterfaceManager interfaceManager);
 
     IGlobalContext setGlobalContext(IGlobalContext globalContext);
-    IGlobalContext setPlugin(Plugin plugin);
     InterfaceManager getInterfaceManager();
 
     void buildGlobalContext();

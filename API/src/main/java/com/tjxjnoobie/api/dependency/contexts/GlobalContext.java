@@ -533,12 +533,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return this;
     }
 
-    
-    public IGlobalContext setPlugin(Plugin plugin) {
-        this.plugin = plugin;
-        if(plugin != null) registerDependency(Plugin.class, plugin, this::getPlugin, this);
-        return this;
-    }
+
 
 
      
