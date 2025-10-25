@@ -275,7 +275,6 @@ public abstract class AbstractGameStateManager<T> {
         
         public GameStateEnum getFromState() { return fromState; }
         public GameStateEnum getToState() { return toState; }
-        public String getServerId() { return serverId; }
         public long getTimestamp() { return timestamp; }
         
         @Override
