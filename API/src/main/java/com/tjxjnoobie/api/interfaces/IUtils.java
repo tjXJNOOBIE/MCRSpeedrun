@@ -28,15 +28,7 @@ public interface IUtils extends ILocalServerMetaData {
         return null;
     }
 
-    /**
-     * Gets the server prefix for messages
-     * This prefix is used for general server messages to players
-     *
-     * @return The server prefix string with color codes (default: "§6§lNovus »§c ")
-     */
-//    default String getMinecraftPrefix() {
-//        return " ";
-//    }
+
 
     /**
      * Gets the game ID from the local server metadata
