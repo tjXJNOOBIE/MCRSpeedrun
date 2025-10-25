@@ -18,7 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
-public  class InventoryManager implements IInventoryManager, Debuggable, IUtils<IGlobalContext> {
+public  class InventoryManager implements IInventoryManager, IMinecraftDebuggable, IUtils {
     
    @Inject private IGlobalContext globalContext;
    @Inject private IVoting voting;
