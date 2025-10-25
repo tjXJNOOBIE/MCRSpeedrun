@@ -589,6 +589,9 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 injectAllRegisteredClasses();
             }
 
+            Log.info("[AUTO-BIND] Binding fields for all registered classes (" + dependencyMap.getDependencyMapSize() + " entries)");
+            bindFieldsForAllRegisteredClasses();
+
             Log.info("[AUTO-BIND] Binding fields from target object: " + targetClass.getSimpleName());
             bindFieldsFromTarget(target, targetClass);
 
@@ -706,6 +709,34 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
             // Inject fields for this instance
             injectFieldsForInstance(instance, clazz);
+        }
+    }
+
+    /**
+     * Binds fields for ALL registered classes in the DependencyMap.
+     * This ensures every class gets its fields bound aggressively from the map.
+     */
+    public void bindFieldsForAllRegisteredClasses() {
+        // Get all registered metadata
+        Collection<IDependencyMetaData> allMetadata = dependencyMap.getDependencyMapValues();
+
+        Log.info("[AUTO-BIND] Binding fields for " + allMetadata.size() + " registered classes");
+
+        for (IDependencyMetaData meta : allMetadata) {
+            if (meta == null || meta.getDependencyClass() == null) {
+                continue;
+            }
+
+            Class<?> clazz = meta.getDependencyClass();
+            Object instance = meta.ensureAndGetInstance(meta);
+
+            if (instance == null) {
+                Log.warn("[AUTO-BIND] No instance available for: " + clazz.getSimpleName());
+                continue;
+            }
+
+            // Bind fields for this instance
+            bindFieldsFromTarget(instance, clazz);
         }
     }
 
