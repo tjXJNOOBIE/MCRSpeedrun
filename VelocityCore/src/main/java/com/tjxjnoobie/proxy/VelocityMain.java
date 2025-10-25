@@ -23,6 +23,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
+import java.util.List;
 
 @Plugin(
     id = "velocitycore",
@@ -39,7 +40,7 @@ public class VelocityMain  {
     @Inject private IProxyUtils proxyUtils;
     @Inject private IRating rating;
     @Inject private IPlayerProfile playerProfile;
-    @Inject private IGlobalContext globalContext;
+    @Inject private IContext<IGlobalContext> globalContext;
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
@@ -60,21 +61,21 @@ public class VelocityMain  {
         ReflectUtil.loadLibs();
         Config.createConfig();
         Config.loadConfig();
-        injectionHelper.injectAllContextsGlobally(this);
+        injectionHelper.performWaveInjection((List<IContext<?>>) globalContext);
 
         MySQL.connect();
         redis.connectToRedis();
 
 
         registerCommand("sim", new Sim());
-        registerCommand("rank", new RankCMD(globalContext));
-        registerCommand("ban", new Ban(globalContext,proxyServer));
-        registerCommand("kick", new Kick(globalContext,proxyServer));
+        registerCommand("rank", new RankCMD());
+        registerCommand("ban", new Ban());
+        registerCommand("kick", new Kick());
         registerCommand("mute", new Mute());
-        registerCommand("warn", new Warn(globalContext,proxyServer));
-        registerCommand("unban", new Unban(globalContext,proxyServer));
-        proxyServer.getEventManager().register(this, new VelocityPreLoginEvent(globalContext));
-        proxyServer.getEventManager().register(this, new VelocityLoginEvent(globalContext));
+        registerCommand("warn", new Warn());
+        registerCommand("unban", new Unban());
+        proxyServer.getEventManager().register(this, new VelocityPreLoginEvent());
+        proxyServer.getEventManager().register(this, new VelocityLoginEvent());
 
     }
 
