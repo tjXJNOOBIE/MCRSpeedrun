@@ -31,19 +31,9 @@ public interface IGlobalContextAccess {
         return getGlobalContext().getGameState();
     }
 
-    default IUtils utils() {
-        return getGlobalContext().getUtils();
-    }
-
     default ISpeedrunStatsCache speedrunStatsCache() {
         return getGlobalContext().getSpeedrunStatsCache();
     }
-
-
-    default IWorldManager worldManager() {
-        return getGlobalContext().getWorldManager();
-    }
-
 
     default IRatingCache ratingCache() {
         return getGlobalContext().getRatingCache();
