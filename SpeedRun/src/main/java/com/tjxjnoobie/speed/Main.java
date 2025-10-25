@@ -127,7 +127,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         iSpeedContext = new SpeedRunContext();
         
         // Register Plugin in both contexts so it's available everywhere
-        iGlobalContext.getContext().setPlugin(this);
         iSpeedContext.getContext().setPlugin(this);
 
         try {
