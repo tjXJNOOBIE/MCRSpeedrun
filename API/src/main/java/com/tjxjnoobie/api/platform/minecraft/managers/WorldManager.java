@@ -17,15 +17,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
+public class WorldManager implements IMCUtils, IWorldManager {
 
 
 
-    @Inject private GlobalContext globalContext;
+    @Inject private ISpeedRunContext speedRunContext;
 
 
-
-
+    @Override
     public void loadWorldFromSeed(String worldName, long seed) {
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.seed(seed);
@@ -33,13 +32,13 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
         World world = Bukkit.createWorld(worldCreator);
         Bukkit.getLogger().info("World " + worldName + " created with seed " + seed);
     }
-
+    @Override
     public void createWorld(String worldName, World.Environment environment) {
 
         World checkWorld = Bukkit.getWorld(worldName);
         if (worldExists(worldName)) {
             Bukkit.getLogger().info(worldName + " already exist on disk");
-            sendDebugMessage (globalContext,getAllPlayers(), staffPrefix + "World exist on disk, loading...");
+            sendDebugMessage (getAllPlayers(), getMinecraftStaffPrefix() + "World exist on disk, loading...");
             loadWorld(worldName);
             return;
         }
@@ -48,13 +47,13 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
         } else {
             WorldCreator worldCreator = new WorldCreator(worldName).environment(environment);
             World world = Bukkit.createWorld(worldCreator);
-                sendDebugMessage(globalContext,getAllPlayers(), staffPrefix + "New World " + worldName + " created in " + environment.toString());
+                sendDebugMessage(getAllPlayers(), getMinecraftStaffPrefix() + "New World " + worldName + " created in " + environment.toString());
 
             Bukkit.getLogger().info(environment.toString() + " created with the name " + worldName);
 
         }
     }
-
+    @Override
     public void createWorldFromSeed(String worldName, World.Environment environment, long seed){
 
         World checkWorld = Bukkit.getWorld(worldName);
@@ -63,7 +62,7 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
 
             if (worldExists(worldName)) {
                     Bukkit.getLogger().info(worldName + " World exist on disk");
-                    sendDebugMessage(globalContext,aplayers,staffPrefix + "World exist on disk, loading...");
+                    sendDebugMessage(aplayers,getMinecraftStaffPrefix() + "World exist on disk, loading...");
 
                     loadWorld(worldName);
 
@@ -75,57 +74,57 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
                     WorldCreator worldCreator = new WorldCreator(worldName).environment(environment);
                     worldCreator.seed(seed);
                     World world = Bukkit.createWorld(worldCreator);
-                    sendDebugMessage(globalContext,aplayers, "New World " + worldName + " created in " + environment.toString());
+                    sendDebugMessage(aplayers, "New World " + worldName + " created in " + environment.toString());
                     Bukkit.getLogger().info(environment.toString() + " created with the name " + worldName);
 
             }
 
     }
-
+    @Override
     public void loadWorld(String worldName) {
         WorldCreator worldCreator = new WorldCreator(worldName);
         World world = Bukkit.getWorld(worldName);
         Player aplayers = getAllPlayers();
         UUID auuid = getAllPlayers().getUniqueId();
         if (isWorldLoaded(worldName)) {
-            sendDebugMessage(globalContext, aplayers, "World is already loaded");
+            sendDebugMessage( aplayers, "World is already loaded");
 
         }
         if (!worldExists(worldName)) {
-            sendDebugMessage(globalContext,aplayers,
+            sendDebugMessage(aplayers,
 
                     "World does not exist");
 
         } else {
-            sendDebugMessage(globalContext,aplayers,
+            sendDebugMessage(aplayers,
 
                     "Loading world " + worldName);
             world = Bukkit.createWorld(worldCreator);
-            sendDebugMessage(globalContext,aplayers,
+            sendDebugMessage(aplayers,
 
                     "World loaded ");
 
         }
     }
 
-
+    @Override
     public boolean worldExists(String worldName) {
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         return worldFolder.exists() && worldFolder.isDirectory();
     }
-
+    @Override
     public boolean isWorldLoaded(String worldName) {
         World world = Bukkit.getWorld(worldName);
         return world != null;
     }
-
+    @Override
     public void unloadWorld(String worldName, boolean save) {
         World world = Bukkit.getWorld(worldName);
         Player aplayers = getAllPlayers();
         UUID auuid = getAllPlayers().getUniqueId();
 
         if (!worldExists(worldName)) {
-            sendDebugMessage(globalContext,aplayers, "World does not exist");
+            sendDebugMessage(aplayers, "World does not exist");
             return;
 
         }
@@ -135,42 +134,43 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
                 if (unloaded) {
                     Bukkit.getLogger().info("World '" + worldName + "' has been unloaded.");
 
-                        sendDebugMessage(globalContext,aplayers, "World '" + worldName + "' has been unloaded.");
+                        sendDebugMessage(aplayers, "World '" + worldName + "' has been unloaded.");
 
                 } else {
                     Bukkit.getLogger().info("Failed to unload world '" + worldName + "'.");
-                       sendDebugMessage(globalContext,aplayers,"Failed to unload world '" + worldName + "'.");
+                       sendDebugMessage(aplayers,"Failed to unload world '" + worldName + "'.");
 
 
                 }
 
         } else {
             Bukkit.getLogger().info("World '" + worldName + "' is not loaded.");
-                sendDebugMessage(globalContext,aplayers,"World '" + worldName + "' is not loaded.");
+                sendDebugMessage(aplayers,"World '" + worldName + "' is not loaded.");
 
         }
     }
+    @Override
     public void deleteWorld(String worldName) {
         // Unload the world
         Player aplayers = getAllPlayers();
         World world = Bukkit.getWorld(worldName);
 
             if (world != null) {
-                sendDebugMessage(globalContext,aplayers, "World found! Unloading...");
+                sendDebugMessage(aplayers, "World found! Unloading...");
                 unloadWorld(worldName, false);// Unload world without saving
             }else{
-                sendDebugMessage(globalContext,aplayers,worldName+" does not exist");
+                sendDebugMessage(aplayers,worldName+" does not exist");
                 return;
             }
-        sendDebugMessage(globalContext,aplayers, "Deleting World....");
+        sendDebugMessage(aplayers, "Deleting World....");
         Bukkit.getLogger().info("Deleting world... " +worldName);
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         deleteDirectory(worldFolder);
         Bukkit.getLogger().info(worldName+  " Deleted");
-        sendDebugMessage(globalContext,aplayers, worldName+ " Deleted");
+        sendDebugMessage(aplayers, worldName+ " Deleted");
 
     }
-
+    @Override
     public void deleteDirectory(File file) {
         if (file.isDirectory()) {
             for (File subFile : file.listFiles()) {
@@ -179,12 +179,13 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
         }
         file.delete();
     }
+    @Override
     public void saveWorldSpawn(String gameType, String world, double x, double y, double z, float pitch, float yaw) throws SQLException {
         MySQL.executePreparedStatement("DELETE FROM world_data WHERE world= ?", world);
         MySQL.executePreparedStatement( "REPLACE INTO world_data (world, X, Y, Z, PITCH, YAW, GAMETYPE) VALUES (?, ?, ?, ?, ?, ?, ?)", world, x, y, z, pitch, yaw,gameType);
 
     }
-
+    @Override
     public Location getSpawn(String world) {
         Integer i;
         try {
@@ -209,7 +210,7 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
 
         return null;
     }
-
+    @Override
     public boolean isSpawnWorld(String worldName) {
         try {
             String query = "SELECT IS_SPAWN FROM world_data WHERE world ='" + worldName + "'";
@@ -222,7 +223,7 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
         }
         return false;
     }
-
+    @Override
     public String getSpawnWorld() {
 
         try {
@@ -244,7 +245,7 @@ public class WorldManager implements IMCUtils, IWorldManager<ISpeedRunContext> {
 
         return "Error";
     }
-
+    @Override
     public void setIsSpawn(int spawn, String world) throws SQLException {
         MySQL.executePreparedStatement("UPDATE world_data SET IS_SPAWN = ? WHERE WORLD = ?",spawn,world);
     }
