@@ -21,13 +21,10 @@ import java.util.UUID;
 
 public class Kick implements SimpleCommand {
     @Inject IPunishManager punishManager;
-    private final IGlobalContext globalContext;
-    private final ProxyServer proxyServer;
+    @Inject private  IGlobalContext globalContext;
+    @com.google.inject.Inject private ProxyServer proxyServer;
 
-    public Kick(IGlobalContext globalContext, ProxyServer proxyServer) {
-        this.globalContext = globalContext;
-        this.proxyServer = proxyServer;
-    }
+
     /**
      * Executes the kick command, allowing a player or console to kick another player from the server.
      *

@@ -16,7 +16,7 @@ public class RankCMD implements SimpleCommand, IUtils {
     @Inject private IGlobalContext globalContext;
 
 
-    
+
 
     @Override
     public void execute(Invocation invocation) {
