@@ -37,7 +37,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
         World checkWorld = Bukkit.getWorld(worldName);
         if (worldExists(worldName)) {
             Bukkit.getLogger().info(worldName + " already exist on disk");
-            sendDebugMessage (getAllPlayers(), getMinecraftStaffPrefix() + "World exist on disk, loading...");
+            sendDebugMessage (getAllPlayers(), getMinecraftStaffInGamePrefix() + "World exist on disk, loading...");
             loadWorld(worldName);
             return;
         }
@@ -46,7 +46,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
         } else {
             WorldCreator worldCreator = new WorldCreator(worldName).environment(environment);
             World world = Bukkit.createWorld(worldCreator);
-                sendDebugMessage(getAllPlayers(), getMinecraftStaffPrefix() + "New World " + worldName + " created in " + environment.toString());
+                sendDebugMessage(getAllPlayers(), getMinecraftStaffInGamePrefix() + "New World " + worldName + " created in " + environment.toString());
 
             Bukkit.getLogger().info(environment.toString() + " created with the name " + worldName);
 
@@ -61,7 +61,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
 
             if (worldExists(worldName)) {
                     Bukkit.getLogger().info(worldName + " World exist on disk");
-                    sendDebugMessage(aplayers,getMinecraftStaffPrefix() + "World exist on disk, loading...");
+                    sendDebugMessage(aplayers,getMinecraftStaffInGamePrefix() + "World exist on disk, loading...");
 
                     loadWorld(worldName);
 
