@@ -160,8 +160,12 @@ public interface IMCUtils {
         return ClickEvent.openUrl(url);
     }
 
-    void sendDebugMessage(Player player, String message);
+    default void sendDebugMessage(Player player, String message){
 
-    boolean isDebugger(String name);
+    }
+
+    default boolean isDebugger(String name){
+        return false;
+    }
 }
 
