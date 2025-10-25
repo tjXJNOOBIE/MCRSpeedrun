@@ -3,6 +3,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.interfaces.IVoting;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,10 +16,7 @@ import java.util.UUID;
 
 public class SpeedRunInventoryClick implements Listener, IUtils {
 
-    private final ISpeedRunContext speedRunContext;
-    public SpeedRunInventoryClick(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
+    @Inject private ISpeedRunContext speedRunContext;
 
 
     @EventHandler
@@ -30,7 +28,7 @@ public class SpeedRunInventoryClick implements Listener, IUtils {
         boolean hasVoted = voting.getHasVotedHash().contains(uuid);
         if (e.getView().getTitle().equals("§aVote for a Gamemode") && e.getClickedInventory() != null) {
             if(hasVoted){
-                player.sendMessage(prefix+"§cYou have already voted!");
+                player.sendMessage(getMinecraftPrefix()+"§cYou have already voted!");
                 e.setCancelled(true);
                 player.closeInventory();
                 return;
@@ -42,7 +40,7 @@ public class SpeedRunInventoryClick implements Listener, IUtils {
             if (clickedItem != null && clickedItem.getType() == Material.PAPER && clickedItem.getItemMeta() != null) {
                 String gamemode = clickedItem.getItemMeta().getDisplayName().replace("§e", "");
                 voting.vote(player,gamemode);
-                player.sendMessage(prefix+"§aYou voted for " + gamemode + "!");
+                player.sendMessage(getMinecraftPrefix()+"§aYou voted for " + gamemode + "!");
                 voting.getHasVotedHash().add(uuid);
 
                 player.closeInventory();
