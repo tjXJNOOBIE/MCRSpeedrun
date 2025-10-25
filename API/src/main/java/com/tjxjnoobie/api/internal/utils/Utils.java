@@ -186,6 +186,7 @@ public class Utils implements IUtils<IGlobalContext> {
 
     @Override
     public Map<String, Object> getConfigValues(IGlobalContext globalContext) {
+        //TODO: Remove context from parameters in favor of custom DI approach
         if (globalContext == null) {
             Log.error("[Config] Failed to get config values: GlobalContext is null");
             return configValues;
