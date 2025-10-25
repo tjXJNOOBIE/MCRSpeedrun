@@ -39,9 +39,6 @@ public interface IGlobalContextAccess {
         return getGlobalContext().getSpeedrunStatsCache();
     }
 
-    default IMCUtils mcUtils() {
-        return getGlobalContext().getMcUtils();
-    }
 
     default IWorldManager worldManager() {
         return getGlobalContext().getWorldManager();
