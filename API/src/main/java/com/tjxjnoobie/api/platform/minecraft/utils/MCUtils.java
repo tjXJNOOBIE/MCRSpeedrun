@@ -16,8 +16,8 @@ public class MCUtils implements IMCUtils {
 
     private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();
-    @Inject private ISpeedRunContext speedRunContext;
-
+    @Inject
+    private ISpeedRunContext speedRunContext;
 
 
     public void hidePlayerFromAll(Player toHide) {
@@ -25,8 +25,9 @@ public class MCUtils implements IMCUtils {
             viewer.hidePlayer(toHide);
         }
     }
-    public Player getAllPlayers(){
-        for(Player ap : Bukkit.getOnlinePlayers()) {
+
+    public Player getAllPlayers() {
+        for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
                 return ap;
             } else {
@@ -39,16 +40,17 @@ public class MCUtils implements IMCUtils {
 
     public void playSoundForAll(Location location, Sound sound, float v, float v1) {
         for (Player ap : Bukkit.getOnlinePlayers()) {
-            ap.playSound(location, sound, v,v1);
+            ap.playSound(location, sound, v, v1);
 
         }
     }
 
-    public void sendMessageToAll(String message){
-        for(Player ap : Bukkit.getOnlinePlayers()){
+    public void sendMessageToAll(String message) {
+        for (Player ap : Bukkit.getOnlinePlayers()) {
             ap.sendMessage(message);
         }
     }
+
     public void playDramaticBoom(Player player) {
         player.playSound(player.getLocation(), Sound.AMBIENT_CAVE, 1.0f, 0.5f); // Low-pitched cave sound
         Bukkit.getScheduler().runTaskLater(plugin, () ->
@@ -58,28 +60,29 @@ public class MCUtils implements IMCUtils {
         Bukkit.getScheduler().runTaskLater(plugin, () ->
                 player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 0.6f), 30L); // Explosion after 30 ticks
     }
+
     public void cancelTask(BukkitTask task) {
         if (task != null && !task.isCancelled()) {
             task.cancel();
-            Bukkit.getLogger().info(task.toString()+" Task has been cancelled.");
+            Bukkit.getLogger().info(task.toString() + " Task has been cancelled.");
         }
     }
-public void sendDebugMessage(Player player,String message){
+
+    public void sendDebugMessage(Player player, String message) {
         //TODO: Move depends to field injection
         IRankCache rankCache = speedRunContext.getRankCache();
         IUtils utils = speedRunContext.getUtils();
         UUID uuid = player.getUniqueId();
         IDebugger debugger = speedRunContext.getDebugger();
-    if (rankCache.getPowerLevel(uuid) <= 10000 ||
-            rankCache.hasPermission(uuid, "network.debug")
-            && debugger.isDebugger(uuid)) {
-        player.sendMessage(utils.getStaffPrefix() +message);
+        if (rankCache.getPowerLevel(uuid) <= 10000 ||
+                rankCache.hasPermission(uuid, "network.debug")
+                        && debugger.isDebugger(uuid)) {
+            player.sendMessage(utils.getStaffPrefix() + message);
+        }
     }
-}
 
 
-
-    public boolean isDebugger(String name){
+    public boolean isDebugger(String name) {
         return debuggers.contains(name);
     }
 }
