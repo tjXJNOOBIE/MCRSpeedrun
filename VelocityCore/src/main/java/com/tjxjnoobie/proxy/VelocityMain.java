@@ -40,7 +40,7 @@ public class VelocityMain  {
     @Inject private IProxyUtils proxyUtils;
     @Inject private IRating rating;
     @Inject private IPlayerProfile playerProfile;
-    @Inject private IContext<IGlobalContext> globalContext;
+    private IContext<IGlobalContext> globalContext;
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
@@ -53,15 +53,16 @@ public class VelocityMain  {
     public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException {
         //TODO: Add main method logging
         //TODO: Remove from main method
+        ReflectUtil.loadLibs();
         IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
         IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
         dependencyInjectorHelper.autoBind(this);
         //TODO: Remove concrete call in favor of DI
         globalContext = new GlobalContext();
-        ReflectUtil.loadLibs();
+
         Config.createConfig();
         Config.loadConfig();
-        injectionHelper.performWaveInjection((List<IContext<?>>) globalContext);
+        injectionHelper.injectAllContextsGlobally((List<IContext<?>>) globalContext);
 
         MySQL.connect();
         redis.connectToRedis();
