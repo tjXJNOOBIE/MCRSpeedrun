@@ -35,7 +35,7 @@ public class SetSpawns implements CommandExecutor, IUtils {
         String gameTypeText = gameType.getGameType().toString();
         int length = args.length;
         if(length > 0){
-            player.sendMessage(getStaffPrefix()+"Usage: /setspawn");
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"Usage: /setspawn");
         }else{
             try {
                 worldManager.saveWorldSpawn(gameTypeText,worldName,X,Y,Z,pitch,yaw);
@@ -45,7 +45,7 @@ public class SetSpawns implements CommandExecutor, IUtils {
             }
             locationCache.removeLocationCache(worldName);
             locationCache.loadLocationCache();
-            player.sendMessage(getStaffPrefix()+"You set spawn to X: " + X+" Y: "+Y+ " Z: "+Z);
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"You set spawn to X: " + X+" Y: "+Y+ " Z: "+Z);
         }
         return false;
     }
