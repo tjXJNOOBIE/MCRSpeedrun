@@ -21,7 +21,6 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
 import java.sql.SQLException;
-import java.util.List;
 
 @Plugin(
     id = "velocitycore",
@@ -58,7 +57,7 @@ public class VelocityMain  {
 
         Config.createConfig();
         Config.loadConfig();
-        injectionHelper.injectAllContextsGlobally((List<IContext<?>>) globalContext);
+        injectionHelper.injectAllContextsGlobally(this);
 
         MySQL.connect();
         redis.connectToRedis();
