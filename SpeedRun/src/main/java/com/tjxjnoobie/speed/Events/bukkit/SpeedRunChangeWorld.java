@@ -14,7 +14,7 @@ import org.bukkit.event.player.PlayerPortalEvent;
 
 import java.util.UUID;
 
-public class SpeedRunChangeWorld implements Listener, IUtils {
+public class SpeedRunChangeWorld implements Listener, IMCUtils {
 
     private final ISpeedRunContext speedRunContext;
 
@@ -45,13 +45,13 @@ public class SpeedRunChangeWorld implements Listener, IUtils {
         if (currentState == GameStateEnum.INGAME) {
             if (world.getEnvironment() == World.Environment.NETHER && gameManager.getPlayersInNetherInt() == 0) {
                 gameManager.addInNether(uuid, name);
-                Bukkit.broadcastMessage(prefix + displayName + " has entered the nether for the first time!");
+                Bukkit.broadcastMessage(getMinecraftPrefix() + displayName + " has entered the nether for the first time!");
                 mcUtils.playSoundForAll(aplocation, Sound.ENTITY_GHAST_DEATH, 1.0f, 1.0f);
                 return;
             }
 
             if (world.getEnvironment().equals(World.Environment.THE_END) && gameManager.getPlayersInEndInt() == 0) {
-                Bukkit.broadcastMessage(prefix+ displayName + " has entered the end for the first time!");
+                Bukkit.broadcastMessage(getMinecraftPrefix()+ displayName + " has entered the end for the first time!");
                 gameManager.addInEnder(uuid, name);
                 mcUtils.playSoundForAll(aplocation, Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
             }
@@ -77,7 +77,7 @@ public class SpeedRunChangeWorld implements Listener, IUtils {
         String displayName = event.getPlayer().getDisplayName();
         if (gameState.getCurrentState() == GameStateEnum.INGAME) {
             if (toWorld != null && toWorld.getEnvironment() == World.Environment.NORMAL) {
-                Bukkit.broadcastMessage(prefix+ displayName + " has reentered the Overworld!");
+                Bukkit.broadcastMessage(getMinecraftPrefix()+ displayName + " has reentered the Overworld!");
             }
 
         if(toWorld.getEnvironment() == World.Environment.NETHER){
