@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 
 import java.util.UUID;
 
-public class SpeedRunPlayerPickup implements Listener, IUtils {
+ public class SpeedRunPlayerPickup implements Listener, IMCUtils {
 
     private final ISpeedRunContext speedRunContext;
 
