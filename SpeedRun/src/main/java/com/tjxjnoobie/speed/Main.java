@@ -201,13 +201,13 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         registerEvents();
         registerCommand("debug", new Debug());
         registerCommand("addplayer", new AddPlayer());
-        registerCommand("createworld", new CreateWorld(globalContext));
+        registerCommand("createworld", new CreateWorld());
         registerCommand("changeworld", new ChangeWorldCMD());
-        registerCommand("world", new LoadWorld(globalContext));
+        registerCommand("world", new LoadWorld());
         registerCommand("loadseed", new Seed());
         registerCommand("setspawn", new SetSpawns(speedRunContext));
         registerCommand("spawndragon", new SpawnEnderDragon(globalContext));
-        registerCommand("debugger", new DebuggerCMD(globalContext));
+        registerCommand("debugger", new DebuggerCMD());
         registerCommand("vote", new Vote(speedRunContext));
         registerCommand("v", new Vote(speedRunContext));
         registerCommand("fireevent", new FireEvent());
