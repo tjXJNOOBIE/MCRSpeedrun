@@ -43,7 +43,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 @Injectable("Main class for Minecraft Speedrun Module")
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils<IGlobalContext>, MainInterFace {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, MainInterFace {
 
     private IContext<IGlobalContext> iGlobalContext;
     private IContext<ISpeedRunContext> iSpeedContext;
