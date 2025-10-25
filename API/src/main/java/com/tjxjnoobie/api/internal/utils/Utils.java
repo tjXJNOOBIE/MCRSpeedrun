@@ -52,13 +52,6 @@ public class Utils implements IUtils<IGlobalContext> {
         return localServerMetaData.getGameID();
     }
 
-    @Override
-    public String getStaffPrefix(){
-        return staffPrefix;
-    }
-
-
-
 
     @Override
     public IGlobalContext getGlobalContext(){
