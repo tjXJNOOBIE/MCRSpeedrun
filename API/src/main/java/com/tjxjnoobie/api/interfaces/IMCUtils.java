@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
+import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -11,7 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 /**
  * Interface for Minecraft utility functions
  */
-public interface IMCUtils {
+public interface IMCUtils extends ILocalServerMetaData {
 
 
     //TODO: Replace class methods parameters for custom DI system
@@ -20,37 +21,7 @@ public interface IMCUtils {
         return null;
     }
 
-
-    /**
-     * Retrieves the Minecraft prefix used in chat messages or commands.
-     *
-     * @return The Minecraft prefix string, typically used to denote server-specific or role-based identifiers (e.g., "§6[Admin]").
-     */
-    default String getMinecraftPrefix() {
-        return "";
-    }
-
-    /**
-     * Retrieves the Minecraft staff prefix used to identify staff members in chat or commands.
-     * This method returns a predefined string that represents the official prefix for staff roles within the server's messaging system.
-     *
-     * @return The Minecraft staff prefix, typically used in chat formatting or player identification
-     */
-    default String getMinecraftStaffPrefix() {
-        return "";
-    }
-
-
-
-    /**
-     * Retrieves the unique identifier for the server.
-     *
-     * @return A string representing the server's unique ID, used to identify and differentiate between servers in distributed or multi-server environments.
-     */
-    default String getServerID() {
-        return "";
-    }
-
+    
     /**
      * Hides a specified player from all other players in the game. This method ensures that the given player is no longer visible to any other active players, typically used for
      *  privacy or security purposes during gameplay.
