@@ -138,24 +138,26 @@ public interface IMCUtils {
 
     }
 
-    // Helper factory methods for convenience (optional)
 
-    default HoverEvent<Component> createHoverText(String text) {
-        return HoverEvent.showText(Component.text(text));
-    }
-
-    default ClickEvent createClickRunCommand(String command) {
-        return ClickEvent.runCommand(command);
-    }
-
-    default ClickEvent createClickOpenUrl(String url) {
-        return ClickEvent.openUrl(url);
-    }
-
+    /**
+     * Sends a debug message to the specified player using the Minecraft chat system.
+     * This method is intended for internal debugging purposes and is not meant for end-user interaction.
+     * The message will be displayed directly in the player's chat interface.
+     *
+     * @param player The player to whom the debug message should be sent
+     * @param message The debug message content to display to the player
+     */
     default void sendDebugMessage(Player player, String message){
 
     }
 
+    /**
+     * Checks if a given player name matches a known debugger identifier.
+     * This method is used to determine whether a specific player should be considered a debugger based on their name.
+     *
+     * @param name the name of the player to check for debugger status
+     * @return true if the player name is recognized as a debugger, false otherwise
+     */
     default boolean isDebugger(String name){
         return false;
     }
