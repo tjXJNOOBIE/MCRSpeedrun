@@ -23,9 +23,10 @@ import java.sql.SQLException;
     name = "VelocityCore",
     version = "1.0"
 )
-public class VelocityMain {
+public class VelocityMain  {
 
-    @Inject private Logger logger;
+    @com.google.inject.Inject private Logger logger;
+    @com.google.inject.Inject
     private ProxyServer proxyServer;
     @Inject private IRank rank;
     @Inject private IUtils utils;
