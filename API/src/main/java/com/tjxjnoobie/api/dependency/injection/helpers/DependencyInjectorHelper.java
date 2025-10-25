@@ -1449,23 +1449,39 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             return implementations;
         }
 
-        String scanPackage = (basePackage == null || basePackage.isBlank())
-                ? (interfaceType.getPackage() != null ? interfaceType.getPackage().getName() : "")
-                : basePackage;
+        Set<String> searchPackages = collectImplementationSearchPackages(interfaceType, basePackage);
+        for (String scanPackage : searchPackages) {
+            Set<Class<?>> candidates = findInjectableClasses(scanPackage);
+            for (Class<?> candidate : candidates) {
+                if (candidate == null || candidate.isInterface()) {
+                    continue;
+                }
 
-        Set<Class<?>> candidates = findInjectableClasses(scanPackage);
-        for (Class<?> candidate : candidates) {
-            if (candidate == null || candidate.isInterface()) {
-                continue;
-            }
-
-            if (interfaceType.isAssignableFrom(candidate)) {
-                implementations.add(candidate);
-                Log.info("Found concrete class: " + candidate.getSimpleName() + " implements " + interfaceType.getSimpleName() + "");
+                if (interfaceType.isAssignableFrom(candidate)) {
+                    implementations.add(candidate);
+                    Log.info("Found concrete class: " + candidate.getSimpleName() + " implements " + interfaceType.getSimpleName() + "");
+                }
             }
         }
 
         return implementations;
+    }
+
+    private Set<String> collectImplementationSearchPackages(Class<?> interfaceType, String basePackage) {
+        LinkedHashSet<String> packages = new LinkedHashSet<>();
+
+        if (basePackage != null && !basePackage.isBlank()) {
+            packages.add(basePackage);
+        }
+
+        addTypeHierarchyPackages(interfaceType, packages);
+
+        packages.addAll(getAllowedPackagePrefixes());
+        packages.addAll(SCANNED_PACKAGES);
+
+        packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
+
+        return packages;
     }
 
     @Override
