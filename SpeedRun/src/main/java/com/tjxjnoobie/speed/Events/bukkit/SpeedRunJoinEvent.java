@@ -77,7 +77,7 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager {
         ratingCache.loadSpeedRunRatings(uuid);
         Bukkit.getLogger().info(name + " Logged in with Rating: " + ratingCache.getRating() + " Deviation: " + ratingCache.getDeviation() + " Vol: " + ratingCache.getVolatility());
 
-        mcUtils.cancelTask(bossBar);
+        mcUtils.cancelBukkitTask(bossBar);
         addPlayer(player); // Add player to the boss bar
 
         if (isQuitPlayer && currentGameState != GameStateEnum.LOBBY && currentGameState != GameStateEnum.ENDING) {
