@@ -292,63 +292,6 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     }
 
     /**
-     * Scans the class hierarchy starting from the given target class and registers all identified injectable classes
-     * into the injection framework. This method performs a recursive search to locate candidate classes that are
-     * annotated with injection annotations (such as @Inject, @Component, etc.) and makes them available for dependency
-     * injection purposes.
-     *
-     * @param targetClass the root class to start the scanning hierarchy from; typically a configuration or main entry point class
-     */
-    default void scanAndRegisterInjectableClasses(Class<?> targetClass){
-
-    }
-
-    /**
-     * Analyzes a set of injectable classes to determine their appropriate dependency roles and assigns those roles based on class hierarchy, dependencies, and other contextual rules
-     * .
-     *
-     * @param injectableClasses A set of Class objects representing types that can be injected into components. These are typically service or component classes used in dependency
-     *  injection frameworks.
-     * @return A map where keys are the analyzed classes and values are their assigned DependencyRole instances, indicating how each class should be treated in the dependency graph
-     *  (e.g., provider, consumer, bridge).
-     */
-    default Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses){
-        return new HashMap<>();
-    }
-
-    /**
-     * Registers a set of injectable classes with their corresponding dependency roles.
-     *
-     * @param injectableClasses a set of class types that are to be injected into the system; each class in this set may have a specific role assigned
-     * @param roleMap a map associating each class type with its intended dependency role, defining how and where the class should be used or resolved within the injection context
-     *
-     */
-    default void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap){
-
-    }
-
-    /**
-     * Registers a set of implementable classes under a specified base package to enable interface implementation registration.
-     *
-     * @param basePackage the base package path where interfaces and their implementations are expected to reside (e.g., "com.example.api")
-     * @param injectableClasses a set of class types that represent concrete implementations of interfaces within the specified package
-     */
-    default void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses){
-
-    }
-
-    /**
-     * Assigns roles to a set of class implementations. This method is intended to map each provided class
-     * to a specific role, typically used in dependency injection or component registration scenarios
-     * where classes are grouped by functionality or interface they implement.
-     *
-     * @param implementations a set of Class objects representing the implementation classes to which roles should be assigned
-     */
-    default void assignRolesToClasses(Set<Class<?>> implementations){
-
-    }
-
-    /**
      * Analyzes the class dependencies of the given class by identifying all classes that it directly or indirectly depends on.
      * This includes classes referenced through fields, methods, or annotations, depending on the implementation logic.
      *

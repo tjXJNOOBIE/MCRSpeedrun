@@ -51,6 +51,12 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
 
+    /**
+     * Collects package prefixes that should be scanned for dependency injection targets.
+     *
+     * @param targetClass the class requesting auto-bind operations
+     * @return a set of package prefixes to scan
+     */
     private Set<String> collectPackages(Class<?> targetClass) {
         LinkedHashSet<String> packages = new LinkedHashSet<>();
 
@@ -175,12 +181,20 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         return false;
     }
 
+    /**
+     * Ensures that each package in the provided set has been scanned for injectables.
+     *
+     * @param packagesToScan the packages that may need scanning
+     * @return true when at least one new package scan occurred
+     */
     private boolean ensurePackagesScanned(Set<String> packagesToScan) {
         boolean scannedNew = false;
         for (String pkg : packagesToScan) {
+            // Step 1: Skip empty package entries that provide no scan value.
             if (pkg == null || pkg.isBlank()) {
                 continue;
             }
+            // Step 2: Scan newly encountered packages and record their processed status.
             if (SCANNED_PACKAGES.add(pkg)) {
                 Log.info("[AUTO-BIND] » scanning package: " + pkg);
                 scanAndRegisterInjectableClasses(pkg);
@@ -190,12 +204,30 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         return scannedNew;
     }
 
+    /**
+     * Logs the binding relationship established between a contract and its resolved dependency.
+     *
+     * @param contract the dependency contract being satisfied
+     * @param resolved the instance or proxy fulfilling the contract
+     * @param origin   contextual information describing how the binding occurred
+     */
     private void logTypeBinding(Class<?> contract, Object resolved, String origin) {
+        // Derive a human-readable name for the resolved dependency.
         String resolvedName = resolved != null ? resolved.getClass().getSimpleName() : "<null>";
         Log.info("[AUTO-BIND] Bound " + contract.getSimpleName() + " -> " + resolvedName + " (" + origin + ")");
     }
 
+    /**
+     * Assigns a value to a field and logs the binding operation.
+     *
+     * @param target            the instance owning the field (or null for static fields)
+     * @param field             the field being populated
+     * @param value             the resolved dependency instance
+     * @param sourceDescription description of the binding source for logging
+     * @throws IllegalAccessException when reflection cannot modify the field
+     */
     private void assignFieldValue(Object target, Field field, Object value, String sourceDescription) throws IllegalAccessException {
+        // Step 1: Determine whether the field is static or instance-based.
         boolean isStatic = Modifier.isStatic(field.getModifiers());
         field.setAccessible(true);
         if (isStatic) {
@@ -204,6 +236,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             field.set(target, value);
         }
 
+        // Step 2: Build a descriptive log entry summarizing the binding.
         String owner = isStatic
                 ? field.getDeclaringClass().getSimpleName()
                 : (target != null ? target.getClass().getSimpleName() : field.getDeclaringClass().getSimpleName());
@@ -283,10 +316,19 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     }
 
+    /**
+     * Initializes the dependency graph, resolves injection order, and processes pending hooks.
+     *
+     * @throws Exception when graph construction or injection fails
+     */
     public void initialize() throws Exception {
+        // Step 1: Build the dependency graph of registered components.
         buildDependencyGraph();
+        // Step 2: Compute depth levels to determine initialization order.
         computeDepthLevels();
+        // Step 3: Perform dependency injection for all registered metadata entries.
         injectAll();
+        // Step 4: Process any deferred @PreConstruct executions.
         processPreConstructRetryQueue();
     }
 
@@ -737,42 +779,70 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         Log.info("[AUTO-BIND] Scanning classpath for injectable classes in package: " + basePackage);
 
         try {
+            // Step 1: Discover candidate classes that could participate in dependency injection.
             Set<Class<?>> allClasses = findInjectableClasses(basePackage);
 
+            // Step 2: Stop early when no candidates exist for the requested package.
             if (allClasses.isEmpty()) {
                 Log.info("[AUTO-BIND] No injectable classes discovered in package: " + basePackage);
                 return;
             }
 
+            // Step 3: Track newly registered classes for summary reporting.
+            Set<Class<?>> newlyRegistered = new HashSet<>();
+
             for (Class<?> clazz : allClasses) {
-                if (!clazz.isInterface() && !dependencyMap.isRegistered(clazz)) {
-                    try {
-                        // Instantiate the class to register
-                        Object instance = clazz.getDeclaredConstructor().newInstance();
+                Log.info("[AUTO-BIND] Scanned for injection: " + clazz.getName());
 
-                        // Register with dependency map
-                        dependencyMap.registerDependency(clazz, instance);
+                // Step 4: Avoid re-registering classes that already exist in the dependency map.
+                if (dependencyMap.isRegistered(clazz)) {
+                    Log.info("[AUTO-BIND] Skipping already registered class: " + clazz.getSimpleName());
+                    continue;
+                }
 
-                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName());
-
-                        // Optionally assign role based on dependencies
-                        Set<Class<?>> deps = analyzeClassDependencies(clazz);
-                        DependencyRole role = determineRoleFromDependencies(deps);
-                        IDependencyMetaData meta = dependencyMap.getDependency(clazz);
-                        if (meta != null) {
-                            meta.setRole(role);
-                            meta.setDependencies(deps);
-                            Log.info("[AUTO-BIND] Assigned role " + role + " to " + clazz.getSimpleName());
+                try {
+                    // Step 5: Route interfaces through the type binding pipeline.
+                    if (clazz.isInterface()) {
+                        bindTypeInternal(clazz, "package scan");
+                        if (dependencyMap.isRegistered(clazz)) {
+                            newlyRegistered.add(clazz);
+                            refreshMetadataForType(clazz, clazz);
                         }
-                    } catch (Exception e) {
-                        Log.warn("[AUTO-BIND] Could not instantiate class: " + clazz.getSimpleName() + " - Error: " + e.getMessage());
+                        continue;
                     }
-                } else {
-                    Log.warn("[AUTO-BIND] Skipping already registered class: " + clazz.getSimpleName());
+
+                    // Step 6: Register abstract classes without instantiating them so metadata is available.
+                    if (Modifier.isAbstract(clazz.getModifiers())) {
+                        registerInstanceAndMetadata(clazz, null, clazz);
+                        newlyRegistered.add(clazz);
+                        Log.info("[AUTO-BIND] Registered abstract class metadata: " + clazz.getSimpleName());
+                        continue;
+                    }
+
+                    // Step 7: Instantiate concrete classes and bind them directly into the dependency map.
+                    Object instance = clazz.getDeclaredConstructor().newInstance();
+                    registerInstanceAndMetadata(clazz, instance, clazz);
+                    newlyRegistered.add(clazz);
+
+                    // Step 8: Capture dependency metadata and role information for the new registration.
+                    IDependencyMetaData meta = dependencyMap.getDependency(clazz);
+                    DependencyRole role = meta != null && meta.getRole() != null
+                            ? meta.getRole()
+                            : determineRoleFromDependencies(analyzeClassDependencies(clazz));
+                    Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName() + " (role=" + role + ")");
+                } catch (Exception e) {
+                    // Step 9: Warn when any individual class fails to prepare for dependency usage.
+                    Log.warn("[AUTO-BIND] Could not prepare class: " + clazz.getSimpleName() + " - Error: " + e.getMessage());
                 }
             }
 
+            // Step 10: Emit a summary when new registrations were added during the scan.
+            if (!newlyRegistered.isEmpty()) {
+                Log.info("[AUTO-BIND] Newly registered classes: " + newlyRegistered.size());
+            }
+
         } catch (Exception e) {
+            // Step 11: Capture unexpected exceptions that occurred during the scan.
             Log.error("[AUTO-BIND] Failed to scan or register classes in package " + basePackage + ": " + e.getMessage());
         }
     }
@@ -830,12 +900,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      */
     @Override
     public void injectAllRegisteredClasses() {
-        // Get all registered metadata
+        // Step 1: Retrieve all registered dependency metadata entries.
         Collection<IDependencyMetaData> allMetadata = dependencyMap.getDependencyMapValues();
 
         Log.info("[AUTO-BIND] Injecting fields for " + allMetadata.size() + " registered classes");
 
         for (IDependencyMetaData meta : allMetadata) {
+            // Step 2: Skip metadata entries that do not reference a concrete class.
             if (meta == null || meta.getDependencyClass() == null) {
                 continue;
             }
@@ -843,12 +914,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Class<?> clazz = meta.getDependencyClass();
             Object instance = meta.ensureAndGetInstance(meta);
 
+            // Step 3: Warn and continue when no instance can be resolved for the metadata.
             if (instance == null) {
                 Log.warn("[AUTO-BIND] No instance available for: " + clazz.getSimpleName());
                 continue;
             }
 
-            // Inject fields for this instance
+            // Step 4: Inject fields for the resolved instance.
             injectFieldsForInstance(instance, clazz);
         }
     }
@@ -858,12 +930,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * This ensures every class gets its fields bound aggressively from the map.
      */
     public void bindFieldsForAllRegisteredClasses() {
-        // Get all registered metadata
+        // Step 1: Retrieve all registered dependency metadata entries.
         Collection<IDependencyMetaData> allMetadata = dependencyMap.getDependencyMapValues();
 
         Log.info("[AUTO-BIND] Binding fields for " + allMetadata.size() + " registered classes");
 
         for (IDependencyMetaData meta : allMetadata) {
+            // Step 2: Skip metadata entries lacking a dependency type.
             if (meta == null || meta.getDependencyClass() == null) {
                 continue;
             }
@@ -871,12 +944,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             Class<?> clazz = meta.getDependencyClass();
             Object instance = meta.ensureAndGetInstance(meta);
 
+            // Step 3: Continue when no instance is available to bind against.
             if (instance == null) {
                 Log.warn("[AUTO-BIND] No instance available for: " + clazz.getSimpleName());
                 continue;
             }
 
-            // Bind fields for this instance
+            // Step 4: Bind fields on the resolved instance using the dependency map.
             bindFieldsFromTarget(instance, clazz);
         }
     }
@@ -889,6 +963,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         Class<?> currentClass = clazz;
 
         while (currentClass != null && currentClass != Object.class) {
+            // Step 1: Evaluate each declared field for injection requirements.
             for (Field field : currentClass.getDeclaredFields()) {
                 if (!field.isAnnotationPresent(Inject.class)) {
                     continue;
@@ -901,11 +976,11 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
                 Class<?> fieldType = field.getType();
 
-                // Try to get instance from DependencyMap
+                // Step 2: Attempt to resolve the dependency directly from the map.
                 Object value = dependencyMap.getDependencyInstance(fieldType);
 
                 if (value == null) {
-                    // Try to find by assignable type
+                    // Step 3: Search for assignable types when a direct match is unavailable.
                     IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(fieldType);
                     if (compatibleMeta != null) {
                         value = compatibleMeta.ensureAndGetInstance(compatibleMeta);
@@ -939,167 +1014,6 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * Also discovers and registers implementations for interfaces.
      */
     @Override
-    public void scanAndRegisterInjectableClasses(Class<?> targetClass) {
-        Log.info("[AUTO-BIND] Scanning classpath for injectable classes...");
-        String basePackage = targetClass.getPackage() != null ? targetClass.getPackage().getName() : "";
-
-        try {
-            Set<Class<?>> injectableClasses = findInjectableClasses(basePackage);
-            Log.info("[AUTO-BIND] Found " + injectableClasses.size() + " injectable classes");
-
-            // First pass: Analyze roles and assign them BEFORE registration
-            Log.info("[AUTO-BIND] Analyzing class dependencies to determine roles...");
-            Map<Class<?>, DependencyRole> roleMap = analyzeAndAssignRoles(injectableClasses);
-
-            // Second pass: Register all concrete classes with their assigned roles
-            Log.info("[AUTO-BIND] Registering classes with assigned roles...");
-            registerClassesWithRoles(injectableClasses, roleMap);
-
-            // Third pass: Find and register implementations for interfaces
-            Log.info("[AUTO-BIND] Scanning for interface implementations...");
-            registerInterfaceImplementations(basePackage, injectableClasses);
-
-        } catch (Exception e) {
-            Log.error("[AUTO-BIND] Error scanning for injectable classes: " + e.getMessage());
-        }
-    }
-
-    /**
-     * Analyzes all injectable classes and assigns roles based on their dependencies.
-     * Returns a map of class to assigned role for use in registration.
-     */
-    @Override
-    public Map<Class<?>, DependencyRole> analyzeAndAssignRoles(Set<Class<?>> injectableClasses) {
-        Map<Class<?>, DependencyRole> roleMap = new HashMap<>();
-
-        for (Class<?> clazz : injectableClasses) {
-            if (!clazz.isInterface()) {
-                Set<Class<?>> dependencies = analyzeClassDependencies(clazz);
-                DependencyRole role = determineRoleFromDependencies(dependencies);
-                roleMap.put(clazz, role);
-                Log.info("[AUTO-BIND] Analyzed " + clazz.getSimpleName() + " -> Role: " + role + " (dependencies: " + dependencies.size() + ")");
-            }
-        }
-
-        return roleMap;
-    }
-
-    /**
-     * Registers all concrete classes with their pre-assigned roles.
-     */
-    @Override
-    public void registerClassesWithRoles(Set<Class<?>> injectableClasses, Map<Class<?>, DependencyRole> roleMap) {
-        for (Class<?> clazz : injectableClasses) {
-            if (!clazz.isInterface() && !dependencyMap.isRegistered(clazz)) {
-                try {
-                    // Instantiate the class
-                    Object instance = clazz.getDeclaredConstructor().newInstance();
-
-                    // Register with metadata
-                    dependencyMap.registerDependency(clazz, instance);
-
-                    // Get metadata and set the pre-assigned role
-                    IDependencyMetaData meta = dependencyMap.getDependency(clazz);
-                    if (meta != null) {
-                        DependencyRole role = roleMap.getOrDefault(clazz, DependencyRole.ISOLATED);
-                        meta.setRole(role);
-                        meta.setDependencies(analyzeClassDependencies(clazz));
-                        Log.info("[AUTO-BIND] Registered: " + clazz.getSimpleName() + " with role " + role);
-                    }
-                } catch (Exception e) {
-                    Log.warn("[AUTO-BIND] Could not instantiate " + clazz.getSimpleName() + ": " + e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * Finds all implementations for interfaces and registers them.
-     * This allows a single DI class to register the entire system.
-     * Also automatically determines and assigns roles based on dependencies.
-     */
-    @Override
-    public void registerInterfaceImplementations(String basePackage, Set<Class<?>> injectableClasses) {
-        Set<Class<?>> interfaces = new HashSet<>();
-        Set<Class<?>> implementations = new HashSet<>();
-
-        // Separate interfaces from implementations
-        for (Class<?> clazz : injectableClasses) {
-            if (clazz.isInterface()) {
-                interfaces.add(clazz);
-            } else {
-                implementations.add(clazz);
-            }
-        }
-
-        Log.info("[AUTO-BIND] Found " + interfaces.size() + " interfaces and " + implementations.size() + " implementations");
-
-        // Analyze and assign roles based on dependencies
-        Log.info("[AUTO-BIND] Analyzing class dependencies to determine roles...");
-        assignRolesToClasses(implementations);
-
-        // For each interface, find and register its implementations
-        for (Class<?> interfaceClass : interfaces) {
-            Set<Class<?>> interfaceImpls = new HashSet<>();
-
-            for (Class<?> implClass : implementations) {
-                // Check if this class implements the interface
-                if (interfaceClass.isAssignableFrom(implClass)) {
-                    interfaceImpls.add(implClass);
-                }
-            }
-
-            if (!interfaceImpls.isEmpty()) {
-                // Register the first implementation as the default for this interface
-                Class<?> defaultImpl = interfaceImpls.iterator().next();
-
-                try {
-                    Object instance = dependencyMap.getDependencyInstance(defaultImpl);
-                    if (instance != null) {
-                        // Register the interface to point to the implementation instance
-                        dependencyMap.registerDependency((Class<Object>) interfaceClass, instance);
-                        Log.info("[AUTO-BIND] Bound interface " + interfaceClass.getSimpleName() + " -> " + defaultImpl.getSimpleName() + " (global registry)");
-
-                        // Log all implementations found
-                        if (interfaceImpls.size() > 1) {
-                            Log.info("[AUTO-BIND] Found " + interfaceImpls.size() + " implementations for " + interfaceClass.getSimpleName() + ": " + interfaceImpls.stream().map(Class::getSimpleName).reduce((a, b) -> a + ", " + b).orElse(""));
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.warn("[AUTO-BIND] Could not bind interface " + interfaceClass.getSimpleName() + ": " + e.getMessage());
-                }
-            } else {
-                Log.info("[AUTO-BIND] No implementations found for interface: " + interfaceClass.getSimpleName());
-            }
-        }
-    }
-
-    /**
-     * Automatically analyzes class dependencies and assigns roles.
-     * - BASE: No @Inject fields (leaf dependencies)
-     * - INTERMEDIATE: 1-2 @Inject fields (depends on a few things)
-     * - ISOLATED: 3+ @Inject fields (complex dependencies)
-     */
-    @Override
-    public void assignRolesToClasses(Set<Class<?>> implementations) {
-        for (Class<?> clazz : implementations) {
-            try {
-                Set<Class<?>> dependencies = analyzeClassDependencies(clazz);
-                DependencyRole role = determineRoleFromDependencies(dependencies);
-
-                // Get or create metadata
-                IDependencyMetaData meta = dependencyMap.getDependency(clazz);
-                if (meta != null) {
-                    meta.setRole(role);
-                    meta.setDependencies(dependencies);
-                    Log.info("[AUTO-BIND] Assigned role " + role + " to " + clazz.getSimpleName() + " (dependencies: " + dependencies.size() + ")");
-                }
-            } catch (Exception e) {
-                Log.warn("[AUTO-BIND] Could not analyze dependencies for " + clazz.getSimpleName() + ": " + e.getMessage());
-            }
-        }
-    }
-
     /**
      * Analyzes a class to find all its @Inject dependencies.
      * Walks the class hierarchy to find all injected fields.
@@ -1110,24 +1024,81 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
         Class<?> current = clazz;
         while (current != null && current != Object.class) {
-            for (Field field : current.getDeclaredFields()) {
-                // Check for @Inject annotation
-                if (field.isAnnotationPresent(Inject.class)) {
-                    dependencies.add(field.getType());
-                }
-            }
-
-            // Check for @Inject methods
-            for (Method method : current.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Inject.class) && method.getParameterCount() == 1) {
-                    dependencies.add(method.getParameterTypes()[0]);
-                }
-            }
-
+            collectInjectDependencies(current, dependencies);
             current = current.getSuperclass();
         }
 
         return dependencies;
+    }
+
+    /**
+     * Updates metadata with dependency and lifecycle information for the supplied type.
+     *
+     * @param metadataKey the type whose metadata should be updated
+     * @param scanTarget the concrete class to analyze for dependency information
+     */
+    private void refreshMetadataForType(Class<?> metadataKey, Class<?> scanTarget) {
+        // Step 1: Ensure both the metadata key and scan target are available.
+        if (metadataKey == null || scanTarget == null) {
+            return;
+        }
+
+        // Step 2: Resolve the metadata entry associated with the key.
+        IDependencyMetaData meta = dependencyMap.getDependency(metadataKey);
+        if (meta == null) {
+            return;
+        }
+
+        // Step 3: Analyze dependencies declared on the scan target.
+        Set<Class<?>> deps = analyzeClassDependencies(scanTarget);
+
+        // Step 4: Persist dependency relationships and inferred role information.
+        meta.setDependencies(deps);
+        meta.setRole(determineRoleFromDependencies(deps));
+
+        // Step 5: Populate metadata with lifecycle hooks sourced from the scan target.
+        meta.populateMetaData(scanTarget);
+    }
+
+    /**
+     * Registers an instance (or metadata-only entry) and refreshes dependency metadata accordingly.
+     *
+     * @param type           the dependency type being registered
+     * @param instance       the resolved instance, which may be null for metadata-only entries
+     * @param metadataSource the class to scan for metadata; falls back to the dependency type when null
+     */
+    private void registerInstanceAndMetadata(Class<?> type, Object instance, Class<?> metadataSource) {
+        // Step 1: Validate that a dependency type has been provided.
+        if (type == null) {
+            return;
+        }
+
+        // Step 2: Persist the dependency registration with the supplied instance (if any).
+        dependencyMap.registerDependency(type, instance);
+
+        // Step 3: Ensure metadata retains a reference to the instance when one exists.
+        IDependencyMetaData meta = dependencyMap.getDependency(type);
+        if (meta != null && instance != null) {
+            meta.setInstance(instance);
+        }
+
+        // Step 4: Choose the class that should drive metadata population.
+        Class<?> target = metadataSource != null ? metadataSource : (instance != null ? instance.getClass() : type);
+
+        // Step 5: Refresh the metadata to include dependency and lifecycle details.
+        refreshMetadataForType(type, target);
+    }
+
+    private void collectInjectDependencies(Class<?> type, Set<Class<?>> dependencies) {
+        Arrays.stream(type.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Inject.class))
+                .map(Field::getType)
+                .forEach(dependencies::add);
+
+        Arrays.stream(type.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(Inject.class) && method.getParameterCount() == 1)
+                .map(method -> method.getParameterTypes()[0])
+                .forEach(dependencies::add);
     }
 
     /**
@@ -1162,6 +1133,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     private void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results, ClassLoader loader) {
         File[] files = dir.listFiles();
+        // Step 1: Abort traversal when the directory is empty or inaccessible.
         if (files == null) return;
 
         for (File file : files) {
@@ -1270,25 +1242,38 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     public void bindFieldsFromTarget(Object target, Class<?> targetClass) {
         Log.info("[AUTO-BIND] Binding fields for: " + targetClass.getSimpleName());
 
+        // Step 1: Begin traversal at the provided target class.
         Class<?> clazz = targetClass;
         while (clazz != null && clazz != Object.class) {
+            // Step 2: Inject each declared field on the current class.
             for (Field field : clazz.getDeclaredFields()) {
                 bindField(target, field);
             }
+            // Step 3: Continue walking up the inheritance hierarchy.
             clazz = clazz.getSuperclass();
         }
     }
 
+    /**
+     * Binds a class or interface into the dependency map, creating instances or proxies as needed.
+     *
+     * @param type   the type to bind
+     * @param origin the origin description for logging purposes
+     * @throws Exception when instantiation or proxy creation fails
+     */
     private void bindTypeInternal(Class<?> type, String origin) throws Exception {
+        // Step 1: Ensure a target type was provided for binding.
         if (type == null) {
             return;
         }
 
+        // Step 2: Skip types that are not eligible for injection.
         if (!isEligibleForInjection(type)) {
             Log.info("[AUTO-BIND] Skipping ineligible type: " + type.getName());
             return;
         }
 
+        // Step 3: Reuse an already registered instance when available.
         IDependencyMetaData existingMeta = dependencyMap.getDependency(type);
         Object existingInstance = existingMeta != null ? dependencyMap.ensureAndGetInstance(existingMeta) : null;
         if (existingInstance != null) {
@@ -1296,10 +1281,11 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             return;
         }
 
+        // Step 4: Attempt to reuse an assignable dependency instance.
         IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(type);
         Object compatibleInstance = compatibleMeta != null ? dependencyMap.ensureAndGetInstance(compatibleMeta) : null;
         if (compatibleInstance != null) {
-            dependencyMap.registerDependency((Class<Object>) type, compatibleInstance);
+            registerInstanceAndMetadata(type, compatibleInstance, compatibleMeta.getDependencyClass());
             String source = compatibleMeta.getDependencyClass() != null
                     ? compatibleMeta.getDependencyClass().getSimpleName()
                     : compatibleInstance.getClass().getSimpleName();
@@ -1307,57 +1293,97 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             return;
         }
 
+        // Step 5: Handle abstract classes by binding metadata and reusing compatible subclasses.
+        if (!type.isInterface() && Modifier.isAbstract(type.getModifiers())) {
+            registerInstanceAndMetadata(type, null, type);
+
+            Set<Class<?>> impls = findImplementations(type, type.getPackage() != null ? type.getPackage().getName() : "");
+            if (!impls.isEmpty()) {
+                Class<?> implClass = impls.iterator().next();
+                Object instance = implClass.getDeclaredConstructor().newInstance();
+                registerInstanceAndMetadata(type, instance, type);
+                logTypeBinding(type, instance, origin + ", resolved abstract via " + implClass.getSimpleName());
+                return;
+            }
+
+            logTypeBinding(type, null, origin + ", registered abstract metadata");
+            return;
+        }
+
+        // Step 6: Instantiate and register concrete classes directly.
         if (!type.isInterface()) {
             Object instance = type.getDeclaredConstructor().newInstance();
-            dependencyMap.registerDependency((Class<Object>) type, instance);
+            registerInstanceAndMetadata(type, instance, type);
             logTypeBinding(type, instance, origin + ", instantiated concrete type");
             return;
         }
 
+        // Step 7: Create self proxies for interfaces with default methods.
         if (Arrays.stream(type.getMethods()).anyMatch(Method::isDefault)) {
             Object proxy = createSelfProxy(type);
-            dependencyMap.registerDependency((Class<Object>) type, proxy);
+            registerInstanceAndMetadata(type, proxy, type);
             logTypeBinding(type, proxy, origin + ", self proxy");
             return;
         }
 
+        // Step 8: Attempt to bind discovered implementations for interfaces.
         Set<Class<?>> impls = findImplementations(type, type.getPackage() != null ? type.getPackage().getName() : "");
         if (!impls.isEmpty()) {
             Class<?> implClass = impls.iterator().next();
             Object instance = implClass.getDeclaredConstructor().newInstance();
-            dependencyMap.registerDependency((Class<Object>) type, instance);
+            registerInstanceAndMetadata(type, instance, implClass);
             logTypeBinding(type, instance, origin + ", discovered " + implClass.getSimpleName());
             return;
         }
 
+        // Step 9: Use a placeholder proxy when no implementation could be located.
         Object placeholder = createPlaceholderProxy(type);
-        dependencyMap.registerDependency((Class<Object>) type, placeholder);
+        registerInstanceAndMetadata(type, placeholder, type);
         logTypeBinding(type, placeholder, origin + ", placeholder proxy");
     }
 
-    // --- Type-level binding (Class<?>) ---
+    /**
+     * Binds the provided type into the dependency map using the manual binding pipeline.
+     *
+     * @param type the class to register within the dependency map
+     * @throws Exception when type binding fails
+     */
     @Override
     public void bindType(Class<?> type) throws Exception {
+        // Delegate to the shared binding routine with a manual origin label.
         bindTypeInternal(type, "manual bind request");
     }
 
-    // --- Field-level binding (instance) ---
+    /**
+     * Resolves and assigns a dependency for the provided field on the target instance.
+     *
+     * @param target the instance whose field should be populated
+     * @param field  the field requiring injection
+     */
     @Override
     public void bindField(Object target, Field field) {
         try {
+            // Step 1: Ensure the field is accessible for reflection-based assignment.
             field.setAccessible(true);
-            Class<?> fieldType = field.getType();
 
+            // Step 2: Determine the type to inject and short-circuit when ineligible.
+            Class<?> fieldType = field.getType();
             if (!isEligibleForInjection(fieldType)) {
                 return;
             }
 
+            // Step 3: Skip binding when a value is already present on the field.
             boolean isStatic = Modifier.isStatic(field.getModifiers());
             Object currentValue = isStatic ? field.get(null) : field.get(target);
             if (currentValue != null) {
                 return;
             }
 
+            // Step 4: Track optional injection semantics for later fallback handling.
+            Inject injectAnnotation = field.getAnnotation(Inject.class);
+            boolean optional = injectAnnotation != null && injectAnnotation.optional();
+
+            // Step 5: Prefer an exact dependency match from the registry when available.
             IDependencyMetaData exactMeta = dependencyMap.getDependency(fieldType);
             Object existingInstance = exactMeta != null ? dependencyMap.ensureAndGetInstance(exactMeta) : null;
             if (existingInstance != null) {
@@ -1365,12 +1391,11 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 return;
             }
 
+            // Step 6: Attempt to reuse an assignable dependency instance.
             IDependencyMetaData compatibleMeta = dependencyMap.findByAssignableType(fieldType);
             Object compatibleInstance = compatibleMeta != null ? dependencyMap.ensureAndGetInstance(compatibleMeta) : null;
             if (compatibleInstance != null) {
-                if (!dependencyMap.isRegistered(fieldType)) {
-                    dependencyMap.registerDependency((Class<Object>) fieldType, compatibleInstance);
-                }
+                registerInstanceAndMetadata(fieldType, compatibleInstance, compatibleMeta.getDependencyClass());
                 String source = compatibleMeta.getDependencyClass() != null
                         ? compatibleMeta.getDependencyClass().getSimpleName()
                         : compatibleInstance.getClass().getSimpleName();
@@ -1378,62 +1403,137 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 return;
             }
 
+            // Step 7: Resolve any instance directly recorded within the dependency map.
+            Object resolved = dependencyMap.getDependencyInstance(fieldType);
+            if (resolved != null) {
+                assignFieldValue(target, field, resolved, "resolved from registry");
+                return;
+            }
+
+            // Step 8: Handle abstract classes by locating a concrete subclass when possible.
+            if (!fieldType.isInterface() && Modifier.isAbstract(fieldType.getModifiers())) {
+                registerInstanceAndMetadata(fieldType, null, fieldType);
+                Set<Class<?>> impls = findImplementations(fieldType, fieldType.getPackage() != null ? fieldType.getPackage().getName() : "");
+                if (!impls.isEmpty()) {
+                    Class<?> implClass = impls.iterator().next();
+                    Object instance = implClass.getDeclaredConstructor().newInstance();
+                    registerInstanceAndMetadata(fieldType, instance, fieldType);
+                    assignFieldValue(target, field, instance, "resolved abstract via " + implClass.getSimpleName());
+                    return;
+                }
+            }
+
+            // Step 9: Bind existing metadata entries before instantiating a concrete class.
             if (!fieldType.isInterface()) {
+                if (dependencyMap.isRegistered(fieldType)) {
+                    Object existing = dependencyMap.getDependencyInstance(fieldType);
+                    if (existing != null) {
+                        assignFieldValue(target, field, existing, "existing registration");
+                        return;
+                    }
+                }
                 Object instance = fieldType.getDeclaredConstructor().newInstance();
-                dependencyMap.registerDependency((Class<Object>) fieldType, instance);
+                registerInstanceAndMetadata(fieldType, instance, fieldType);
                 assignFieldValue(target, field, instance, "instantiated " + fieldType.getSimpleName());
                 return;
             }
 
+            // Step 10: Create default-method proxies for interfaces that can self-handle invocations.
             if (Arrays.stream(fieldType.getMethods()).anyMatch(Method::isDefault)) {
+                if (dependencyMap.isRegistered(fieldType)) {
+                    Object existing = dependencyMap.getDependencyInstance(fieldType);
+                    if (existing != null) {
+                        assignFieldValue(target, field, existing, "existing registration");
+                        return;
+                    }
+                }
                 Object proxy = createSelfProxy(fieldType);
-                dependencyMap.registerDependency((Class<Object>) fieldType, proxy);
+                registerInstanceAndMetadata(fieldType, proxy, fieldType);
                 assignFieldValue(target, field, proxy, "self proxy");
                 return;
             }
 
+            // Step 11: Discover and instantiate concrete implementations for interface injections.
             Set<Class<?>> impls = findImplementations(fieldType, fieldType.getPackage() != null ? fieldType.getPackage().getName() : "");
             if (!impls.isEmpty()) {
                 Class<?> implClass = impls.iterator().next();
+                if (dependencyMap.isRegistered(fieldType)) {
+                    Object existing = dependencyMap.getDependencyInstance(fieldType);
+                    if (existing != null) {
+                        assignFieldValue(target, field, existing, "existing registration");
+                        return;
+                    }
+                }
                 Object instance = implClass.getDeclaredConstructor().newInstance();
-                dependencyMap.registerDependency((Class<Object>) fieldType, instance);
+                registerInstanceAndMetadata(fieldType, instance, implClass);
                 assignFieldValue(target, field, instance, "discovered " + implClass.getSimpleName());
                 return;
             }
 
-            Object placeholder = createPlaceholderProxy(fieldType);
-            dependencyMap.registerDependency((Class<Object>) fieldType, placeholder);
-            assignFieldValue(target, field, placeholder, "placeholder proxy");
+            // Step 12: Reuse any late-registered instance before falling back to a placeholder.
+            if (dependencyMap.isRegistered(fieldType)) {
+                Object existing = dependencyMap.getDependencyInstance(fieldType);
+                if (existing != null) {
+                    assignFieldValue(target, field, existing, "existing registration");
+                    return;
+                }
+            }
+
+            // Step 13: Provide placeholder proxies for required but unresolved dependencies.
+            if (!optional) {
+                Object placeholder = createPlaceholderProxy(fieldType);
+                registerInstanceAndMetadata(fieldType, placeholder, fieldType);
+                assignFieldValue(target, field, placeholder, "placeholder proxy");
+            } else {
+                // Step 14: Leave optional dependencies unset when no suitable binding was resolved.
+                Log.info("[AUTO-BIND] Optional dependency left unset for " + field.getDeclaringClass().getSimpleName()
+                        + "." + field.getName());
+            }
         } catch (InaccessibleObjectException ignored) {
             //TODO: Add 'verbose' logging option
-            // Log.info("Skipping inaccessible field: " + field.getName());
+            // Step 15: Field is inaccessible due to module boundaries; ignore silently for now.
         } catch (Exception e) {
+            // Step 16: Report unexpected binding failures for diagnostic purposes.
             Log.error("Error binding field " + field.getName() + ": " + e.getMessage());
         }
     }
 
-    // --- Self-proxy creation helper ---
+    /**
+     * Creates a proxy that routes interface calls to default method implementations when available.
+     *
+     * @param iface the interface requiring a self proxy
+     * @return a proxy capable of invoking default methods or logging unimplemented calls
+     * @throws Exception when reflective invocation of default methods fails
+     */
     @Override
     public Object createSelfProxy(Class<?> iface) throws Exception {
+        // Step 1: Construct a proxy that delegates to default methods when present.
         return Proxy.newProxyInstance(iface.getClassLoader(), new Class<?>[]{iface}, (proxyObj, method, args) -> {
             if (method.isDefault()) {
                 try {
                     MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(iface, MethodHandles.lookup());
                     return lookup.unreflectSpecial(method, iface).bindTo(proxyObj).invokeWithArguments(args);
                 } catch (Throwable t) {
+                    // Step 2: Surface failures during default-method invocation.
                     Log.error("Failed to invoke default method " + method.getName() + " on " + iface.getSimpleName() + ": " + t.getMessage());
                     throw t;
                 }
             }
+            // Step 3: Warn when the interface lacks an implementation path.
             Log.warn("Unimplemented interface call: " + method.getName() + " in " + iface.getSimpleName());
             return null;
         });
     }
 
-    // --- Placeholder proxy helper ---
+    /**
+     * Creates a placeholder proxy that logs calls to unresolved dependencies.
+     *
+     * @param iface the interface missing an implementation
+     * @return a proxy that logs invocation attempts
+     */
     @Override
-
     public Object createPlaceholderProxy(Class<?> iface) {
+        // Produce a proxy that reports unimplemented method usage.
         return Proxy.newProxyInstance(iface.getClassLoader(), new Class<?>[]{iface}, (p, m, a) -> {
             Log.warn("Called " + m.getName() + " on unimplemented interface: " + iface.getSimpleName());
             return null;
@@ -1442,6 +1542,13 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
 
     // tryInvokeBuildMethod removed: contexts should use explicit registration APIs.
+    /**
+     * Finds implementations or subclasses for the provided type within the given package.
+     *
+     * @param interfaceType the type to search implementations for
+     * @param basePackage   the base package to scan
+     * @return a set of assignable, non-abstract implementations
+     */
     @Override
     public Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
         Set<Class<?>> implementations = new HashSet<>();
@@ -1491,16 +1598,22 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
         for (File file : files) {
             if (file.isDirectory()) {
+                // Step 1: Recurse into subdirectories to continue discovery.
                 walkDirectory(interfaceType, file, packageName + "." + file.getName(), results);
             } else if (file.getName().endsWith(".class")) {
                 String className = packageName + '.' + file.getName().replace(".class", "");
                 try {
                     Class<?> clazz = Class.forName(className);
-                    if (!clazz.isInterface() && interfaceType.isAssignableFrom(clazz)) {
+                    // Step 2: Record concrete, non-abstract classes assignable to the target type.
+                    if (!clazz.isInterface()
+                            && interfaceType.isAssignableFrom(clazz)
+                            && !Modifier.isAbstract(clazz.getModifiers())
+                            && !clazz.equals(interfaceType)) {
                         results.add(clazz);
                         Log.info("Found concrete class: " + clazz.getSimpleName() + " implements " + interfaceType.getSimpleName());
                     }
                 } catch (Throwable ignored) {
+                    // Step 3: Ignore classes that fail to load during scanning.
                 }
             }
         }
