@@ -1,6 +1,7 @@
 package com.tjxjnoobie.proxy.Commands;
 
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
@@ -17,13 +18,9 @@ import java.util.concurrent.CompletableFuture;
 
 public class Unban implements SimpleCommand {
 
-   private final IGlobalContext globalContext;
-   private final ProxyServer proxyServer;
+   @Inject private IGlobalContext globalContext;
+   @com.google.inject.Inject private ProxyServer proxyServer;
 
-    public Unban(IGlobalContext globalContext, ProxyServer proxyServer) {
-        this.globalContext = globalContext;
-        this.proxyServer = proxyServer;
-    }
 
 
     /**
