@@ -45,8 +45,8 @@ import java.util.jar.JarFile;
  */
 public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper {
 
-    private static final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
-    private static final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
+    private final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
+    private final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
 
     public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
