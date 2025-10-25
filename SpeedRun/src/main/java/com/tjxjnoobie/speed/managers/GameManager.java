@@ -585,8 +585,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         String serverID =    getServerID();
         GameModeEnum CurrentGM = gameMode.getCurrentGameMode() ;
         Player allPlayers =   getAllPlayers();
-        playDramaticBoom(allPlayers, plugin);
-
+        playDramaticBoom(allPlayers);
         if(players == 0 && CurrentGM == GameModeEnum.SOLO){
 
         }
