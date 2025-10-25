@@ -13,16 +13,10 @@ import java.util.Map;
  * This interface defines essential utility methods for server management, messaging,
  * time formatting, and configuration handling.
  * 
- * @param <T> The type of context this utility interface works with
  */
-//TODO: Remove type T
 public interface IUtils {
 
-    String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    String prefix = "§6§lNovus§8§l »»§f ";
-    String staffPrefix = "§4§lNovus §8§l»»§c ";
-    String serverID = null;
-    String gameID = "";
+
 
     /**
      * Gets the context instance
@@ -40,7 +34,7 @@ public interface IUtils {
      * @return The server prefix string with color codes (default: "§6§lNovus »§c ")
      */
     default String getPrefix() {
-        return prefix;
+        return " ";
     }
 
     /**
@@ -50,7 +44,7 @@ public interface IUtils {
      * @return The staff prefix string with color codes (default: "§4§lNovus »§c ")
      */
     default String getStaffPrefix() {
-        return staffPrefix;
+        return " ";
     }
 
     /**
