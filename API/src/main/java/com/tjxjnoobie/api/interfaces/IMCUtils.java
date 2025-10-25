@@ -20,6 +20,9 @@ public interface IMCUtils {
 
     //TODO: Replace class methods parameters for custom DI system
 
+    default ISpeedRunContext getSpeedRunContext() {
+        return null;
+    }
 
     /**
      * Plays a dramatic boom effect
@@ -70,13 +73,13 @@ public interface IMCUtils {
         return "";
     }
 
-    default ISpeedRunContext getSpeedRunContext() {
-        return null;
-    }
+
 
     default String getServerID() {
         return "";
     }
+
+    void hidePlayerFromAll(Player toHide);
 
     default Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
@@ -102,7 +105,9 @@ public interface IMCUtils {
     }
 
 
-    default void cancelTask(BukkitTask task) {
+    void playDramaticBoom(Player player);
+
+    default void cancelBukkitTask(BukkitTask task) {
         if (task != null && !task.isCancelled()) {
             task.cancel();
             Bukkit.getLogger().info(task.toString() + " Task has been cancelled.");
@@ -154,5 +159,9 @@ public interface IMCUtils {
     default ClickEvent createClickOpenUrl(String url) {
         return ClickEvent.openUrl(url);
     }
+
+    void sendDebugMessage(Player player, String message);
+
+    boolean isDebugger(String name);
 }
 
