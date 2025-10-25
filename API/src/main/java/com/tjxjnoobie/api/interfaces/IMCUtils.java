@@ -64,8 +64,8 @@ public interface IMCUtils {
             player.sendMessage(utils.getStaffPrefix() + message);
         }
     }
-    default void hidePlayerFromAll(Player toHide, IGlobalContext globalContext) {
-        Plugin plugin = globalContext.getPlugin();
+    default void hidePlayerFromAll(Player toHide, ISpeedRunContext speedRunContext) {
+        Plugin plugin = speedRunContext.getPlugin();
         for (Player viewer : Bukkit.getOnlinePlayers()) {
             viewer.hidePlayer(plugin, toHide);
         }
