@@ -109,10 +109,8 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         // Register interface types for dependency injection
         System.out.println("Registering dependencies...");
         registerDependency(IGameMode.class, gameMode, this::getGameMode, this);
-        registerDependency(IUtils.class, utils, this::getUtils, this);
         registerDependency(ISpeedrunStatsCache.class, statsCache, this::getSpeedrunStatsCache, this);
         registerDependency(IGameState.class, gameState, this::getGameState, this);
-        registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
         registerDependency(IRatingCache.class, ratingCache, this::getRatingCache, this);
         registerDependency(IRating.class, rating, this::getRating, this);
         registerDependency(IRatingAPI.class, ratingAPI, this::getRatingAPI, this);
@@ -157,9 +155,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     }
 
      
-    public IUtils<IGlobalContext> getUtils() {
-        return utils;
-    }
 
 
      
@@ -170,9 +165,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
 
 
      
-    public IWorldManager<ISpeedRunContext> getWorldManager() {
-        return worldManager;
-    }
 
      
 
@@ -296,31 +288,12 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return this;
     }
 
-     @Override
-     public IGlobalContext setUtils(IUtils<IGlobalContext> utils) {
-        this.utils = utils;
-        if (utils != null) registerDependency(IUtils.class, utils, this::getUtils, this);
-        return this;
-    }
-
      
     public IGlobalContext setStatsCache(ISpeedrunStatsCache statsCache) {
         this.statsCache = statsCache;
         if (statsCache != null) registerDependency(ISpeedrunStatsCache.class, statsCache, this::getSpeedrunStatsCache, this);
         return this;
     }
-
-     
-
-
-    @Override
-    public IGlobalContext setWorldManager(IWorldManager<ISpeedRunContext> worldManager) {
-        this.worldManager = worldManager;
-        if (worldManager != null) registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
-        return this;
-    }
-
-
 
      
     public IGlobalContext setRatingCache(IRatingCache ratingCache) {
@@ -498,8 +471,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
                 setRatingAPI(ratingAPI).
                 setRankCache(rankCache).
                 setLobbyStatsCache(lobbyStatsCache).
-                setUtils(utils).
-                setWorldManager(worldManager).
                 setPlayerProfile(playerProfile).
                 setSoundManager(soundManager).
                 setPunishManager(punishManager).
