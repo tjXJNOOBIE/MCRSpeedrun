@@ -9,22 +9,19 @@
 
 package com.tjxjnoobie.api.dependency.injection.interfaces;
 
+import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.IConfigUtils;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.ITimeUtils;
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
-import org.bukkit.plugin.Plugin;
 
 public interface IGlobalContextAccess {
 
     IGlobalContext getGlobalContext();
    
     
-    default Plugin plugin() {
-        return getGlobalContext().getPlugin();
-    }
+
 
     default IGameMode gameMode() {
         return getGlobalContext().getGameMode();
