@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class AddPlayer implements CommandExecutor, IUtils {
+public class AddPlayer implements CommandExecutor, IMCUtils {
 
     private final IGlobalContext globalContext;
     private final ISpeedRunContext speedRunContext;
