@@ -81,7 +81,9 @@ public interface IMCUtils {
         return "";
     }
 
-    void hidePlayerFromAll(Player toHide);
+    default void hidePlayerFromAll(Player toHide){
+
+    }
 
     default Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
@@ -103,7 +105,9 @@ public interface IMCUtils {
     }
 
 
-    void playDramaticBoom(Player player);
+    default void playDramaticBoom(Player player){
+
+    }
 
     default void cancelBukkitTask(BukkitTask task) {
 
