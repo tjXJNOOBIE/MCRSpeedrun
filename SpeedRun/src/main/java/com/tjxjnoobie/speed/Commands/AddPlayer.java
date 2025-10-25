@@ -30,12 +30,12 @@ public class AddPlayer implements CommandExecutor, IMCUtils {
           || rankCache.hasPermission(player.getUniqueId(), "speedrun.fakeplayer")) {
             if (length == 0) {
                 gameManager.addInGame(uuid, name);
-                player.sendMessage(getStaffPrefix() + "Added to game hash");
+                player.sendMessage(getMinecraftStaffPrefix() + "Added to game hash");
             } else {
-                player.sendMessage(getPrefix() + "Usage: /addplayer");
+                player.sendMessage(getMinecraftStaffPrefix() + "Usage: /addplayer");
             }
         }else{
-            player.sendMessage(getPrefix()+" §cNo permission.");
+            player.sendMessage(getMinecraftStaffPrefix()+" §cNo permission.");
         }
         return false;
     }
