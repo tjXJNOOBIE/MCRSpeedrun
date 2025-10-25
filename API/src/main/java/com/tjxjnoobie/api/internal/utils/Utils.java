@@ -7,7 +7,6 @@ import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
-import org.bukkit.Bukkit;
 
 import java.io.File;
 import java.security.SecureRandom;
@@ -53,6 +52,10 @@ public class Utils implements IUtils<IGlobalContext> {
         return localServerMetaData.getGameID();
     }
 
+    @Override
+    public String getStaffPrefix(){
+        return staffPrefix;
+    }
 
 
 
@@ -197,17 +200,7 @@ public class Utils implements IUtils<IGlobalContext> {
         return globalContext.getUtils().getConfigValues(globalContext);
     }
 
-    @Override
-    public void broadcastMessage(IGlobalContext globalContext, String message) {
-        if (globalContext == null) {
-            Log.error("[Broadcast] Failed to broadcast message: GlobalContext is null");
-            return;
-        }
-        globalContext.getUtils().broadcastMessage(globalContext, message);
-        if (message != null && !message.trim().isEmpty()) {
-            Bukkit.broadcastMessage(prefix + message);
-        }
-    }
+
 
     @Override
     public Object getConfigValue(IGlobalContext globalContext, String key) {
