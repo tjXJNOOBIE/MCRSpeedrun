@@ -66,6 +66,10 @@ public interface IMCUtils {
         return null;
    }
 
+    default String getServerID(){
+        return "";
+    }
+
     default Player getAllPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
