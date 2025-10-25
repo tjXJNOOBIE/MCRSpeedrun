@@ -10,8 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.UUID;
-
 /**
  * Interface for Minecraft utility functions
  */
@@ -40,22 +38,11 @@ public interface IMCUtils {
 
 
     default void sendDebugMessage(ISpeedRunContext speedRunContext, Player player, String message) {
-        IRankCache rankCache = speedRunContext.getRankCache();
-        IUtils utils = speedRunContext.getUtils();
-        UUID uuid = player.getUniqueId();
-        IDebugger debugger = speedRunContext.getDebugger();
-        if (rankCache.getPowerLevel(uuid) <= 10000 ||
-                rankCache.hasPermission(uuid, "network.debug")
-                        && debugger.isDebugger(uuid)) {
-            player.sendMessage(utils.getStaffPrefix() + message);
-        }
+
     }
 
     default void hidePlayerFromAll(Player toHide, ISpeedRunContext speedRunContext) {
-        Plugin plugin = speedRunContext.getPlugin();
-        for (Player viewer : Bukkit.getOnlinePlayers()) {
-            viewer.hidePlayer(plugin, toHide);
-        }
+
     }
 
     default String getMinecraftPrefix() {
