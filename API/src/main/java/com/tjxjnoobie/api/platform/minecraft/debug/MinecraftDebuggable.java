@@ -1,11 +1,12 @@
 package com.tjxjnoobie.api.platform.minecraft.debug;
 
+import com.tjxjnoobie.api.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IMinecraftDebuggable;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.entity.Player;
 
-public class MinecraftDebuggable implements IMinecraftDebuggable {
+public class MinecraftDebuggable implements IMinecraftDebuggable, IMCUtils {
 
     @Inject
     private ISpeedRunContext speedRunContext;
@@ -20,8 +21,7 @@ public class MinecraftDebuggable implements IMinecraftDebuggable {
         if (player != null) {
             boolean isDebugger = getSpeedRunContext().getDebugger().isDebugger(player.getUniqueId());
             if (isDebugger) {
-                String staffPrefix = getSpeedRunContext().getUtils().getStaffPrefix();
-                player.sendMessage(staffPrefix + "§c" + message);
+                player.sendMessage(getMinecraftStaffInGamePrefix() + "§c" + message);
             }
         }
     }
@@ -31,8 +31,7 @@ public class MinecraftDebuggable implements IMinecraftDebuggable {
         if (player != null) {
             boolean isDebugger = getSpeedRunContext().getDebugger().isDebugger(player.getUniqueId());
             if (isDebugger) {
-                String staffPrefix = getSpeedRunContext().getUtils().getStaffPrefix();
-                player.sendMessage(staffPrefix + "§c" + prefix + " " + message);
+                player.sendMessage(getMinecraftStaffInGamePrefix() + "§c" + prefix + " " + message);
             }
         }
     }
