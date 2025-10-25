@@ -31,9 +31,11 @@ public class MCUtils implements IMCUtils {
         return localServerMetaData.getServerID();
     }
 
+
+
     @Override
-    public String getMinecraftStaffPrefix(){
-        return localServerMetaData.getMinecraftStaffInGamePrefix();
+    public String getServerID(){
+        return localServerMetaData.getServerID();
     }
 
     @Override
@@ -98,7 +100,7 @@ public class MCUtils implements IMCUtils {
         if (rankCache.getPowerLevel(uuid) <= 10000 ||
                 rankCache.hasPermission(uuid, "network.debug")
                         && debugger.isDebugger(uuid)) {
-            player.sendMessage(utils.getStaffPrefix() + message);
+            player.sendMessage(getMinecraftStaffInGamePrefix() + message);
         }
     }
 
