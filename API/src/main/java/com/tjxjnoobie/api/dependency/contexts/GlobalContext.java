@@ -164,10 +164,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return gameMode;
     }
 
-     
-    public Plugin getPlugin(){
-        return plugin;
-    }
 
      
     public IGameState getGameState() {

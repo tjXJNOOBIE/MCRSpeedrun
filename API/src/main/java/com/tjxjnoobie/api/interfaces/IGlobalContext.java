@@ -21,7 +21,6 @@ public interface IGlobalContext extends IAbstractClassMetaData<IGlobalContext> {
     IGlobalContext getGlobalContext();
 
     // Core getters using interfaces
-    Plugin getPlugin();
     IGameMode getGameMode();
     IGameState getGameState();
     IUtils<IGlobalContext> getUtils();
