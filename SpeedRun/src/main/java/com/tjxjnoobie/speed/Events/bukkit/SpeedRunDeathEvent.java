@@ -35,7 +35,7 @@ public class SpeedRunDeathEvent implements Listener {
             playerManager.eliminatePlayer(uuid,name,player);
         }else{
             e.setCancelled(true);
-            mcUtils.sendDebugMessage(globalContext,player,name+"Tried to die outside of INGAME state.");
+            mcUtils.sendDebugMessage(player,name+"Tried to die outside of INGAME state.");
         }
     }
 }
