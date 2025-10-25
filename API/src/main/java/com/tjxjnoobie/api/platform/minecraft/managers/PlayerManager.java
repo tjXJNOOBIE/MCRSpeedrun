@@ -29,7 +29,7 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
         try {
             Player target = gameManager.getInGamePlayers();
             
-            hidePlayerFromAll(player,globalContext);
+            hidePlayerFromAll(player,speedRunContext);
             player.sendMessage(prefix + "You are now a spectator");
             
             if (target != null) {
