@@ -6,7 +6,6 @@ import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
@@ -21,39 +20,6 @@ public interface IMCUtils {
         return null;
     }
 
-    /**
-     * Plays a dramatic boom effect
-     *
-     * @param player The player to play the effect for
-     */
-    default void playDramaticBoom(Player player, Plugin plugin) {
-    }
-
-    /**
-     * Sends a debug message to the specified player using the provided context.
-     * This method is intended for internal debugging purposes and may not be visible or accessible to end users.
-     * The message will be sent directly to the player via the Minecraft chat system.
-     *
-     * @param speedRunContext The SpeedRun context containing dependencies such as plugins, game state, and utilities
-     * @param player The player to whom the debug message should be sent
-     * @param message The debug message content to display to the player
-     */
-
-    default void sendDebugMessage(ISpeedRunContext speedRunContext, Player player, String message) {
-
-    }
-
-    /**
-     * Hides a specified player from all other players in the game. This method ensures that the given player is no longer visible to any other active players, typically used for
-     *  privacy or security purposes during gameplay.
-     *
-     * @param toHide The player entity to hide from all other players
-     * @param speedRunContext The context containing necessary services and dependencies for the game logic; used to access game-specific functionality and ensure proper execution
-     *  environment
-     */
-    default void hidePlayerFromAll(Player toHide, ISpeedRunContext speedRunContext) {
-
-    }
 
     /**
      * Retrieves the Minecraft prefix used in chat messages or commands.
