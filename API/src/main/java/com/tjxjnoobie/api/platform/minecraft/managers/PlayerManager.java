@@ -43,7 +43,7 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
             sendDebugMessage(player, "[PLAYER MANAGER] "+ "Player " + name + " is now spectating");
             
         } catch (Exception e) {
-            sendDebugMessage(speedRunContext, player, "[PLAYER_MANAGER] "+ "Error making player spectator: " + e.getMessage());
+            sendDebugMessage(player, "[PLAYER_MANAGER] "+ "Error making player spectator: " + e.getMessage());
             throw new RuntimeException("Failed to make player spectator", e);
         }
     }
