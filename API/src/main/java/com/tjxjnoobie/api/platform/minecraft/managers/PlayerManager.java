@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
+public class PlayerManager implements IPlayerManager, IMCUtils {
 
     @Inject private IGlobalContext globalContext;
     @Inject private ISpeedRunContext speedRunContext;
@@ -33,7 +33,7 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
             player.sendMessage(getMinecraftPrefix() + "You are now a spectator");
             
             if (target != null) {
-                player.sendMessage(getPrefix() + "You are spectating... " + target.getName());
+                player.sendMessage(getMinecraftPrefix() + "You are spectating... " + target.getName());
                 player.setSpectatorTarget(target);
             }
             
@@ -57,12 +57,12 @@ public class PlayerManager implements IPlayerManager, IUtils, IMCUtils {
         try {
 
             makeSpectator(uuid, name, player);
-            player.sendMessage(getPrefix() + "§cYou were eliminated!");
+            player.sendMessage(getMinecraftPrefix() + "§cYou were eliminated!");
             
-            sendDebugMessage(speedRunContext,player, "[PLAYER_MANAGER] "+ "player " + name + " was eliminated");
+            sendDebugMessage(player, "[PLAYER_MANAGER] "+ "player " + name + " was eliminated");
             
         } catch (Exception e) {
-            sendDebugMessage(speedRunContext,player, "[PLAYER_MANAGER] "+ "Error eliminating player: " +name + e.getMessage());
+            sendDebugMessage(player, "[PLAYER_MANAGER] "+ "Error eliminating player: " +name + e.getMessage());
             throw new RuntimeException("Failed to eliminate player", e);
         }
     }
