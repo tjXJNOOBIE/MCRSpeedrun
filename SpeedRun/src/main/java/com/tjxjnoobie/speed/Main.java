@@ -208,8 +208,8 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         registerCommand("setspawn", new SetSpawns(speedRunContext));
         registerCommand("spawndragon", new SpawnEnderDragon(globalContext));
         registerCommand("debugger", new DebuggerCMD());
-        registerCommand("vote", new Vote(speedRunContext));
-        registerCommand("v", new Vote(speedRunContext));
+        registerCommand("vote", new Vote());
+        registerCommand("v", new Vote());
         registerCommand("fireevent", new FireEvent());
 
         // Set initial game state
