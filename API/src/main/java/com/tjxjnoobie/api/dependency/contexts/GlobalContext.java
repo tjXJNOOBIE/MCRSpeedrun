@@ -28,7 +28,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private IRatingAPI ratingAPI;
     private IPlayerProfile playerProfile;
     private IRank rank;
-    private IDebugger debugger;
+
     private ISoundManager soundManager;
     private IRankCache rankCache;
     private IRetentionManager retentionManager;
@@ -75,7 +75,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     public GlobalContext(IGameMode gameMode, IUtils<IGlobalContext> utils, ISpeedrunStatsCache statsCache, IGameState gameState,
                          IMCUtils mcUtils, IWorldManager<ISpeedRunContext> worldManager, IRatingCache ratingCache,
                          IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, 
-                         IDebugger debugger, ISoundManager soundManager, IRankCache rankCache, 
+                         ISoundManager soundManager, IRankCache rankCache,
                          IRetentionManager retentionManager, IRedis redis, IGameType gameType, 
                          IProxyUtils proxyUtils, IStatsManager statsManager, ILobbyStatsCache lobbyStatsCache,
                          ISpeedrunStatsCache speedrunStatsCache, IPunishManager punishManager, IPunishLog punishLog
@@ -92,7 +92,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         this.ratingAPI = ratingAPI;
         this.playerProfile = playerProfile;
         this.rank = rank;
-        this.debugger = debugger;
         this.soundManager = soundManager;
         this.rankCache = rankCache;
         this.retentionManager = retentionManager;
@@ -126,7 +125,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         registerDependency(IRatingAPI.class, ratingAPI, this::getRatingAPI, this);
         registerDependency(IPlayerProfile.class, playerProfile, this::getPlayerProfile, this);
         registerDependency(IRank.class, rank, this::getRank, this);
-        registerDependency(IDebugger.class, debugger, this::getDebugger, this);
+
         registerDependency(ISoundManager.class, soundManager, this::getSoundManager, this);
         registerDependency(IRankCache.class, rankCache, this::getRankCache, this);
         registerDependency(IRetentionManager.class, retentionManager, this::getRetentionManager, this);
@@ -214,9 +213,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     }
 
      
-    public IDebugger getDebugger() {
-        return debugger;
-    }
 
      
     public ISoundManager getSoundManager() {
@@ -381,12 +377,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return this;
     }
 
-     
-    public IGlobalContext setDebugger(IDebugger debugger) {
-        this.debugger = debugger;
-        if (debugger != null) registerDependency(IDebugger.class, debugger, this::getDebugger, this);
-        return this;
-    }
+
 
      
     public IGlobalContext setSoundManager(ISoundManager soundManager) {
@@ -539,7 +530,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
                 setInterfaceManager(interfaceManager).
                 setRank(rank).
                 setRatingAPI(ratingAPI).
-                setDebugger(debugger).
                 setRankCache(rankCache).
                 setLobbyStatsCache(lobbyStatsCache).
                 setUtils(utils).
@@ -644,8 +634,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         if (gameState == null) missing.append("gameState, ");
         if (utils == null) missing.append("utils, ");
         if (mcUtils == null) missing.append("mcUtils, ");
-        if (debugger == null) missing.append("debugger, ");
-        
+
         if (!missing.isEmpty()) {
             missing.setLength(missing.length() - 2); // Remove last comma and space
             // Default void abstraction - log missing dependencies instead of throwing
@@ -666,7 +655,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         summary.append("- Utils: ").append(utils != null ? "✓" : "✗").append("\n");
         summary.append("- MCUtils: ").append(mcUtils != null ? "✓" : "✗").append("\n");
         summary.append("- WorldManager: ").append(worldManager != null ? "✓" : "✗").append("\n");
-        summary.append("- Debugger: ").append(debugger != null ? "✓" : "✗").append("\n");
         summary.append("- Redis: ").append(redis != null ? "✓" : "✗").append("\n");
         summary.append("- StatsCache: ").append(statsCache != null ? "✓" : "✗").append("\n");
         summary.append("- RatingCache: ").append(ratingCache != null ? "✓" : "✗").append("\n");
