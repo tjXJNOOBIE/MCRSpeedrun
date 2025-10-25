@@ -22,13 +22,13 @@ public class Seed implements CommandExecutor, IMCUtils {
         Player player = (Player) commandSender;
         //TODO Add Permissions Check
         if(length <1 && player.isOp()){
-            player.sendMessage(getMinecraftStaffPrefix()+"Usage: /loadseed <name> <seed>");
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"Usage: /loadseed <name> <seed>");
         }
         if(length == 2){
             String worldname = args[0];
             long seed = Long.parseLong(args[1]);
             worldManager.loadWorldFromSeed(worldname,seed);
-            player.sendMessage(getMinecraftStaffPrefix()+"Loading world " + worldname+" from seed " +seed);
+            player.sendMessage(getMinecraftStaffInGamePrefix()+"Loading world " + worldname+" from seed " +seed);
         }
 
 

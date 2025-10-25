@@ -381,7 +381,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                         soloMessage--;
                         if(soloMessage == 30)
                         canSolo = true;
-                        Bukkit.broadcastMessage(getMinecraftStaffPrefix() + "You can play SOLO! Just type /solo");
+                        Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + "You can play SOLO! Just type /solo");
                           playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
                         if(soloMessage == 0) {
                             soloMessage = 30;
@@ -393,7 +393,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     if (ingameSize == minPlayers) {
                         Player allPlayers =   getAllPlayers();
                         Location pLocation = allPlayers.getLocation();
-                        Bukkit.broadcastMessage(getMinecraftStaffPrefix() + "Minimum number of players reached! Starting match...");
+                        Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + "Minimum number of players reached! Starting match...");
 
                         lobbyCountdown = 11;
                         startLobbyCountdown();
@@ -662,7 +662,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public void createWorlds(World.Environment environment){
         IWorldManager worldManager = speedRunContext.getWorldManager();
           
-        Bukkit.broadcastMessage(getMinecraftStaffPrefix()+" §cLoading Worlds...");
+        Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix()+" §cLoading Worlds...");
             for (UUID ingame_uuid : ingame.keySet()) {
                 Player player = Bukkit.getPlayer(ingame_uuid);
                 System.out.print("Creating world " + ingame_uuid.toString());
