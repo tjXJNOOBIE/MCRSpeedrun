@@ -1,6 +1,7 @@
 package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,18 +11,15 @@ import java.util.UUID;
 
 public class AddPlayer implements CommandExecutor, IMCUtils {
 
-    private final IGlobalContext globalContext;
-    private final ISpeedRunContext speedRunContext;
-    public AddPlayer(IGlobalContext globalContext, ISpeedRunContext speedRunContext) {
-        this.globalContext = globalContext;
+    @Inject private IGlobalContext globalContext;
+    @Inject private ISpeedRunContext speedRunContext;
+    @Inject private IGameManager gameManager;
+    @Inject IRankCache rankCache;
 
-        this.speedRunContext = speedRunContext;
-    }
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command,String s, String [] args) {
-        IGameManager gameManager = speedRunContext.getGameManager(); ;
-        IRankCache rankCache = globalContext.getRankCache();
+
         int length = args.length;
         Player player = (Player) commandSender;
         UUID uuid = UUID.randomUUID();
