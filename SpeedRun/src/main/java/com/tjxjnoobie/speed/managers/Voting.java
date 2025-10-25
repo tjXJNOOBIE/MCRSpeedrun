@@ -54,11 +54,11 @@ public class Voting implements IVoting, IMCUtils {
         UUID uuid = player.getUniqueId();
 
         if(isComplete){
-            player.sendMessage(prefix+"§cVoting has already concluded!");
+            player.sendMessage(getMinecraftPrefix()+"§cVoting has already concluded!");
             return;
         }
         if(hasVoted(uuid)){
-            player.sendMessage(prefix+"§cYou have already voted!");
+            player.sendMessage(getMinecraftPrefix()+"§cYou have already voted!");
             return;
         }
         IRankCache rankCache = speedRunContext.getRankCache();
@@ -160,7 +160,7 @@ public class Voting implements IVoting, IMCUtils {
         this.winner = winningGamemode;
         setComplete(true);
 
-        String announcement = prefix+"§aVoting is complete! The winning gamemode is §c"
+        String announcement = getMinecraftPrefix()+"§aVoting is complete! The winning gamemode is §c"
                 + winningGamemode;
 
         // Announce to all online players
