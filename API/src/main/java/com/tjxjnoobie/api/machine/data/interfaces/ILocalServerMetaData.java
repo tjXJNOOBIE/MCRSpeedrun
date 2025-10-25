@@ -11,11 +11,29 @@ package com.tjxjnoobie.api.machine.data.interfaces;
 
 public interface ILocalServerMetaData {
 
-    String getServerID();
+    default String getServerID() {
+        return "";
+    }
 
-    void setServerID(String serverID);
+    default void setServerID(String serverID) {
+    }
 
-    String getGameID();
+    default String getMinecraftInGamePrefix(){
+        return "";
+    }
 
-    void setGameID(String gameID);
+    default String getMinecraftStaffInGamePrefix(){
+        return "";
+    }
+
+    default String getGameID() {
+        return "";
+    }
+
+    default void setGameID(String gameID) {
+    }
+
+    default String getMinecraftPrefix(){
+        return "";
+    }
 }
