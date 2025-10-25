@@ -44,9 +44,6 @@ public interface IGlobalContextAccess {
         return getGlobalContext().getWorldManager();
     }
 
-    default IRankMC rankMC() {
-        return getGlobalContext().getRankMC();
-    }
 
     default IRatingCache ratingCache() {
         return getGlobalContext().getRatingCache();
@@ -66,10 +63,6 @@ public interface IGlobalContextAccess {
 
     default IRank rank() {
         return getGlobalContext().getRank();
-    }
-
-    default IDebugger debugger() {
-        return getGlobalContext().getDebugger();
     }
 
     default ISoundManager soundManager() {
@@ -114,14 +107,6 @@ public interface IGlobalContextAccess {
 
     default IPunishLog punishLog() {
         return getGlobalContext().getPunishLog();
-    }
-
-    default IInventoryBuilder inventoryBuilder() {
-        return getGlobalContext().getInventoryBuilder();
-    }
-
-    default IInventoryManager inventoryManager() {
-        return getGlobalContext().getInventoryManager();
     }
 
     default IConfigUtils configUtils() {
