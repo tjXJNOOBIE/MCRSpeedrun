@@ -28,26 +28,26 @@ public class Vote implements CommandExecutor, IMCUtils {
         int length = args.length;
         int choice = 0;
         if(length != 1){
-        player.sendMessage(prefix+"Usage: /vote <number>");
+        player.sendMessage(getMinecraftPrefix()+"Usage: /vote <number>");
         }else{
             if(voting.getHasVotedHash().contains(uuid)){
-                player.sendMessage(prefix+"You have already voted!");
+                player.sendMessage(getMinecraftPrefix()+"You have already voted!");
                 return false;
             }
             if(gameState.getCurrentState() != GameStateEnum.LOBBY){
-                player.sendMessage(prefix+"You may only vote in lobby");
+                player.sendMessage(getMinecraftPrefix()+"You may only vote in lobby");
                 return false;
             }
             try {
                 choice = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
-                player.sendMessage(prefix+"Please Enter a number!");
+                player.sendMessage(getMinecraftPrefix()+"Please Enter a number!");
 
             }
             List<String> gamemodes = new ArrayList<>(voting.getGameModes().keySet());
 
             if (choice < 1 || choice > gamemodes.size()) {
-                player.sendMessage(prefix+ "Invalid choice. Please select a number between 1 and " + gamemodes.size() + ".");
+                player.sendMessage(getMinecraftPrefix()+ "Invalid choice. Please select a number between 1 and " + gamemodes.size() + ".");
                 return false;
             }
             String selectedGamemode = gamemodes.get(choice - 1);
