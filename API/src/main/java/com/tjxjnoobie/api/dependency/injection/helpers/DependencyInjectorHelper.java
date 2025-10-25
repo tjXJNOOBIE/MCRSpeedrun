@@ -1008,12 +1008,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
     }
 
-    /**
-     * Scans the classpath for injectable classes and registers them in the dependency map.
-     * This ensures the dependency map is populated before field binding occurs.
-     * Also discovers and registers implementations for interfaces.
-     */
-    @Override
+
     /**
      * Analyzes a class to find all its @Inject dependencies.
      * Walks the class hierarchy to find all injected fields.
