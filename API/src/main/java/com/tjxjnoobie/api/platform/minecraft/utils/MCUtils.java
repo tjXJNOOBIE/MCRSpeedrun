@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.platform.minecraft.utils;
 
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -12,14 +13,12 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 public class MCUtils implements IMCUtils {
-    private final Plugin plugin;
 
+    private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();
-    private final IGlobalContext globalContext;
-    public MCUtils(Plugin plugin, IGlobalContext globalContext) {
-        this.plugin = plugin;
-        this.globalContext = globalContext;
-    }
+    @Inject private ISpeedRunContext speedRunContext;
+
+
 
     public void hidePlayerFromAll(Player toHide) {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
@@ -66,10 +65,11 @@ public class MCUtils implements IMCUtils {
         }
     }
 public void sendDebugMessage(Player player,String message){
-        IRankCache rankCache = globalContext.getRankCache();
-        IUtils utils = globalContext.getUtils();
+        //TODO: Move depends to field injection
+        IRankCache rankCache = speedRunContext.getRankCache();
+        IUtils utils = speedRunContext.getUtils();
         UUID uuid = player.getUniqueId();
-        IDebugger debugger = globalContext.getDebugger();
+        IDebugger debugger = speedRunContext.getDebugger();
     if (rankCache.getPowerLevel(uuid) <= 10000 ||
             rankCache.hasPermission(uuid, "network.debug")
             && debugger.isDebugger(uuid)) {
