@@ -19,6 +19,11 @@ public class MCUtils implements IMCUtils {
     @Inject
     private ISpeedRunContext speedRunContext;
 
+    @Override
+    public ISpeedRunContext getSpeedRunContext(){
+        return speedRunContext;
+    }
+
 
     public void hidePlayerFromAll(Player toHide) {
         for (Player viewer : Bukkit.getOnlinePlayers()) {
