@@ -16,7 +16,7 @@ import java.util.Map;
  * @param <T> The type of context this utility interface works with
  */
 //TODO: Remove type T
-public interface IUtils<T> {
+public interface IUtils {
 
     String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     String prefix = "§6§lNovus§8§l »»§f ";
