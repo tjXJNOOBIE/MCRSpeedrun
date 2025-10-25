@@ -26,7 +26,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private IRatingCache ratingCache;
     private IRating rating;
     private IRatingAPI ratingAPI;
-    private IRankMC rankMC;
     private IPlayerProfile playerProfile;
     private IRank rank;
     private IDebugger debugger;
@@ -74,7 +73,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
      * Constructor with all dependencies
      */
     public GlobalContext(IGameMode gameMode, IUtils<IGlobalContext> utils, ISpeedrunStatsCache statsCache, IGameState gameState,
-                         IMCUtils mcUtils, IWorldManager<ISpeedRunContext> worldManager, IRankMC rankMC, IRatingCache ratingCache,
+                         IMCUtils mcUtils, IWorldManager<ISpeedRunContext> worldManager, IRatingCache ratingCache,
                          IRating rating, IRatingAPI ratingAPI, IPlayerProfile playerProfile, IRank rank, 
                          IDebugger debugger, ISoundManager soundManager, IRankCache rankCache, 
                          IRetentionManager retentionManager, IRedis redis, IGameType gameType, 
@@ -88,7 +87,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         this.gameState = gameState;
         this.mcUtils = mcUtils;
         this.worldManager = worldManager;
-        this.rankMC = rankMC;
         this.ratingCache = ratingCache;
         this.rating = rating;
         this.ratingAPI = ratingAPI;
@@ -123,7 +121,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         registerDependency(ISpeedrunStatsCache.class, statsCache, this::getSpeedrunStatsCache, this);
         registerDependency(IGameState.class, gameState, this::getGameState, this);
         registerDependency(IWorldManager.class, worldManager, this::getWorldManager, this);
-        registerDependency(IRankMC.class, rankMC, this::getRankMC, this);
         registerDependency(IRatingCache.class, ratingCache, this::getRatingCache, this);
         registerDependency(IRating.class, rating, this::getRating, this);
         registerDependency(IRatingAPI.class, ratingAPI, this::getRatingAPI, this);
@@ -188,9 +185,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     }
 
      
-    public IRankMC getRankMC() {
-        return rankMC;
-    }
 
      
     public IRatingCache getRatingCache() {
@@ -350,12 +344,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         return this;
     }
 
-     
-    public IGlobalContext setRankMC(IRankMC rankMC) {
-        this.rankMC = rankMC;
-        if (rankMC != null) registerDependency(IRankMC.class, rankMC, this::getRankMC, this);
-        return this;
-    }
+
 
      
     public IGlobalContext setRatingCache(IRatingCache ratingCache) {
@@ -558,7 +547,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
                 setPlayerProfile(playerProfile).
                 setInventoryManager(inventoryManager).
                 setSoundManager(soundManager).
-                setRankMC(rankMC).
                 setPunishManager(punishManager).
                 setPunishLog(punishLog).
                 setInventoryBuilder(inventoryBuilder).
