@@ -20,13 +20,10 @@ import java.util.Map;
 import java.util.TimeZone;
 
 
-public class Utils implements IUtils<IGlobalContext> {
+public class Utils implements IUtils {
 
     public final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    public String prefix ="§6§lNovus§8§l »»§f ";
-    public String staffPrefix = "§4§lNovus §8§l»»§c ";
-    public String serverID;
-    public String gameID;
+
     
     @Inject private IGlobalContext globalContext;
     @Inject private ILocalServerMetaData localServerMetaData;
@@ -38,17 +35,11 @@ public class Utils implements IUtils<IGlobalContext> {
 
     @Override
     public String getServerID() {
-        if (localServerMetaData == null) {
-            return this.serverID;
-        }
         return localServerMetaData.getServerID();
     }
 
     @Override
     public String getGameID() {
-        if (localServerMetaData == null) {
-            return this.gameID;
-        }
         return localServerMetaData.getGameID();
     }
 
@@ -189,9 +180,9 @@ public class Utils implements IUtils<IGlobalContext> {
         //TODO: Remove context from parameters in favor of custom DI approach
         if (globalContext == null) {
             Log.error("[Config] Failed to get config values: GlobalContext is null");
-            return configValues;
+            return null;
         }
-        return globalContext.getUtils().getConfigValues(globalContext);
+        return configValues;
     }
 
 
@@ -205,7 +196,8 @@ public class Utils implements IUtils<IGlobalContext> {
         if (key == null || key.trim().isEmpty()) {
             Log.error("[Config] Failed to get key: key is null or key map is empty");
             return null;
-        } 
+
+        }
         return getConfigValues(globalContext).get(key);
     }
 
