@@ -1,6 +1,7 @@
 package com.tjxjnoobie.proxy.Events;
 
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -15,11 +16,9 @@ import java.util.UUID;
 
 public class VelocityLoginEvent {
 
-    private final IGlobalContext globalContext;
+   @Inject private IGlobalContext globalContext;
 
-    public VelocityLoginEvent(IGlobalContext globalContext) {
-        this.globalContext = globalContext;
-    }
+
 
 
     @Subscribe
