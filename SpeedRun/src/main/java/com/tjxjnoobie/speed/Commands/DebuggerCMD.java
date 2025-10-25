@@ -1,9 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IDebugger;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class DebuggerCMD implements CommandExecutor, IUtils {
+public class DebuggerCMD implements CommandExecutor, IMCUtils {
 
 
 
