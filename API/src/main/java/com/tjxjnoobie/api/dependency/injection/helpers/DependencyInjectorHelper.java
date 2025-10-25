@@ -46,21 +46,9 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
 
     private Set<String> collectPackages(Class<?> targetClass) {
-        LinkedHashSet<String> packages = new LinkedHashSet<>();
-        if (targetClass != null && targetClass.getPackage() != null) {
-            String pkg = targetClass.getPackage().getName();
-            while (pkg != null && !pkg.isEmpty()) {
-                packages.add(pkg);
-                int lastDot = pkg.lastIndexOf('.');
-                if (lastDot < 0) {
-                    break;
-                }
-                pkg = pkg.substring(0, lastDot);
-            }
-        }
-
-        packages.addAll(getAllowedPackagePrefixes());
-        return packages;
+        // To extend scanning to all classes in all packages, scan from the root allowed package prefixes
+        // This ensures all subpackages under the project roots are scanned
+        return new LinkedHashSet<>(getAllowedPackagePrefixes());
     }
 
     private boolean ensurePackagesScanned(Set<String> packagesToScan) {
