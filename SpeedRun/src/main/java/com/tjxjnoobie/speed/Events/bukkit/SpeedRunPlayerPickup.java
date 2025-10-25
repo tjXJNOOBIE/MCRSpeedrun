@@ -25,7 +25,6 @@ import java.util.UUID;
     @EventHandler
     public void onPickup(EntityPickupItemEvent e) {
         IGameManager gameManager = speedRunContext.getGameManager();
-        IUtils utils;
         IMCUtils mcUtils = speedRunContext.getMcUtils();
         IGameState gameState = speedRunContext.getGameState();
         Material item = e.getItem().getItemStack().getType();
