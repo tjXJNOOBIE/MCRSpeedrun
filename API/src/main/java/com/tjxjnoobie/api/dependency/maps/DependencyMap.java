@@ -293,14 +293,6 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
             return null;
         }
 
-        IDependencyMetaData direct = get(clazz);
-        if (direct != null) {
-            Object instance = ensureAndGetInstance(direct);
-            if (instance != null) {
-                return instance;
-            }
-        }
-
         IDependencyMetaData compatible = findByAssignableType(clazz);
         return compatible != null ? ensureAndGetInstance(compatible) : null;
     }
