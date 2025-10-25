@@ -25,10 +25,16 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.*;
+import java.net.JarURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * DependencyInjectorHelper – TODO: implement class functionality
@@ -46,9 +52,127 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
 
     private Set<String> collectPackages(Class<?> targetClass) {
-        // To extend scanning to all classes in all packages, scan from the root allowed package prefixes
-        // This ensures all subpackages under the project roots are scanned
-        return new LinkedHashSet<>(getAllowedPackagePrefixes());
+        LinkedHashSet<String> packages = new LinkedHashSet<>();
+
+        if (targetClass != null) {
+            collectPackagesFromTypeHierarchy(targetClass, packages);
+            collectPackagesFromInjectMembers(targetClass, packages);
+        }
+
+        packages.addAll(getAllowedPackagePrefixes());
+        packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
+
+        return packages;
+    }
+
+    private void collectPackagesFromTypeHierarchy(Class<?> type, Set<String> packages) {
+        if (type == null || type == Object.class) {
+            return;
+        }
+
+        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
+
+        for (Class<?> iface : type.getInterfaces()) {
+            collectPackagesFromTypeHierarchy(iface, packages);
+        }
+
+        collectPackagesFromTypeHierarchy(type.getSuperclass(), packages);
+    }
+
+    private void collectPackagesFromInjectMembers(Class<?> type, Set<String> packages) {
+        Class<?> current = type;
+        while (current != null && current != Object.class) {
+            for (Field field : current.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Inject.class) || field.isAnnotationPresent(AutoInjectAll.class)) {
+                    addTypeHierarchyPackages(field.getType(), packages);
+                    addGenericTypePackages(field.getGenericType(), packages);
+                }
+            }
+
+            for (Method method : current.getDeclaredMethods()) {
+                if (method.isAnnotationPresent(Inject.class)) {
+                    for (Class<?> paramType : method.getParameterTypes()) {
+                        addTypeHierarchyPackages(paramType, packages);
+                    }
+                    Type[] genericParams = method.getGenericParameterTypes();
+                    for (Type genericType : genericParams) {
+                        addGenericTypePackages(genericType, packages);
+                    }
+                }
+            }
+
+            current = current.getSuperclass();
+        }
+    }
+
+    private void addTypeHierarchyPackages(Class<?> type, Set<String> packages) {
+        if (type == null) {
+            return;
+        }
+
+        if (type.isArray()) {
+            addTypeHierarchyPackages(type.getComponentType(), packages);
+            return;
+        }
+
+        if (type.isPrimitive()) {
+            return;
+        }
+
+        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
+
+        for (Class<?> iface : type.getInterfaces()) {
+            addTypeHierarchyPackages(iface, packages);
+        }
+
+        addTypeHierarchyPackages(type.getSuperclass(), packages);
+    }
+
+    private void addGenericTypePackages(Type type, Set<String> packages) {
+        if (type instanceof ParameterizedType parameterizedType) {
+            for (Type arg : parameterizedType.getActualTypeArguments()) {
+                if (arg instanceof Class<?> clazz) {
+                    addTypeHierarchyPackages(clazz, packages);
+                }
+            }
+        }
+    }
+
+    private void addPackageCandidate(String packageName, Set<String> packages) {
+        if (packageName == null || packageName.isBlank()) {
+            return;
+        }
+
+        if (!shouldConsiderPackage(packageName)) {
+            return;
+        }
+
+        packages.add(packageName);
+    }
+
+    private boolean shouldConsiderPackage(String packageName) {
+        if (packageName == null || packageName.isBlank()) {
+            return false;
+        }
+
+        for (String excluded : getExcludedPackagePrefixes()) {
+            if (packageName.startsWith(excluded)) {
+                return false;
+            }
+        }
+
+        Set<String> allowedPrefixes = getAllowedPackagePrefixes();
+        if (allowedPrefixes.isEmpty()) {
+            return true;
+        }
+
+        for (String allowed : allowedPrefixes) {
+            if (packageName.startsWith(allowed)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private boolean ensurePackagesScanned(Set<String> packagesToScan) {
@@ -664,15 +788,32 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     @Override
     public Set<Class<?>> findInjectableClasses(String basePackage) {
         Set<Class<?>> results = new HashSet<>();
+        if (basePackage == null || basePackage.isBlank()) {
+            return results;
+        }
+
         String path = basePackage.replace('.', '/');
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
         try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
+            Enumeration<URL> resources = loader.getResources(path);
+            if (!resources.hasMoreElements()) {
+                Log.warn("[AUTO-BIND] No classpath entries found for package: " + basePackage);
+            }
+
             while (resources.hasMoreElements()) {
                 URL resource = resources.nextElement();
-                File dir = new File(resource.getFile());
-                if (dir.exists() && dir.isDirectory()) {
-                    walkDirectoryForInjectables(dir, basePackage, results);
+                String protocol = resource.getProtocol();
+
+                if ("file".equals(protocol)) {
+                    File dir = new File(URLDecoder.decode(resource.getFile(), StandardCharsets.UTF_8));
+                    if (dir.exists() && dir.isDirectory()) {
+                        walkDirectoryForInjectables(dir, basePackage, results, loader);
+                    }
+                } else if ("jar".equals(protocol)) {
+                    scanJarResource(resource, path, results, loader);
+                } else {
+                    scanUnknownResource(resource, path, results, loader);
                 }
             }
         } catch (IOException e) {
@@ -1016,35 +1157,112 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      */
     @Override
     public void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results) {
+        walkDirectoryForInjectables(dir, packageName, results, Thread.currentThread().getContextClassLoader());
+    }
+
+    private void walkDirectoryForInjectables(File dir, String packageName, Set<Class<?>> results, ClassLoader loader) {
         File[] files = dir.listFiles();
         if (files == null) return;
 
         for (File file : files) {
             if (file.isDirectory()) {
-                walkDirectoryForInjectables(file, packageName + "." + file.getName(), results);
+                walkDirectoryForInjectables(file, packageName + "." + file.getName(), results, loader);
             } else if (file.getName().endsWith(".class")) {
                 String className = packageName + '.' + file.getName().replace(".class", "");
-                try {
-                    Class<?> clazz = Class.forName(className);
-                    // TODO: Re-enable @Injectable check after all classes are properly annotated
-                    // TODO: Remove multiple checks of Injectable.java in multiple methods
-                    // Currently accepting ALL classes and interfaces in project packages
-                    // if (clazz.isAnnotationPresent(Injectable.class) || 
-                    //     (clazz.isInterface() && !clazz.getName().startsWith("java."))) {
-                    //     results.add(clazz);
-                    // }
-
-                    // Temporary: Accept all non-java/third-party classes
-                    if (!clazz.getName().startsWith("java.") && !clazz.getName().startsWith("javax.") && !clazz.getName().startsWith("org.bukkit.") && !clazz.getName().startsWith("com.velocitypowered.") && !clazz.getName().startsWith("org.slf4j.") && !clazz.getName().startsWith("sun.")) {
-                        results.add(clazz);
-                    }
-
-                } catch (Throwable ignored) {
-                    // Skip classes that can't be loaded
-                }
+                handleDiscoveredClass(className, results, loader);
             }
         }
     }
+
+    private void scanJarResource(URL resource, String packagePath, Set<Class<?>> results, ClassLoader loader) {
+        try {
+            URLConnection connection = resource.openConnection();
+            if (connection instanceof JarURLConnection jarConnection) {
+                try (JarFile jarFile = jarConnection.getJarFile()) {
+                    scanJarEntries(jarFile, packagePath, results, loader);
+                }
+                return;
+            }
+        } catch (IOException e) {
+            Log.warn("[AUTO-BIND] Failed to open jar resource " + resource + ": " + e.getMessage());
+            return;
+        }
+
+        scanUnknownResource(resource, packagePath, results, loader);
+    }
+
+    private void scanUnknownResource(URL resource, String packagePath, Set<Class<?>> results, ClassLoader loader) {
+        String file = resource.getFile();
+        if (file == null) {
+            return;
+        }
+
+        int separator = file.indexOf('!');
+        if (separator == -1) {
+            return;
+        }
+
+        String jarPath = file.substring(0, separator);
+        if (jarPath.startsWith("file:")) {
+            jarPath = jarPath.substring("file:".length());
+        }
+
+        try (JarFile jarFile = new JarFile(URLDecoder.decode(jarPath, StandardCharsets.UTF_8))) {
+            scanJarEntries(jarFile, packagePath, results, loader);
+        } catch (IOException e) {
+            Log.warn("[AUTO-BIND] Failed to scan jar entries from " + jarPath + ": " + e.getMessage());
+        }
+    }
+
+    private void scanJarEntries(JarFile jarFile, String packagePath, Set<Class<?>> results, ClassLoader loader) throws IOException {
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            if (entry.isDirectory()) {
+                continue;
+            }
+
+            String name = entry.getName();
+            if (!name.endsWith(".class") || !name.startsWith(packagePath)) {
+                continue;
+            }
+
+            String className = name.replace('/', '.').replace(".class", \"\");
+            handleDiscoveredClass(className, results, loader);
+        }
+    }
+
+    private void handleDiscoveredClass(String className, Set<Class<?>> results, ClassLoader loader) {
+        if (className == null || className.isBlank()) {
+            return;
+        }
+
+        if (className.endsWith("package-info") || className.endsWith("module-info")) {
+            return;
+        }
+
+        try {
+            Class<?> clazz = Class.forName(className, false, loader);
+            if (!shouldConsiderClass(clazz)) {
+                return;
+            }
+            results.add(clazz);
+        } catch (ClassNotFoundException | NoClassDefFoundError | UnsupportedClassVersionError ignored) {
+            // Skip classes that cannot be loaded in the current runtime
+        }
+    }
+
+    private boolean shouldConsiderClass(Class<?> clazz) {
+        if (clazz == null || clazz.isSynthetic()) {
+            return false;
+        }
+
+        Package pkg = clazz.getPackage();
+        String packageName = pkg != null ? pkg.getName() : "";
+        return shouldConsiderPackage(packageName);
+    }
+
+
 
     /**
      * Binds fields from the target object using the now-populated dependency map.
@@ -1227,20 +1445,26 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     @Override
     public Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
         Set<Class<?>> implementations = new HashSet<>();
-        String path = basePackage.replace('.', '/');
-
-        try {
-            Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(path);
-            while (resources.hasMoreElements()) {
-                URL resource = resources.nextElement();
-                File dir = new File(resource.getFile());
-                if (dir.exists() && dir.isDirectory()) {
-                    walkDirectory(interfaceType, dir, basePackage, implementations);
-                }
-            }
-        } catch (IOException e) {
-            Log.error("Failed to walk package tree for " + interfaceType.getSimpleName() + ": " + e.getMessage());
+        if (interfaceType == null) {
+            return implementations;
         }
+
+        String scanPackage = (basePackage == null || basePackage.isBlank())
+                ? (interfaceType.getPackage() != null ? interfaceType.getPackage().getName() : "")
+                : basePackage;
+
+        Set<Class<?>> candidates = findInjectableClasses(scanPackage);
+        for (Class<?> candidate : candidates) {
+            if (candidate == null || candidate.isInterface()) {
+                continue;
+            }
+
+            if (interfaceType.isAssignableFrom(candidate)) {
+                implementations.add(candidate);
+                Log.info("Found concrete class: " + candidate.getSimpleName() + " implements " + interfaceType.getSimpleName() + "");
+            }
+        }
+
         return implementations;
     }
 
