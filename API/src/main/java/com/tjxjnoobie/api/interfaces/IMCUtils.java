@@ -17,6 +17,8 @@ import java.util.UUID;
  */
 public interface IMCUtils {
 
+
+    //TODO: Replace class methods parameters for custom DI system
     /**
      * Gets all online players
      *
@@ -53,11 +55,11 @@ public interface IMCUtils {
      */
 
 
-    default void sendDebugMessage(IGlobalContext globalContext, Player player, String message) {
-        IRankCache rankCache = globalContext.getRankCache();
-        IUtils utils = globalContext.getUtils();
+    default void sendDebugMessage(ISpeedRunContext speedRunContext, Player player, String message) {
+        IRankCache rankCache = speedRunContext.getRankCache();
+        IUtils utils = speedRunContext.getUtils();
         UUID uuid = player.getUniqueId();
-        IDebugger debugger = globalContext.getDebugger();
+        IDebugger debugger = speedRunContext.getDebugger();
         if (rankCache.getPowerLevel(uuid) <= 10000 ||
                 rankCache.hasPermission(uuid, "network.debug")
                         && debugger.isDebugger(uuid)) {
