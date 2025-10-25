@@ -60,7 +60,10 @@ public interface IMCUtils {
             viewer.hidePlayer(plugin, toHide);
         }
     }
-    default String getPrefix(){
+    default String getMinecraftPrefix(){
+        return "";
+    }
+    default String getMinecraftStaffPrefix(){
         return "";
     }
 
