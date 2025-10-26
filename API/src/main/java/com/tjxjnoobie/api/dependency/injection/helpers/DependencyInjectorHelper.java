@@ -603,6 +603,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 Object value = resolveDependency(depClass);
                 injectFieldValue(target, field, value, optional, isStatic, depClass, clazz);
             } catch (Throwable e) {
+                Log.error("[DI] Failed to inject field '" + field.getName() + "' in class '" + clazz.getName() + "'.");
                 Log.exception(e);
             }
         }
