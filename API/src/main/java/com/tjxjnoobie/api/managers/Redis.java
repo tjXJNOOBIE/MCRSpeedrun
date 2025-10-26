@@ -3,6 +3,7 @@ package com.tjxjnoobie.api.managers;
 import com.tjxjnoobie.api.abstracts.AbstractManager;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IRedis;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.HandleBlocks;
 import redis.clients.jedis.Jedis;
@@ -20,7 +21,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
 
 
     //TODO: Testing method fire without annotation
-    // @PostConstruct
+    @PostConstruct
     @Override
     public void connectToRedis() throws ClassNotFoundException {
 
