@@ -57,7 +57,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      */
     @Override
     public void injectAllContextsGlobally(Object target) throws IllegalAccessException {
-        Log.info("[DI] ===== Global context injection started =====");
+        Log.info("[DI] ===== Context Based Injection Started =====");
         Log.info("[DI] Total contexts registered: " + contextRegistry.size());
 
         // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
