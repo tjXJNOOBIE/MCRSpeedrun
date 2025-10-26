@@ -6,7 +6,6 @@ import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInject
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.managers.Redis;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.proxy.Commands.*;
@@ -19,7 +18,6 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
-import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
 
@@ -42,7 +40,9 @@ public class VelocityMain  {
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
-    private Jedis redis;
+    //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
+
+//    private Jedis redis;
 
 
 
@@ -59,8 +59,9 @@ public class VelocityMain  {
         Config.loadConfig();
         injectionHelper.injectAllContextsGlobally(this);
         MySQL.connect();
-        redis = Redis.jedis;
-        redis.connect();
+        //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
+//        redis = Redis.jedis;
+//        redis.connect();
 
 
         registerCommand("sim", new Sim());
