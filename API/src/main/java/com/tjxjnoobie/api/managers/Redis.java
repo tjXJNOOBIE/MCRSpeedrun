@@ -18,8 +18,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     private static HandleBlocks handleBlocks;
 
 
-    public Redis() {
-    }
+
     //TODO: Testing method fire without annotation
     // @PostConstruct
     @Override
