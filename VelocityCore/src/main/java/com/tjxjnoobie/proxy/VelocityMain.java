@@ -42,7 +42,7 @@ public class VelocityMain  {
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
-    @Inject public static Jedis redis;
+    private Jedis redis;
 
 
 
