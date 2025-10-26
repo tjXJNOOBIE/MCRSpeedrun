@@ -1,12 +1,12 @@
 package com.tjxjnoobie.api.platform.minecraft.velocity.managers;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
+import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IPlayerProfile;
 import com.tjxjnoobie.api.interfaces.IPunishManager;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.Redis;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.params.ScanParams;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class PunishManager implements IUtils, IPunishManager {
 
-   @Inject private GlobalContext globalContext;
+    @Inject private IGlobalContext globalContext;
     private final Jedis jedis = Redis.jedis;
 
 
