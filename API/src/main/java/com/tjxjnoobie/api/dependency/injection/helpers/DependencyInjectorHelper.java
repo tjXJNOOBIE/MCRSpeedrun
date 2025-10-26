@@ -578,8 +578,9 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         Field[] fields;
         try {
             fields = clazz.getDeclaredFields();
-        } catch (Throwable e) {
-            Log.info("[DI] Skipping class <yellow>" + clazz.getSimpleName() + "</yellow> due to missing dependency: <red>" + e.getMessage() + "</red>");
+        } catch (LinkageError | ReflectiveOperationException e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            Log.info("[DI] Skipping field processing for class <yellow>" + clazz.getSimpleName() + "</yellow> due to an error: <red>" + errorMessage + "</red>");
             Log.exception(e);
             return;
         }
