@@ -6,6 +6,7 @@ import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInject
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
+import com.tjxjnoobie.api.managers.Redis;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.proxy.Commands.*;
@@ -40,9 +41,9 @@ public class VelocityMain  {
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
-    //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
 
-//    private Jedis redis;
+    //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
+    @Inject private Redis redis;
 
 
 
