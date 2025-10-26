@@ -30,7 +30,6 @@
         <dependency>
             <groupId>com.tjxjnoobie</groupId>
             <artifactId>api</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
