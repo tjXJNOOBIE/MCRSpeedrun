@@ -55,26 +55,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
         initializeDefaults();
     }
     
-    /**
-     * Initializes default configuration values for allowed and excluded packages.
-     * Sets up the default package whitelist and blacklist for dependency injection eligibility.
-     */
-    public void initializeDefaults() {
-        // Add default allowed packages
-        allowedPackages.add("com.tjxjnoobie");
 
-        // Add default excluded packages
-        excludedPackages.add("java.");
-        excludedPackages.add("javax.");
-        excludedPackages.add("sun.");
-        excludedPackages.add("com.sun.");
-
-        if (DEFAULT_PACKAGE_LOGGED.compareAndSet(false, true)) {
-            Log.info("[PackageExclusion] Allowed prefixes=" + allowedPackages
-                    + " | Excluded prefixes=" + excludedPackages);
-        }
-
-    }
 
     // ===== CORE RESOLUTION (Highest Priority) =====
 
