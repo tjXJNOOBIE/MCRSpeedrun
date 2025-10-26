@@ -19,6 +19,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
+import redis.clients.jedis.Jedis;
 
 import java.sql.SQLException;
 
@@ -41,7 +42,7 @@ public class VelocityMain  {
     @Inject private IRankCache rankCache;
     @Inject private IPunishManager punishManager;
     @Inject private IPunishLog punishLog;
-    @Inject private Redis redis;
+    @Inject public static Jedis redis;
 
 
 
@@ -54,13 +55,12 @@ public class VelocityMain  {
         IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
         //TODO: Remove concrete call in favor of DI
         globalContext = new GlobalContext();
-
         Config.createConfig();
         Config.loadConfig();
         injectionHelper.injectAllContextsGlobally(this);
-
         MySQL.connect();
-        redis.connectToRedis();
+        redis = Redis.jedis;
+        redis.connect();
 
 
         registerCommand("sim", new Sim());
