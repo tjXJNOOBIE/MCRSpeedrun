@@ -24,7 +24,6 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     // @PostConstruct
     @Override
     public void connectToRedis() throws ClassNotFoundException {
-        Class.forName("redis.clients.jedis.Jedis");
 
         jedis = new Jedis(host, Integer.parseInt(port)); // Change this if your Redis server is different
         jedis.auth(password);
