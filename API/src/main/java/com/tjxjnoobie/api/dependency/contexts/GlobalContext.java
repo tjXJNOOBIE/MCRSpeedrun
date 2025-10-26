@@ -21,7 +21,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     private IGameMode gameMode;
     private ILocalServerMetaData localServerMetaData;
     private ISpeedrunStatsCache statsCache;
-    private IWorldManager worldManager;
     private IRatingCache ratingCache;
     private IRating rating;
     private IRatingAPI ratingAPI;
@@ -81,7 +80,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         this.utils = utils;
         this.statsCache = statsCache;
         this.gameState = gameState;
-        this.worldManager = worldManager;
         this.ratingCache = ratingCache;
         this.rating = rating;
         this.ratingAPI = ratingAPI;
@@ -587,7 +585,6 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
         summary.append("- GameMode: ").append(gameMode != null ? "✓" : "✗").append("\n");
         summary.append("- GameState: ").append(gameState != null ? "✓" : "✗").append("\n");
         summary.append("- Utils: ").append(utils != null ? "✓" : "✗").append("\n");
-        summary.append("- WorldManager: ").append(worldManager != null ? "✓" : "✗").append("\n");
         summary.append("- Redis: ").append(redis != null ? "✓" : "✗").append("\n");
         summary.append("- StatsCache: ").append(statsCache != null ? "✓" : "✗").append("\n");
         summary.append("- RatingCache: ").append(ratingCache != null ? "✓" : "✗").append("\n");
