@@ -575,22 +575,37 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     @Override
     public void injectFieldsForClass(Object target, Class<?> clazz, boolean autoInject, boolean includeStatic, boolean includeInstance, Set<Class<?>> dependencies) {
         if (clazz == null) return;
-        for (Field field : clazz.getDeclaredFields()) {
-            if (!shouldInjectField(field, autoInject)) continue;
+        Field[] fields;
+        try {
+            fields = clazz.getDeclaredFields();
+        } catch (LinkageError | ReflectiveOperationException e) {
+            String errorMessage = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            Log.info("[DI] Skipping field processing for class <yellow>" + clazz.getSimpleName() + "</yellow> due to an error: <red>" + errorMessage + "</red>");
+            Log.exception(e);
+            return;
+        }
 
-            boolean isStatic = Modifier.isStatic(field.getModifiers());
-            if ((isStatic && !includeStatic) || (!isStatic && !includeInstance)) continue;
+        for (Field field : fields) {
+            try {
+                if (!shouldInjectField(field, autoInject)) continue;
 
-            Inject inject = field.getAnnotation(Inject.class);
-            boolean optional = inject != null && inject.optional();
-            Class<?> depClass = field.getType();
+                boolean isStatic = Modifier.isStatic(field.getModifiers());
+                if ((isStatic && !includeStatic) || (!isStatic && !includeInstance)) continue;
 
-            if (dependencies != null) {
-                dependencies.add(depClass);
+                Inject inject = field.getAnnotation(Inject.class);
+                boolean optional = inject != null && inject.optional();
+                Class<?> depClass = field.getType();
+
+                if (dependencies != null) {
+                    dependencies.add(depClass);
+                }
+
+                Object value = resolveDependency(depClass);
+                injectFieldValue(target, field, value, optional, isStatic, depClass, clazz);
+            } catch (Throwable e) {
+                Log.error("[DI] Failed to inject field '" + field.getName() + "' in class '" + clazz.getName() + "'.");
+                Log.exception(e);
             }
-
-            Object value = resolveDependency(depClass);
-            injectFieldValue(target, field, value, optional, isStatic, depClass, clazz);
         }
     }
 
