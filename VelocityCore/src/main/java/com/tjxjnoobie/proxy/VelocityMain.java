@@ -59,6 +59,8 @@ public class VelocityMain  {
         Config.createConfig();
         Config.loadConfig();
         injectionHelper.injectAllContextsGlobally(this);
+        //TODO: Testing method delegation now
+        redis.connectToRedis();
         MySQL.connect();
         //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
 //        redis = Redis.jedis;
