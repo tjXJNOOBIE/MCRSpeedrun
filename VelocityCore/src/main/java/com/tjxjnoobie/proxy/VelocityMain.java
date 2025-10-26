@@ -9,6 +9,7 @@ import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.Redis;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.console.style.LogColors;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.proxy.Commands.*;
 import com.tjxjnoobie.proxy.Events.VelocityLoginEvent;
@@ -64,7 +65,8 @@ public class VelocityMain  {
         if(redis != null) {
             redis.connectToRedis();
         } else {
-            Log.error("Redis instance is null, skipping");
+            //TODO: Testing log color inline text
+            Log.error(LogColors.RED+"Redis "+LogColors.RESET+" instance is null, skipping");
         }
         MySQL.connect();
         //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
