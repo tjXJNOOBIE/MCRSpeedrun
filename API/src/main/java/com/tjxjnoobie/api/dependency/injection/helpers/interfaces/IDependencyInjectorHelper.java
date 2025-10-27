@@ -33,6 +33,8 @@ import java.util.*;
 public interface IDependencyInjectorHelper extends InjectionConfig {
 
 
+
+
     @PreConstruct(priority = 0)
     default void initializeDependencySystem(){
 
@@ -50,7 +52,17 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
         // Default no-op implementation - override in concrete class
     }
 
+    /**
+     * Registers dependencies based on annotations present in the specified set of classes.
+     * This method scans the provided classes to detect and process custom annotations
+     * that help configure and register dependencies automatically.
+     *
+     * @param classesToScan a set of classes to be scanned for annotations that define
+     *                       dependencies or rules for registration.
+     */
+    default void registerDependenciesViaAnnotation(Set<Class<?>> classesToScan){
 
+    }
     /**
      * Registers an instance as a key component with a specified priority for dependency injection.
      * <p>
