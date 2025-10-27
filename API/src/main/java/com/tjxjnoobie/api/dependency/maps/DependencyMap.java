@@ -15,6 +15,7 @@ import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -383,10 +384,11 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * Checks if a dependency is registered (has metadata).
      *
      * @param clazz The class type to check
+     * @param ensureInstance If true, attempts to create instances via factories; if false, only checks existing instances
      * @return true if registered, false otherwise
      */
     @Override
-    public boolean isRegistered(Class<?> clazz) {
+    public boolean isRegistered(Class<?> clazz, boolean ensureInstance) {
         if (clazz == null) {
             return false;
         }
@@ -396,9 +398,36 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
             return true;
         }
 
+        // Check instances based on ensureInstance flag
         return values().stream()
-                .map(this::ensureAndGetInstance)
-                .anyMatch(instance -> instance != null && clazz.isInstance(instance));
+                .anyMatch(metaData -> {
+                    if (metaData == null) {
+                        return false;
+                    }
+
+                    Object instance;
+                    if (ensureInstance) {
+                        // Use the existing method that tries factory if instance is null
+                        instance = ensureAndGetInstance(metaData);
+                    } else {
+                        // Only get existing instance, don't create via factory
+                        instance = metaData.getDependencyInstance(metaData.getDependencyClass());
+                    }
+
+                    return instance != null && clazz.isInstance(instance);
+                });
+    }
+
+
+    /**
+     * Checks if a dependency is registered (has metadata).
+     *
+     * @param clazz The class type to check
+     * @return true if registered, false otherwise
+     */
+    @Override
+    public boolean isRegistered(Class<?> clazz) {
+        return isRegistered(clazz, true);
     }
 
     @Override
