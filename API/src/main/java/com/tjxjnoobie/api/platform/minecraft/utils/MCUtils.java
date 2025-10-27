@@ -30,7 +30,7 @@ public class MCUtils implements IMCUtils {
 
     @Override
     public String getMinecraftPrefix(){
-        return localServerMetaData.getServerID();
+        return getMinecraftPrefix();
     }
 
 
