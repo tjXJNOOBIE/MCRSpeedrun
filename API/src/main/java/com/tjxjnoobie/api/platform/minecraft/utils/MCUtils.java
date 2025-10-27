@@ -15,7 +15,7 @@ import java.util.UUID;
 
 @DelegatesToInterface(IMCUtils.class)
 public class MCUtils implements IMCUtils {
-
+    //TODO: First test candidate for our new injection system
     private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();
     @Inject
@@ -28,14 +28,14 @@ public class MCUtils implements IMCUtils {
 
     @Override
     public String getMinecraftPrefix(){
-        return getMinecraftPrefix();
+        return getLocalServerPrefix();
     }
 
 
 
     @Override
-    public String getServerID(){
-        return getServerID();
+    public String getMinecraftServerID(){
+        return getLocalServerID();
     }
 
     @Override
