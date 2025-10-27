@@ -2,7 +2,6 @@ package com.tjxjnoobie.api.platform.minecraft.utils;
 
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -21,7 +20,6 @@ public class MCUtils implements IMCUtils {
     public ArrayList<String> debuggers = new ArrayList<>();
     @Inject
     private ISpeedRunContext speedRunContext;
-    @Inject private ILocalServerMetaData localServerMetaData;
 
     @Override
     public ISpeedRunContext getSpeedRunContext(){
@@ -37,7 +35,7 @@ public class MCUtils implements IMCUtils {
 
     @Override
     public String getServerID(){
-        return localServerMetaData.getServerID();
+        return getServerID();
     }
 
     @Override
