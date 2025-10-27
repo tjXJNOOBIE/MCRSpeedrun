@@ -9,6 +9,8 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesFromConcrete;
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
@@ -19,6 +21,7 @@ import com.tjxjnoobie.api.platform.global.annotations.AutoInjectAll;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.annotations.PreConstruct;
 import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.console.style.LogColor;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.io.File;
@@ -197,11 +200,148 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             // Step 2: Scan newly encountered packages and record their processed status.
             if (SCANNED_PACKAGES.add(pkg)) {
                 Log.info("[AUTO-BIND] » scanning package: " + pkg);
-                scanAndRegisterInjectableClasses(pkg);
+                // Legacy injectable scan disabled in favor of @Delegates* registration flow
+                //scanAndRegisterInjectableClasses(pkg);
                 scannedNew = true;
             }
         }
         return scannedNew;
+    }
+
+    /**
+     * Registers dependencies declared via @DelegatesToInterface and @DelegatesFromConcrete annotations.
+     * <p>
+     * This scanner respects configured package allow/exclude lists and gracefully skips invalid entries.
+     * It ensures the DependencyMap is populated with interface keys and concrete instances sourced from
+     * the annotation metadata.
+     * </p>
+     */
+    public void registerDependenciesViaAnnotation(Set<Class<?>> classesToScan) {
+        Log.info("[DI-Helper] " + LogColor.YELLOW + "Processing" + LogColor.RESET
+                + " @DelegatesToInterface registrations");
+
+        if (classesToScan == null || classesToScan.isEmpty()) {
+            Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                    + " No candidate types available for delegate registration");
+            return;
+        }
+
+        int registeredCount = 0;
+
+        for (Class<?> candidate : classesToScan) {
+            if (candidate == null) {
+                continue;
+            }
+            if (candidate.isInterface()) {
+                DelegatesFromConcrete fromConcrete = candidate.getAnnotation(DelegatesFromConcrete.class);
+                if (fromConcrete == null) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "WARN" + LogColor.RESET
+                            + " Interface " + candidate.getName()
+                            + " is missing @DelegatesFromConcrete");
+                    continue;
+                }
+
+                Class<?> declaredConcrete = fromConcrete.value();
+                if (declaredConcrete == null || declaredConcrete == Void.class) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " Interface " + candidate.getName()
+                            + " declared no delegate in @DelegatesFromConcrete");
+                    continue;
+                }
+
+                if (!candidate.isAssignableFrom(declaredConcrete)) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " Declared delegate " + declaredConcrete.getName()
+                            + " is not assignable to " + candidate.getName());
+                    continue;
+                }
+
+                DelegatesToInterface toInterface = declaredConcrete.getAnnotation(DelegatesToInterface.class);
+                if (toInterface == null) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " Declared delegate " + declaredConcrete.getName()
+                            + " for " + candidate.getName()
+                            + " is missing @DelegatesToInterface");
+                    continue;
+                }
+
+                Class<?> interfaceType = toInterface.value();
+                if (interfaceType == null) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " " + declaredConcrete.getName()
+                            + " did not specify a target interface");
+                    continue;
+                }
+
+                if (!interfaceType.equals(candidate)) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " Delegate mismatch: " + declaredConcrete.getName()
+                            + " references " + interfaceType.getName()
+                            + " instead of " + candidate.getName());
+                    continue;
+                }
+
+                if (dependencyMap.isRegistered(candidate)) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                            + " Interface " + candidate.getName()
+                            + " is already registered");
+                    continue;
+                }
+
+                Object instance;
+                try {
+                    Constructor<?> constructor = declaredConcrete.getDeclaredConstructor();
+                    constructor.setAccessible(true);
+                    instance = constructor.newInstance();
+                } catch (Exception e) {
+                    Log.error("[DI-Helper] " + LogColor.RED + "FAILED" + LogColor.RESET
+                            + " to instantiate " + declaredConcrete.getName() + ": " + e.getMessage());
+                    continue;
+                }
+
+                dependencyMap.registerDependency(candidate, instance);
+                Log.success("[DI-Helper] " + LogColor.GREEN + "REGISTERED interface" + LogColor.RESET
+                        + " " + candidate.getSimpleName()
+                        + " -> " + declaredConcrete.getSimpleName());
+                registeredCount++;
+            } else {
+                if (!candidate.isAnnotationPresent(DelegatesToInterface.class)) {
+                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "WARN" + LogColor.RESET
+                            + " Concrete class " + candidate.getName()
+                            + " is missing @DelegatesToInterface");
+                }
+            }
+        }
+
+        Log.info("[DI-Helper] " + LogColor.YELLOW + "SUMMARY" + LogColor.RESET
+                + " Annotation registration complete. Total registered: " + registeredCount);
+    }
+
+    public Set<Class<?>> scanDirectoryForClasses() {
+        Set<Class<?>> discovered = new LinkedHashSet<>();
+        Set<String> packagesToScan = collectPackages(null);
+
+        if (packagesToScan.isEmpty()) {
+            Package currentPackage = getClass().getPackage();
+            if (currentPackage != null && currentPackage.getName() != null) {
+                packagesToScan.add(currentPackage.getName());
+            }
+        }
+
+        for (String basePackage : packagesToScan) {
+            if (basePackage == null || basePackage.isBlank()) {
+                continue;
+            }
+
+            Log.info("[DI-Helper] " + LogColor.YELLOW + "SCAN" + LogColor.RESET
+                    + " Searching package: " + basePackage);
+            discovered.addAll(findInjectableClasses(basePackage));
+        }
+
+        Log.info("[DI-Helper] " + LogColor.YELLOW + "SUMMARY" + LogColor.RESET
+                + " scanDirectoryForClasses located " + discovered.size() + " candidates");
+
+        return discovered;
     }
 
     /**
@@ -322,6 +462,9 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * @throws Exception when graph construction or injection fails
      */
     public void initialize() throws Exception {
+        Set<Class<?>> scannedClasses = scanDirectoryForClasses();
+        registerDependenciesViaAnnotation(scannedClasses);
+
         // Step 1: Build the dependency graph of registered components.
         buildDependencyGraph();
         // Step 2: Compute depth levels to determine initialization order.
