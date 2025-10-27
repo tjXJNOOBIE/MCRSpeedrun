@@ -17,6 +17,7 @@ public interface IMCUtils extends ILocalServerMetaData {
 
     //TODO: Replace class methods parameters for custom DI system
 
+    //TODO: Make a more concerned context for IMCutils instead of using SpeedRunContext
     default ISpeedRunContext getSpeedRunContext() {
         return null;
     }
