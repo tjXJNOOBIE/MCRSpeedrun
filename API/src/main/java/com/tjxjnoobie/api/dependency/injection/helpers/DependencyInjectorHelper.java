@@ -215,6 +215,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * the annotation metadata.
      * </p>
      */
+    @Override
     public void registerDependenciesViaAnnotation(Set<Class<?>> classesToScan) {
         Log.info("[DI-Helper] " + LogColor.YELLOW + "Processing" + LogColor.RESET
                 + " @DelegatesToInterface registrations");
