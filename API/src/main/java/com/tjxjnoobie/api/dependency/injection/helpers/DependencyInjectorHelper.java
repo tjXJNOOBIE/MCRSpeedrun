@@ -266,7 +266,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 continue;
             }
 
-            if (dependencyMap.containsKey(interfaceType)) {
+            if (dependencyMap.isRegistered(interfaceType, false)) {
                 Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
                         + " Interface " + interfaceType.getName()
                         + " is already registered with a concrete implementation");
