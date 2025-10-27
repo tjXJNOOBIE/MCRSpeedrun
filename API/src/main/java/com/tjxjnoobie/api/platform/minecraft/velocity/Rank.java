@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.velocity;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.managers.MySQL;
@@ -10,7 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-
+@DelegatesToInterface(IRank.class)
 public class Rank implements IRank {
 
     @Inject private PlayerProfile playerProfile;
