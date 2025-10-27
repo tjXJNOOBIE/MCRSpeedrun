@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
-public class SpeedRunQuitEvent implements Listener, IUtils {
+public class SpeedRunQuitEvent implements Listener, IMCUtils {
 
 
     private final ISpeedRunContext speedRunContext;
