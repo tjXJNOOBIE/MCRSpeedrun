@@ -1,7 +1,7 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
+import com.tjxjnoobie.api.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
-import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.interfaces.IVoting;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Material;
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunInventoryClick implements Listener, IUtils {
+public class SpeedRunInventoryClick implements Listener, IMCUtils {
 
     @Inject private ISpeedRunContext speedRunContext;
 
