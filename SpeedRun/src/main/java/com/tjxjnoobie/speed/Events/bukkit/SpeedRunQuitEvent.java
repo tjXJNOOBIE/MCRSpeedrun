@@ -21,6 +21,7 @@ public class SpeedRunQuitEvent implements Listener, IMCUtils {
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
+        //TODO: Remove these delegations
         IGameManager gameManager = speedRunContext.getGameManager();
         IGameState gameState = speedRunContext.getGameState();
         IMCUtils mcUtils = speedRunContext.getMcUtils();
