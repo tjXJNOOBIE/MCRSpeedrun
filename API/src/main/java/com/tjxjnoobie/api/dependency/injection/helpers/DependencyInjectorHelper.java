@@ -9,7 +9,6 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
-import com.tjxjnoobie.api.dependency.annotations.DelegatesFromConcrete;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
@@ -209,7 +208,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     }
 
     /**
-     * Registers dependencies declared via @DelegatesToInterface and @DelegatesFromConcrete annotations.
+     * Registers dependencies declared via @DelegatesToInterface annotations.
      * <p>
      * This scanner respects configured package allow/exclude lists and gracefully skips invalid entries.
      * It ensures the DependencyMap is populated with interface keys and concrete instances sourced from
@@ -232,85 +231,64 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             if (candidate == null) {
                 continue;
             }
-            if (candidate.isInterface()) {
-                DelegatesFromConcrete fromConcrete = candidate.getAnnotation(DelegatesFromConcrete.class);
-                if (fromConcrete == null) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "WARN" + LogColor.RESET
-                            + " Interface " + candidate.getName()
-                            + " is missing @DelegatesFromConcrete");
-                    continue;
-                }
 
-                Class<?> declaredConcrete = fromConcrete.value();
-                if (declaredConcrete == null || declaredConcrete == Void.class) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " Interface " + candidate.getName()
-                            + " declared no delegate in @DelegatesFromConcrete");
-                    continue;
-                }
-
-                if (!candidate.isAssignableFrom(declaredConcrete)) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " Declared delegate " + declaredConcrete.getName()
-                            + " is not assignable to " + candidate.getName());
-                    continue;
-                }
-
-                DelegatesToInterface toInterface = declaredConcrete.getAnnotation(DelegatesToInterface.class);
-                if (toInterface == null) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " Declared delegate " + declaredConcrete.getName()
-                            + " for " + candidate.getName()
-                            + " is missing @DelegatesToInterface");
-                    continue;
-                }
-
-                Class<?> interfaceType = toInterface.value();
-                if (interfaceType == null) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " " + declaredConcrete.getName()
-                            + " did not specify a target interface");
-                    continue;
-                }
-
-                if (!interfaceType.equals(candidate)) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " Delegate mismatch: " + declaredConcrete.getName()
-                            + " references " + interfaceType.getName()
-                            + " instead of " + candidate.getName());
-                    continue;
-                }
-
-                if (dependencyMap.isRegistered(candidate)) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
-                            + " Interface " + candidate.getName()
-                            + " is already registered");
-                    continue;
-                }
-
-                Object instance;
-                try {
-                    Constructor<?> constructor = declaredConcrete.getDeclaredConstructor();
-                    constructor.setAccessible(true);
-                    instance = constructor.newInstance();
-                } catch (Exception e) {
-                    Log.error("[DI-Helper] " + LogColor.RED + "FAILED" + LogColor.RESET
-                            + " to instantiate " + declaredConcrete.getName() + ": " + e.getMessage());
-                    continue;
-                }
-
-                dependencyMap.registerDependency(candidate, instance);
-                Log.success("[DI-Helper] " + LogColor.GREEN + "REGISTERED interface" + LogColor.RESET
-                        + " " + candidate.getSimpleName()
-                        + " -> " + declaredConcrete.getSimpleName());
-                registeredCount++;
-            } else {
-                if (!candidate.isAnnotationPresent(DelegatesToInterface.class)) {
-                    Log.warn("[DI-Helper] " + LogColor.YELLOW + "WARN" + LogColor.RESET
-                            + " Concrete class " + candidate.getName()
-                            + " is missing @DelegatesToInterface");
-                }
+            DelegatesToInterface toInterface = candidate.getAnnotation(DelegatesToInterface.class);
+            if (toInterface == null) {
+                continue;
             }
+
+            if (candidate.isInterface()) {
+                Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                        + " Candidate " + candidate.getName()
+                        + " is an interface but annotated with @DelegatesToInterface");
+                continue;
+            }
+
+            Class<?> interfaceType = toInterface.value();
+            if (interfaceType == null || interfaceType == Void.class) {
+                Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                        + " " + candidate.getName()
+                        + " did not specify a target interface");
+                continue;
+            }
+
+            if (!interfaceType.isInterface()) {
+                Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                        + " " + candidate.getName()
+                        + " declared non-interface target " + interfaceType.getName());
+                continue;
+            }
+
+            if (!interfaceType.isAssignableFrom(candidate)) {
+                Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                        + " " + candidate.getName()
+                        + " is not assignable to " + interfaceType.getName());
+                continue;
+            }
+
+            if (dependencyMap.isRegistered(interfaceType)) {
+                Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
+                        + " Interface " + interfaceType.getName()
+                        + " is already registered");
+                continue;
+            }
+
+            Object instance;
+            try {
+                Constructor<?> constructor = candidate.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                instance = constructor.newInstance();
+            } catch (Exception e) {
+                Log.error("[DI-Helper] " + LogColor.RED + "FAILED" + LogColor.RESET
+                        + " to instantiate " + candidate.getName() + ": " + e.getMessage());
+                continue;
+            }
+
+            dependencyMap.registerDependency(interfaceType, instance);
+            Log.success("[DI-Helper] " + LogColor.GREEN + "REGISTERED interface" + LogColor.RESET
+                    + " " + interfaceType.getSimpleName()
+                    + " -> " + candidate.getSimpleName());
+            registeredCount++;
         }
 
         Log.info("[DI-Helper] " + LogColor.YELLOW + "SUMMARY" + LogColor.RESET
