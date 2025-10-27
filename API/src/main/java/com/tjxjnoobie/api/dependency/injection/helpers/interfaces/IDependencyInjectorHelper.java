@@ -77,6 +77,15 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     default void registerImportant(Class<?> clazz, Object instance, int priority) {
     }
 
+    /**
+     * Scans a directory for classes and retrieves a set of all discovered classes.
+     * This method provides a default implementation that returns an empty set.
+     *
+     * @return a set of discovered classes, or an empty set if no classes are found.
+     */
+    default Set<Class<?>> scanDirectoryForClasses(){
+        return new HashSet<>();
+    }
 
     /**
      * Automatically binds dependencies for all classes in the project, including type-level and instance-level bindings.

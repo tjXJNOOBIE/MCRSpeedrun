@@ -296,6 +296,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 + " Annotation registration complete. Total registered: " + registeredCount);
     }
 
+    @Override
     public Set<Class<?>> scanDirectoryForClasses() {
         Set<Class<?>> discovered = new LinkedHashSet<>();
         Set<String> packagesToScan = collectPackages(null);
