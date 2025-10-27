@@ -23,6 +23,18 @@ public interface IMCUtils extends ILocalServerMetaData {
     }
 
 
+    default String getMinecraftPrefix(){
+        return "";
+    }
+
+    /**
+     * Retrieves the unique identifier for the current Minecraft server.
+     * This method provides a string representation of the server's ID, which can
+     * be used for distinguishing the server in a multi-server environment or for
+     * logging and configuration purposes.
+     *
+     * @return A string representing the unique identifier of the Minecraft server
+     */
     default String getMinecraftServerID(){
         return "";
     }
