@@ -226,7 +226,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
     public String getSpawnWorld() {
 
         try {
-            String serverID = getServerID();
+            String serverID = getLocalServerID();
             String query = "SELECT SPAWNWORLD FROM servers WHERE SERVERID= ?";
             ResultSet rs = MySQL.getResult(query, serverID);
             if (rs.next()) {

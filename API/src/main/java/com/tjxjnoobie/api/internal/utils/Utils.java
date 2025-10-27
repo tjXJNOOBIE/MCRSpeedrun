@@ -35,7 +35,7 @@ public class Utils implements IUtils {
 
     @Override
     public String getServerID() {
-        return localServerMetaData.getServerID();
+        return localServerMetaData.getLocalServerID();
     }
 
     @Override
