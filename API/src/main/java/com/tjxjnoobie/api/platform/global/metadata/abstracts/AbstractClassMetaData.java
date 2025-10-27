@@ -868,7 +868,8 @@ public abstract class AbstractClassMetaData<T> implements IAbstractClassMetaData
         return classNames;
     }
     
-    
+    @Deprecated(forRemoval = true, since = "10/27/25")
+    //TODO: Replace method with class scanning method in DependencyInjectionHelper
     public Set<String> scanJarFileForClasses(File jarFile, String packagePrefix) {
         Set<String> classNames = new HashSet<>();
         
