@@ -1,8 +1,8 @@
 package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class SpawnEnderDragon implements CommandExecutor, IUtils {
+public class SpawnEnderDragon implements CommandExecutor, IMCUtils {
 
 
    @Inject
