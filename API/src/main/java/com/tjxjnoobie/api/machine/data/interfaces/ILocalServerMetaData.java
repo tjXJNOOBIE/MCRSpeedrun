@@ -64,7 +64,7 @@ public interface ILocalServerMetaData {
      *
      * @return the Minecraft staff prefix string, which is generally empty by default
      */
-    default String getMinecraftPrefix(){
+    default String getLocalServerPrefix(){
         return "";
     }
 }
