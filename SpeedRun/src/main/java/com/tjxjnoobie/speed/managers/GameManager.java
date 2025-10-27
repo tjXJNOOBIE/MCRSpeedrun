@@ -42,7 +42,6 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public ArrayList<UUID> finished_players = new ArrayList<>();
 
 
-
     public int minPlayers = 2;
     public int maxPlayers = 4;
     public int lobbyCountdown = 60;
@@ -61,9 +60,12 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public boolean canMove = true;
     public GameStateEnum gameStateEnum;
 
-    @Inject private SpeedRunContext speedRunContext;
-    @Inject private IGlobalContext globalContext;
-    @Inject private Plugin plugin; // Will be injected automatically from context
+    @Inject
+    private SpeedRunContext speedRunContext;
+    @Inject
+    private IGlobalContext globalContext;
+    @Inject
+    private Plugin plugin; // Will be injected automatically from context
     private BukkitTask lobbyTimer;
     private BukkitTask lobby;
     private BukkitTask checkers;
@@ -77,33 +79,32 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
 
 
-      
     public long getSeed() {
         return seed;
     }
 
-      
+
     public long getTimeElapsedLong() {
         return timeElapsed;
     }
 
-      
+
     public int getMinPlayers() {
         return minPlayers;
     }
 
-      
+
     public int getCurrentPlayers() {
         return ingame.size();
     }
 
-      
-    public long getFinalTime(UUID uuid){
+
+    public long getFinalTime(UUID uuid) {
         return final_time.get(uuid);
     }
 
-      
-    public String getFinalTimeString(UUID uuid){
+
+    public String getFinalTimeString(UUID uuid) {
         long finalTime = final_time.get(uuid);
         finalTime = System.currentTimeMillis() - startTime;
 
@@ -116,8 +117,8 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
         return String.format("§a%02d§8:§a%02d§8:§a%02d§8.§a%02d", hours, minutes, seconds, milliseconds);
     }
-      
-    public String getCurrentTime(){
+
+    public String getCurrentTime() {
         long finalTime = System.currentTimeMillis() - startTime;
         long hours = finalTime / (1000 * 60 * 60);
         long minutes = (finalTime / (1000 * 60)) % 60;
@@ -127,12 +128,12 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         // Format time
         return String.format("%02d:%02d:%02d.%02d", hours, minutes, seconds, milliseconds);
     }
-      
-    public long getCurrentTimeLong(){
+
+    public long getCurrentTimeLong() {
         return System.currentTimeMillis() - startTime;
     }
 
-      
+
     public UUID getPlayerUUID(String name) {
         Map.Entry<UUID, String> playeruuid = null;
         for (Map.Entry<UUID, String> entry : allPlayers.entrySet()) {
@@ -180,43 +181,44 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         return lobbyCountdown;
     }
 
-    public int getPlayerNeeded(){
+    public int getPlayerNeeded() {
         return minPlayers;
     }
+
     public int getFinished() {
         return finished;
     }
 
 
-
-
-    public Player getWinner(){
+    public Player getWinner() {
         return winner.getFirst();
     }
 
 
-    public Player getInGamePlayers(){
-        for(UUID playerUUID : ingame.keySet()){
+    public Player getInGamePlayers() {
+        for (UUID playerUUID : ingame.keySet()) {
             Player player = Bukkit.getPlayer(playerUUID);
-            if(player != null && player.isOnline()){
+            if (player != null && player.isOnline()) {
                 return player;
             }
         }
         return null;
     }
-    public Player getPlayersWatching(){
-        for(UUID playerUUID : watching.keySet()){
+
+    public Player getPlayersWatching() {
+        for (UUID playerUUID : watching.keySet()) {
             Player player = Bukkit.getPlayer(playerUUID);
-            if(player != null && player.isOnline()){
+            if (player != null && player.isOnline()) {
                 return player;
             }
         }
         return null;
     }
-    public Player getAllPlayers(){
-        for(UUID playerUUID : allPlayers.keySet()){
+
+    public Player getAllPlayers() {
+        for (UUID playerUUID : allPlayers.keySet()) {
             Player player = Bukkit.getPlayer(playerUUID);
-            if(player != null && player.isOnline()){
+            if (player != null && player.isOnline()) {
                 return player;
             }
         }
@@ -227,49 +229,63 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public boolean isSpectator(UUID uuid) {
         return watching.containsKey(uuid);
     }
-    public boolean hasBlazeRod(UUID uuid){
+
+    public boolean hasBlazeRod(UUID uuid) {
         return blaze_rod.containsKey(uuid);
     }
-    public boolean hasEnderEye(UUID uuid){
+
+    public boolean hasEnderEye(UUID uuid) {
         return ender_eye.containsKey(uuid);
     }
-    public boolean hasEnderPearl(UUID uuid){
+
+    public boolean hasEnderPearl(UUID uuid) {
         return ender_eye.containsKey(uuid);
     }
-    public boolean hasKilledBlaze(UUID uuid){
+
+    public boolean hasKilledBlaze(UUID uuid) {
         return killed_blaze.containsKey(uuid);
     }
-    public boolean canSolo(){
+
+    public boolean canSolo() {
         return canSolo;
     }
-    public boolean canMove(){
+
+    public boolean canMove() {
         return canMove;
     }
 
     public HashMap<UUID, String> getPlaying() {
         return ingame;
     }
+
     public HashMap<UUID, String> getWatching() {
         return watching;
     }
+
     public HashMap<UUID, String> getAllPlayersHash() {
         return allPlayers;
     }
+
     public HashMap<UUID, String> getBlazeRod() {
         return blaze_rod;
     }
+
     public HashMap<UUID, String> getEnderPearl() {
         return ender_pearl;
     }
+
     public HashMap<UUID, String> getEyeOfEnder() {
         return ender_eye;
     }
+
     public HashMap<UUID, String> getKilledBlaze() {
         return killed_blaze;
     }
+
     public HashMap<UUID, String> getEnderDragon() {
         return killed_enderdragon;
     }
+
     public HashMap<UUID, String> getInNetherHash() {
         return in_nether;
     }
@@ -286,9 +302,11 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public HashMap<UUID, String> getQuitPlayers() {
         return quit;
     }
+
     public HashMap<UUID, Location> QuitLocation() {
         return quit_location;
     }
+
     public String getTimeElapsed() {
         long hours = (timeElapsed / 3600000) % 24; // Convert to hours
         long minutes = (timeElapsed / 60000) % 60; // Convert to minutes
@@ -301,6 +319,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public Location getSpawnFromSeed(long seed) {
         return spawn.get(seed);
     }
+
     public Location getQuitLocation(UUID uuid) {
         return quit_location.get(uuid); // Returns null if the UUID is not in the map
     }
@@ -329,97 +348,103 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         in_end.put(uuid, name);
 
     }
+
     public void addBlazeRod(UUID uuid, String name) {
         blaze_rod.put(uuid, name);
 
     }
+
     public void addEnderEye(UUID uuid, String name) {
         ender_eye.put(uuid, name);
 
     }
+
     public void addEnderPearl(UUID uuid, String name) {
         ender_pearl.put(uuid, name);
 
     }
+
     public void addFinishedPlayer(UUID uuid) {
         finished_players.add(uuid);
 
     }
+
     public void addFinished() {
-        finished = finished+1;
+        finished = finished + 1;
     }
-    public void setWinner(Player player){
+
+    public void setWinner(Player player) {
         winner.add(player);
     }
-    public void setFinalTime(UUID uuid){
+
+    public void setFinalTime(UUID uuid) {
         long finalTime = System.currentTimeMillis() - startTime;
-        final_time.put(uuid,finalTime);
+        final_time.put(uuid, finalTime);
     }
 
 
-
-
-    public void runCheckers(){
+    public void runCheckers() {
         IGameState gameState = speedRunContext.getGameState();
         IGameMode gameMode = speedRunContext.getGameMode();
-         
-       checkers = new BukkitRunnable(){
-              
+
+        checkers = new BukkitRunnable() {
+
             public void run() {
                 GameStateEnum currentState = gameState.getCurrentState();
                 int ingameSize = ingame.size();
                 int soloMessage = 29;
                 GameModeEnum currentGM = gameMode.getCurrentGameMode();
-                Player player =   getAllPlayers();
-                if(player == null){
+                Player player = getAllPlayers();
+                if (player == null) {
                     return;
                 }
-                if(currentState== GameStateEnum.LOBBY) {
+                if (currentState == GameStateEnum.LOBBY) {
                     Location plocation = player.getLocation();
 
                     if (ingameSize == 1 && soloTime >= 120) {
                         soloMessage--;
-                        if(soloMessage == 30)
-                        canSolo = true;
+                        if (soloMessage == 30)
+                            canSolo = true;
                         Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + "You can play SOLO! Just type /solo");
-                          playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
-                        if(soloMessage == 0) {
+                        playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+                        if (soloMessage == 0) {
                             soloMessage = 30;
                         }
-                    } else if(ingameSize > 0){
+                    } else if (ingameSize > 0) {
                         canSolo = false;
                     }
 
                     if (ingameSize == minPlayers) {
-                        Player allPlayers =   getAllPlayers();
+                        Player allPlayers = getAllPlayers();
                         Location pLocation = allPlayers.getLocation();
                         Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + "Minimum number of players reached! Starting match...");
 
                         lobbyCountdown = 11;
                         startLobbyCountdown();
-                          playSoundForAll(pLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                        playSoundForAll(pLocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
                         cancel();
                     }
 
-                }else if(currentState == GameStateEnum.PREGAME) {
-                    if(ingame.isEmpty() && currentGM != GameModeEnum.SOLO) {
+                } else if (currentState == GameStateEnum.PREGAME) {
+                    if (ingame.isEmpty() && currentGM != GameModeEnum.SOLO) {
                         Bukkit.getLogger().info("All players left the server in pre lobby Gamestate: " + gameState + " ingame: " + ingameSize + " gamemode: " + gameMode);
                         //restart game or whatever
                     }
-                }else if(currentState == GameStateEnum.INGAME) {
+                } else if (currentState == GameStateEnum.INGAME) {
 
 
                 }
             }
-        }.runTaskTimer(plugin,100L,1L);
+        }.runTaskTimer(plugin, 100L, 1L);
     }
-    public void startLobby() {{
-        IGameState gameState = speedRunContext.getGameState();
-          
-          
-         
+
+    public void startLobby() {
+        {
+            IGameState gameState = speedRunContext.getGameState();
+
+
             new BukkitRunnable() {
-                  
+
                 public void run() {
                     Bukkit.broadcastMessage("Running Lobby Checker");
 
@@ -429,25 +454,25 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     if (!(currentState == GameStateEnum.LOBBY)) {
                         cancel();
                     }
-                    if(ingame == 0){
+                    if (ingame == 0) {
                         runCheckers();
                         cancel();
                         Bukkit.getLogger().info("Server is empty returning to pre check status");
                     }
-                    if(ingame==1){
+                    if (ingame == 1) {
                         soloTime++;
                     }
 
                     if (ingame < minPlayers && currentState == GameStateEnum.LOBBY) {
-                        Player players =   getAllPlayers();
-                        if(players == null){
+                        Player players = getAllPlayers();
+                        if (players == null) {
                             return;
                         }
                         Location plocation = players.getLocation();
                         Bukkit.broadcastMessage(getMinecraftPrefix() + "§c" + startPlayers + " §fMore player(s) are needed to start ");
-                          playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
-                        players.playSound(plocation,Sound.ENTITY_PLAYER_LEVELUP,1.0f,1.0f);
-                    }else{
+                        playSoundForAll(plocation, Sound.BLOCK_NOTE_BLOCK_CHIME, 1.0f, 1.0f);
+                        players.playSound(plocation, Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                    } else {
                         cancel();
                         startLobbyCountdown();
                     }
@@ -459,43 +484,43 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
     public void startPreGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
-          
-        
+
+
         ISpeedRunJoinEvent joinEvent = speedRunContext.getJoinEvent();
         IBossBarManager bossBarManager = speedRunContext.getBossBarManager();
         new BukkitRunnable() {
-              
+
             public void run() {
                 teleportPlayersToWorlds();
             }
         }.runTaskLater(plugin, 20 * 5);
 
         Player aplayers = getAllPlayers();
-        String serverID =   getServerID();
+        String serverID = getLocalServerID();
         gameState.setGameState(GameStateEnum.PREGAME, serverID);
         createWorlds(World.Environment.NORMAL);
         new BukkitRunnable() {
-              
+
             public void run() {
                 Player allPlayers = getAllPlayers();
                 Location allPlayersLocation = getAllPlayers().getLocation();
 
                 if (preGameCount == 0) {
                     cancel();
-                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "Match has started!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix() + "Match has started!");
                     playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Final title update before match starts
                     allPlayers.sendTitle("§aMATCH STARTED!!!", "", 10, 40, 10);
 
                     try {
-                        for(String bossBar : bossBarManager.getActiveBossBars()){
-                            if(bossBar.contains(" ")){
+                        for (String bossBar : bossBarManager.getActiveBossBars()) {
+                            if (bossBar.contains(" ")) {
                                 bossBarManager.cleanup();
                             }
                         }
                         bossBarManager.removePlayer(allPlayers);
-                        gameState.setGameState(GameStateEnum.INGAME,serverID);
+                        gameState.setGameState(GameStateEnum.INGAME, serverID);
                         startGame();
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -504,7 +529,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 }
 
                 if (preGameCount == 60 || preGameCount == 30 || (preGameCount <= 10 && preGameCount > 0)) {
-                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "Match starting in §c" + preGameCount + " §fseconds!");
+                    Bukkit.broadcastMessage(getMinecraftPrefix() + "Match starting in §c" + preGameCount + " §fseconds!");
                     playSoundForAll(allPlayersLocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 10 seconds
@@ -522,23 +547,20 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
 
 
-
-
-
     public void startLobbyCountdown() {
         IVoting voting = speedRunContext.getVoting();
-        
-         
+
+
         lobbyTimer = new BukkitRunnable() {
-              
+
             public void run() {
-                Player aplayers =   getAllPlayers();
+                Player aplayers = getAllPlayers();
                 Location aplocation = aplayers.getLocation();
                 Bukkit.broadcastMessage("Running Lobby countdown");
 
                 if (lobbyCountdown == 60 || lobbyCountdown == 30 || (lobbyCountdown <= 10 && lobbyCountdown > 0)) {
-                    Bukkit.broadcastMessage(getMinecraftPrefix()+ lobbyCountdown + " seconds until the match starts!");
-                      playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                    Bukkit.broadcastMessage(getMinecraftPrefix() + lobbyCountdown + " seconds until the match starts!");
+                    playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Send title only once at 60 seconds
                     if (lobbyCountdown == 60) {
@@ -552,9 +574,9 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 if (lobbyCountdown == 0) {
                     voting.calculateAndAnnounceWinner();
                     cancel();
-                    Bukkit.broadcastMessage(getMinecraftPrefix()+ "§cMatch is starting!");
-                    canMove =false;
-                      playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                    Bukkit.broadcastMessage(getMinecraftPrefix() + "§cMatch is starting!");
+                    canMove = false;
+                    playSoundForAll(aplocation, Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
                     // Final title update
                     aplayers.sendTitle("§eMatch Starting...", "", 10, 40, 10);
@@ -575,69 +597,69 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public void startGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
         IGameMode gameMode = speedRunContext.getGameMode();
-          
-          
-         
+
+
         startTime = System.currentTimeMillis();
         runHotBarTimer();
         runGame();
         int players = ingame.size();
-        String serverID =    getServerID();
-        GameModeEnum CurrentGM = gameMode.getCurrentGameMode() ;
-        Player allPlayers =   getAllPlayers();
+        String serverID = getLocalServerID();
+        GameModeEnum CurrentGM = gameMode.getCurrentGameMode();
+        Player allPlayers = getAllPlayers();
         playDramaticBoom(allPlayers);
-        if(players == 0 && CurrentGM == GameModeEnum.SOLO){
+        if (players == 0 && CurrentGM == GameModeEnum.SOLO) {
 
         }
     }
 
     public void runGame() throws SQLException {
-          
-        String serverID =    getServerID();
+
+        String serverID = getLocalServerID();
 
     }
 
 
     public void stopGame() throws SQLException {
         IGameState gameState = speedRunContext.getGameState();
-          
-          
+
+
         IWorldManager worldManager = speedRunContext.getWorldManager();
-         
-        String serverID =    getServerID();
-        Player aplayers =   getAllPlayers();
+
+        String serverID = getLocalServerID();
+        Player aplayers = getAllPlayers();
         World world = Bukkit.getWorld("lobby");
         Location spawn = world.getSpawnLocation();
-        gameState.setGameState(GameStateEnum.ENDING,serverID);
+        gameState.setGameState(GameStateEnum.ENDING, serverID);
         System.out.println("Starting cleanup...");
         hotBarTimer.cancel();
         // Teleport to spawn/peds
-        new BukkitRunnable(){
-              
+        new BukkitRunnable() {
+
             public void run() {
                 aplayers.teleport(spawn);
             }
-        }.runTaskLater(plugin,20*15);
+        }.runTaskLater(plugin, 20 * 15);
         // Delete player worlds
-        new BukkitRunnable(){
-              
+        new BukkitRunnable() {
+
             public void run() {
-                for(UUID ingame_uuid : ingame.keySet()) {
+                for (UUID ingame_uuid : ingame.keySet()) {
 
                     System.out.print("Deleting worlds from play " + ingame_uuid.toString());
-                    worldManager.deleteWorld(ingame_uuid.toString()+"_NORMAL");
-                    worldManager.deleteWorld(ingame_uuid.toString()+"_NETHER");
-                    worldManager.deleteWorld(ingame_uuid.toString()+"_ENDER");
+                    worldManager.deleteWorld(ingame_uuid.toString() + "_NORMAL");
+                    worldManager.deleteWorld(ingame_uuid.toString() + "_NETHER");
+                    worldManager.deleteWorld(ingame_uuid.toString() + "_ENDER");
 
-                }            }
-        }.runTaskLater(plugin,20*20);
+                }
+            }
+        }.runTaskLater(plugin, 20 * 20);
 
     }
 
-    public void runHotBarTimer(){
-         
+    public void runHotBarTimer() {
+
         hotBarTimer = new BukkitRunnable() {
-              
+
             public void run() {
                 // Calculate elapsed time
                 timeElapsed = System.currentTimeMillis() - startTime;
@@ -659,25 +681,26 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         }.runTaskTimer(plugin, 0L, 1L); // Repeat every tick (1L)
     }
 
-    public void createWorlds(World.Environment environment){
+    public void createWorlds(World.Environment environment) {
         IWorldManager worldManager = speedRunContext.getWorldManager();
-          
-        Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix()+" §cLoading Worlds...");
-            for (UUID ingame_uuid : ingame.keySet()) {
-                Player player = Bukkit.getPlayer(ingame_uuid);
-                System.out.print("Creating world " + ingame_uuid.toString());
-                worldManager.createWorld(ingame_uuid.toString() + "_" + environment.name(), environment);
-                worldManager.createWorld(ingame_uuid.toString()+"_"+environment.name(), World.Environment.NETHER);
-            }
-    }
-    public void createWorldsWithSeed(World.Environment environment, Long seed){
-          
-        Bukkit.broadcastMessage(getMinecraftPrefix()+" §cLoading Worlds...");
 
-        for(UUID ingame_uuid : ingame.keySet()) {
+        Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + " §cLoading Worlds...");
+        for (UUID ingame_uuid : ingame.keySet()) {
+            Player player = Bukkit.getPlayer(ingame_uuid);
+            System.out.print("Creating world " + ingame_uuid.toString());
+            worldManager.createWorld(ingame_uuid.toString() + "_" + environment.name(), environment);
+            worldManager.createWorld(ingame_uuid.toString() + "_" + environment.name(), World.Environment.NETHER);
+        }
+    }
+
+    public void createWorldsWithSeed(World.Environment environment, Long seed) {
+
+        Bukkit.broadcastMessage(getMinecraftPrefix() + " §cLoading Worlds...");
+
+        for (UUID ingame_uuid : ingame.keySet()) {
             IWorldManager worldManager = speedRunContext.getWorldManager();
             System.out.print("Creating world " + ingame_uuid.toString());
-            worldManager.createWorldFromSeed(ingame_uuid.toString()+"_"+environment.name(),environment,seed);
+            worldManager.createWorldFromSeed(ingame_uuid.toString() + "_" + environment.name(), environment, seed);
         }
     }
 
@@ -691,6 +714,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
             player.teleport(spawn);
         }
     }
+
     //TODO: Update game loop to use AbstractGameManager
     //TODO: Fill out loop logic in AbstractGameManager
     @Override
