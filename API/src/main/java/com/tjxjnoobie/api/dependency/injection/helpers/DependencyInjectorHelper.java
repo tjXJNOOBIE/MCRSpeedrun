@@ -237,10 +237,10 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 continue;
             }
 
-            if (candidate.isInterface()) {
+            if (candidate.isInterface() || Modifier.isAbstract(candidate.getModifiers())) {
                 Log.warn("[DI-Helper] " + LogColor.YELLOW + "SKIP" + LogColor.RESET
                         + " Candidate " + candidate.getName()
-                        + " is an interface but annotated with @DelegatesToInterface");
+                        + " is an interface or abstract class and cannot be instantiated.");
                 continue;
             }
 
