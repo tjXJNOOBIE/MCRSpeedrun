@@ -73,12 +73,21 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
     }
 
 
+    /**
+     * Checks whether an instance of the specified class is registered in the dependency registry.
+     * If {@code ensureInstance} is true, this method will create an instance using the factory if one does not already exist.
+     *
+     * @param clazz the class type to check for registration
+     * @param ensureInstance if true, attempts to create an instance from the factory if not already present
+     * @return true if the class is registered or an instance can be created; false otherwise
+     */
     default boolean isRegistered(Class<?> clazz, boolean ensureInstance){
         return false;
     }
 
     /**
      * Checks whether an instance of a given class is currently registered in the registry.
+     * This method also creates an instance from the dependency factory of it does not exist
      *
      * @param clazz the class type to check for registration
      * @return true if the class has been registered; false otherwise
