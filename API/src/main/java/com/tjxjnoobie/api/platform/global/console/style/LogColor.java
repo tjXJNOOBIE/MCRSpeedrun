@@ -43,15 +43,6 @@ public enum LogColor {
         return code;
     }
 
-    public String apply(String text) {
-        if (text == null) {
-            return code;
-        }
-        if (this == RESET) {
-            return code + text;
-        }
-        return code + text + RESET.code;
-    }
 
     public boolean isReset() {
         return this == RESET;
