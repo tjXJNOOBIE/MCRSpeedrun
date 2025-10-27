@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.utils;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
@@ -13,6 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@DelegatesToInterface(IMCUtils.class)
 public class MCUtils implements IMCUtils {
 
     private Plugin plugin;
