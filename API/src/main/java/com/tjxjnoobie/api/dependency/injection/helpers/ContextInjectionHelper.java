@@ -66,7 +66,9 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         for (Class<?> allClasses : getDependencyMap().getDependencies()) {
             if (allClasses != null) {
                 Log.info("[AUTO-BIND] AutoBinding from DependencyMap: " + allClasses.getSimpleName());
-                dependencyInjectorHelper.autoBind(allClasses);
+                // Suspend autoBind method usage to test the new annotation system
+                // dependencyInjectorHelper.autoBind(allClasses);
+                dependencyInjectorHelper.registerDependenciesViaAnnotation(sc);
                 // WAIT: autoBind must complete for this context before moving to next
             } else{
                 Log.error("[AUTO-BIND] No classes available for binding! Skipping...");
