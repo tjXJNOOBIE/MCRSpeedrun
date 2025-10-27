@@ -16,7 +16,7 @@ public interface ILocalServerMetaData {
      *
      * @return a string representing the server ID; empty string if not set or unavailable
      */
-    default String getServerID() {
+    default String getLocalServerID(){
         return "";
     }
 
@@ -54,6 +54,7 @@ public interface ILocalServerMetaData {
      */
     default void setGameID(String gameID) {
     }
+
 
     /**
      * Retrieves the Minecraft staff prefix used in server messages.
