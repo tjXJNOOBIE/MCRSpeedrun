@@ -73,6 +73,10 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
     }
 
 
+    default boolean isRegistered(Class<?> clazz, boolean ensureInstance){
+        return false;
+    }
+
     /**
      * Checks whether an instance of a given class is currently registered in the registry.
      *
