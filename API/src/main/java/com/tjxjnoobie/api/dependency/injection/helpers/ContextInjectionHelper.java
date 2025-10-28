@@ -84,8 +84,10 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] ✓ Graph registration complete");
 
         // ===== PHASE 4: Wave-based injection =====
-        Log.info("[DI] --- Phase 4: Wave-based injection ---");
-        performWaveInjection(new ArrayList<>(contextRegistry));
+        Log.info("[DI] --- Phase 4: Wave-based injection (PAUSED) ---");
+        //TODO: Wave injection  paused for testing
+
+        // performWaveInjection(new ArrayList<>(contextRegistry));
 
         // ===== PHASE 5: Target injection =====
         if (target != null) {
