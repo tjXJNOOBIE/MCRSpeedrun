@@ -812,14 +812,14 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
         Class<?> clazz = rootClass;
         while (clazz != null && clazz != Object.class) {
-            // Inject static fields for this class via helper to keep this method clean
-            injectStaticFields(clazz, auto);
-
-            // === Field injection (instance fields only; static handled above) ===
-            injectFieldsForClass(target, clazz, auto, false, true, dependencies);
-
-            // === Method injection ===
-            injectMethodsForClass(target, clazz, auto, dependencies);
+//            // Inject static fields for this class via helper to keep this method clean
+//            injectStaticFields(clazz, auto);
+//
+//            // === Field injection (instance fields only; static handled above) ===
+//            injectFieldsForClass(target, clazz, auto, false, true, dependencies);
+//
+//            // === Method injection ===
+//            injectMethodsForClass(target, clazz, auto, dependencies);
 
             // === Lifecycle detection ===
             EnumMap<LifecycleType, Method> lifecycle = detectLifecycleForClass(clazz);
