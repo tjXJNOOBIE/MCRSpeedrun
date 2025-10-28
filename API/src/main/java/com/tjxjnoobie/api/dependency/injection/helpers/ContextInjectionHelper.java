@@ -65,7 +65,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         Log.info("[DI] DependencyMap size: " + getDependencyMap().getDependencies().size());
         while (!dependencyInjectorHelper.getDependencyMap().isRegistered((Class<?>) target, false)) {
             if (target != null) {
-                Log.info("[AUTO-BIND] AutoBinding from DependencyMap: " + allClasses.getSimpleName());
+                Log.info("[AUTO-BIND] AutoBinding from DependencyMap: " + target.getClass().getSimpleName());
                 // Suspend autoBind method usage to test the new annotation system
                 // dependencyInjectorHelper.autoBind(allClasses);
                 dependencyInjectorHelper.registerDependenciesViaAnnotation(scanDirectoryForClasses());
