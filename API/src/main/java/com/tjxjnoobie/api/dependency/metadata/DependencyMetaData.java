@@ -14,10 +14,8 @@ import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInj
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Supplier;
@@ -50,11 +48,11 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      */
     public void populateMetaData(Class<?> clazz) {
         Set<Class<?>> dependencies = new HashSet<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Inject.class)) {
-                dependencies.add(field.getType());
-            }
-        }
+//        for (Field field : clazz.getDeclaredFields()) {
+//            if (field.isAnnotationPresent(Inject.class)) {
+//                dependencies.add(field.getType());
+//            }
+//        }
         // Track inheritance
         if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
             dependencies.add(clazz.getSuperclass());
