@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Configuration interface for dependency injection behavior.
@@ -22,6 +23,7 @@ public interface InjectionConfig {
             Collections.synchronizedMap(new WeakHashMap<>());
     Map<InjectionConfig, Map<Class<?>, Boolean>> __ELIGIBILITY =
             Collections.synchronizedMap(new WeakHashMap<>());
+      AtomicBoolean isInitialized = new AtomicBoolean(false);
 
     /**
      * Gets the set of allowed package prefixes
@@ -345,8 +347,9 @@ public interface InjectionConfig {
      * Initializes default configuration
      */
     default void initializeDefaults() {
-        boolean isInitialized = false;
-        if (!isInitialized) {
+
+        if (isInitialized.compareAndSet(false,true)) {
+
             // Exclude common third-party and standard library packages
             excludePackage("java.");
             excludePackage("javax.");
@@ -377,6 +380,7 @@ public interface InjectionConfig {
 
             // Allow project packages by default
             allowPackage("com.tjxjnoobie.");
+
         } else {
         Log.warn("[DI-Config] Injection configuration already initialized");
 
