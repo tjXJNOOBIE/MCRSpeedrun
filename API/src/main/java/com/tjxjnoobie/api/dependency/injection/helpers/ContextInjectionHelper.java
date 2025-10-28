@@ -64,10 +64,9 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         Log.info("[DI] DependencyMap size: " + getDependencyMap().getDependencies().size());
         Class<?> clazz = target != null ? target.getClass() : null;
-            Log.info("[AUTO-BIND] AutoBinding from via @DelegamesToInterface annotation: " + target.getClass().getSimpleName());
             // Suspend autoBind method usage to test the new annotation system
             // dependencyInjectorHelper.autoBind(allClasses);
-            dependencyInjectorHelper.registerDependenciesViaAnnotation(scanDirectoryForClasses());
+            dependencyInjectorHelper.registerDependenciesViaAnnotation(findAllImplementations(clazz));
             // WAIT: autoBind must complete for this context before moving to next
 
 
