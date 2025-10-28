@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.dependency.contexts;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.contexts.abstracts.AbstractContext;
 import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
@@ -13,7 +14,7 @@ import com.tjxjnoobie.api.platform.global.utils.interfaces.IConfigUtils;
 import com.tjxjnoobie.api.platform.global.utils.interfaces.ITimeUtils;
 import org.bukkit.plugin.Plugin;
 
-
+@DelegatesToInterface(IGlobalContext.class)
 public class GlobalContext extends AbstractContext<IGlobalContext> implements IGlobalContext, IContext<IGlobalContext>, IAbstractClassMetaData<IGlobalContext> {
     //TODO: Update class meta data system to integrate better with having to implement a interface
     // Core dependencies using interfaces
