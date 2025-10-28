@@ -63,15 +63,15 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
         Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
         Log.info("[DI] DependencyMap size: " + getDependencyMap().getDependencies().size());
-        for (Class<?> allClasses : getDependencyMap().getDependencies()) {
-            if (allClasses != null) {
+        while (!dependencyInjectorHelper.getDependencyMap().isRegistered((Class<?>) target, false)) {
+            if (target != null) {
                 Log.info("[AUTO-BIND] AutoBinding from DependencyMap: " + allClasses.getSimpleName());
                 // Suspend autoBind method usage to test the new annotation system
                 // dependencyInjectorHelper.autoBind(allClasses);
                 dependencyInjectorHelper.registerDependenciesViaAnnotation(scanDirectoryForClasses());
                 // WAIT: autoBind must complete for this context before moving to next
             } else{
-                Log.error("[AUTO-BIND] No classes available for binding! Skipping...");
+                Log.error("[AUTO-BIND] Target class cannot be null for autoBind");
             }
         }
         Log.info("[DI] ✓ AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
