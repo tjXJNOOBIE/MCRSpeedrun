@@ -52,6 +52,7 @@ public abstract class AbstractContext<T> implements IContext<T>, IAbstractClassM
                 INITIALIZING_HELPERS.set(false);
             }
         }
+        //TODO: Move this method to prevent it from spam firing
         initializeDefaults();
     }
     
