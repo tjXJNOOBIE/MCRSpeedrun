@@ -380,7 +380,7 @@ public interface InjectionConfig {
 
             // Allow project packages by default
             allowPackage("com.tjxjnoobie.");
-
+            isInitialized.set(true);
         } else {
         Log.warn("[DI-Config] Injection configuration already initialized");
 
