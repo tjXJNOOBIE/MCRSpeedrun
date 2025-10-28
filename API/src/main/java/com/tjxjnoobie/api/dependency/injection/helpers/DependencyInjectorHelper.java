@@ -65,6 +65,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         if (targetClass != null) {
             collectPackagesFromTypeHierarchy(targetClass, packages);
             collectPackagesFromInjectMembers(targetClass, packages);
+            Log.success("[DI-Helper] " + LogColor.GREEN + "Collected packages for " + targetClass.getSimpleName() + ": " + packages.size());
         } else{
             Log.warn("[DI-Helper] " + LogColor.YELLOW + "No target class provided to scan for dependencies");
         }
@@ -93,14 +94,14 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         Class<?> current = type;
         while (current != null && current != Object.class) {
             for (Field field : current.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class) || field.isAnnotationPresent(AutoInjectAll.class)) {
+                if (field.isAnnotationPresent(DelegatesToInterface.class) || field.isAnnotationPresent(AutoInjectAll.class)) {
                     addTypeHierarchyPackages(field.getType(), packages);
                     addGenericTypePackages(field.getGenericType(), packages);
                 }
             }
 
             for (Method method : current.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(Inject.class)) {
+                if (method.isAnnotationPresent(DelegatesToInterface.class)) {
                     for (Class<?> paramType : method.getParameterTypes()) {
                         addTypeHierarchyPackages(paramType, packages);
                     }
