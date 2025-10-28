@@ -15,7 +15,6 @@ import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
@@ -62,18 +61,16 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
         Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
+
         Log.info("[DI] DependencyMap size: " + getDependencyMap().getDependencies().size());
-        while (!dependencyInjectorHelper.getDependencyMap().isRegistered((Class<?>) target, false)) {
-            if (target != null) {
-                Log.info("[AUTO-BIND] AutoBinding from DependencyMap: " + target.getClass().getSimpleName());
-                // Suspend autoBind method usage to test the new annotation system
-                // dependencyInjectorHelper.autoBind(allClasses);
-                dependencyInjectorHelper.registerDependenciesViaAnnotation(scanDirectoryForClasses());
-                // WAIT: autoBind must complete for this context before moving to next
-            } else{
-                Log.error("[AUTO-BIND] Target class cannot be null for autoBind");
-            }
-        }
+        Class<?> clazz = target != null ? target.getClass() : null;
+            Log.info("[AUTO-BIND] AutoBinding from via @DelegamesToInterface annotation: " + target.getClass().getSimpleName());
+            // Suspend autoBind method usage to test the new annotation system
+            // dependencyInjectorHelper.autoBind(allClasses);
+            dependencyInjectorHelper.registerDependenciesViaAnnotation(scanDirectoryForClasses());
+            // WAIT: autoBind must complete for this context before moving to next
+
+
         Log.info("[DI] ✓ AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
 
         // ===== PHASE 2: Role Calculation (WAIT GATE) =====
@@ -98,7 +95,8 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             // Inject from all contexts
             for (Class<?> context : getDependencyMap().getDependencies()) {
                 if (context != null) {
-                    dependencyInjectorHelper.injectAndRecordMetaData(target);
+                    //TODO: Inject annotation paused for testing
+                  //  dependencyInjectorHelper.injectAndRecordMetaData(target);
                 }
             }
         }
@@ -108,7 +106,9 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
         // ===== PHASE 6: Static field injection =====
         Log.info("[DI] --- Phase 6: Static field injection ---");
         //TODO: Automate finding classes with static fields
-        dependencyInjectorHelper.injectStaticFields(InterfaceManager.class);
+        //TODO: Inject annotation paused for testing
+
+        // dependencyInjectorHelper.injectStaticFields(InterfaceManager.class);
 
         generateInjectableReport();
     }
