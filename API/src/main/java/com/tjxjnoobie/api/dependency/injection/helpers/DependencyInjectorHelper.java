@@ -49,6 +49,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
     private final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
     private final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
+    public static final Map<String, Class<?>> LOADED_CLASSES = new ConcurrentHashMap<>();
 
     public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
