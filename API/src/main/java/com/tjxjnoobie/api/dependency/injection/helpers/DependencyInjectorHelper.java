@@ -65,9 +65,11 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         if (targetClass != null) {
             collectPackagesFromTypeHierarchy(targetClass, packages);
             collectPackagesFromInjectMembers(targetClass, packages);
+        } else{
+            Log.warn("[DI-Helper] " + LogColor.YELLOW + "No target class provided to scan for dependencies");
         }
 
-        packages.addAll(getAllowedPackagePrefixes());
+         packages.addAll(getAllowedPackagePrefixes());
          packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
 
         return packages;
