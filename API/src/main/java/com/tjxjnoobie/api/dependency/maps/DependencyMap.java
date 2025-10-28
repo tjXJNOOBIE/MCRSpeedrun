@@ -14,6 +14,7 @@ import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.console.style.LogColor;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.util.*;
@@ -389,43 +390,69 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     @Override
     public boolean isRegistered(Class<?> clazz, boolean ensureInstance) {
         if (clazz == null) {
+            Log.warn("[DependencyMap] " + LogColor.YELLOW + "isRegistered" + LogColor.RESET + " called with " + LogColor.RED + "null" + LogColor.RESET + " class");
             return false;
         }
-
+        
+        Log.info("[DependencyMap] Checking registration for " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET + " (ensureInstance=" + ensureInstance + ")");
+        
         // Check direct registration
         if (containsKey(clazz)) {
+            Log.success("[DependencyMap] " + LogColor.GREEN + "FOUND" + LogColor.RESET + " direct registration: " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET);
             return true;
         }
-
+        
+        Log.info("[DependencyMap] No direct registration found, checking instance assignments...");
+        
         // Check instances based on ensureInstance flag
-        return values().stream()
+        boolean found = values().stream()
                 .anyMatch(metaData -> {
                     if (metaData == null) {
                         return false;
                     }
-
+                    
                     Object instance;
                     if (ensureInstance) {
                         // Use the existing method that tries factory if instance is null
+                        Log.info("[DependencyMap] " + LogColor.YELLOW + "Attempting" + LogColor.RESET + " factory creation for: " + clazz.getSimpleName());
                         instance = ensureAndGetInstance(metaData);
+                        if (instance != null) {
+                            Log.info("[DependencyMap] " + LogColor.GREEN + "Created" + LogColor.RESET + " instance via factory: " + instance.getClass().getSimpleName());
+                        }
                     } else {
                         // Only get existing instance, don't create via factory
+                        Log.info("[DependencyMap] Checking " + LogColor.BOLD + "existing instance only" + LogColor.RESET + " (no factory)");
                         instance = metaData.getDependencyInstance(metaData.getDependencyClass());
                     }
-
-                    return instance != null && clazz.isInstance(instance);
+                    
+                    boolean matches = instance != null && clazz.isInstance(instance);
+                    if (matches) {
+                        Log.success("[DependencyMap] " + LogColor.GREEN + "MATCH" + LogColor.RESET + " found: " + clazz.getSimpleName() 
+                                + " -> " + instance.getClass().getSimpleName());
+                    }
+                    return matches;
                 });
+        
+        if (found) {
+            Log.success("[DependencyMap] " + LogColor.GREEN + "✓" + LogColor.RESET + " Registration confirmed for: " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET);
+        } else {
+            Log.warn("[DependencyMap] " + LogColor.RED + "✗" + LogColor.RESET + " No registration found for: " + LogColor.YELLOW + clazz.getSimpleName() + LogColor.RESET);
+        }
+        
+        return found;
     }
-
 
     /**
      * Checks if a dependency is registered (has metadata).
+     * Defaults to attempting factory creation if no instance exists.
      *
      * @param clazz The class type to check
      * @return true if registered, false otherwise
      */
     @Override
     public boolean isRegistered(Class<?> clazz) {
+        Log.info("[DependencyMap] isRegistered called for " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET 
+                + " (defaulting to " + LogColor.BOLD + "ensureInstance=true" + LogColor.RESET + ")");
         return isRegistered(clazz, true);
     }
 
