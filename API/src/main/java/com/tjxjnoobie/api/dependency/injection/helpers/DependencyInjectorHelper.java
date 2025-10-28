@@ -98,17 +98,17 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 }
 
 
-            for (Method method : current.getDeclaredMethods()) {
-                if (method.isAnnotationPresent(DelegatesToInterface.class)) {
-                    for (Class<?> paramType : method.getParameterTypes()) {
-                        addTypeHierarchyPackages(paramType, packages);
-                    }
-                    Type[] genericParams = method.getGenericParameterTypes();
-                    for (Type genericType : genericParams) {
-                        addGenericTypePackages(genericType, packages);
-                    }
-                }
-            }
+//            for (Method method : current.getDeclaredMethods()) {
+//                if (method.isAnnotationPresent(DelegatesToInterface.class)) {
+//                    for (Class<?> paramType : method.getParameterTypes()) {
+//                        addTypeHierarchyPackages(paramType, packages);
+//                    }
+//                    Type[] genericParams = method.getGenericParameterTypes();
+//                    for (Type genericType : genericParams) {
+//                        addGenericTypePackages(genericType, packages);
+//                    }
+//                }
+//            }
 
             current = current.getSuperclass();
         }
