@@ -6,7 +6,6 @@ import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInject
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.managers.Redis;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.console.style.LogColors;
@@ -45,7 +44,7 @@ public class VelocityMain  {
     @Inject private IPunishLog punishLog;
 
     //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
-    @Inject private Redis redis;
+    private IRedis redis;
 
 
 
@@ -60,7 +59,7 @@ public class VelocityMain  {
         globalContext = new GlobalContext();
         Config.createConfig();
         Config.loadConfig();
-        injectionHelper.injectAllContextsGlobally(this);
+        injectionHelper.injectAllContextsGlobally(globalContext);
         //TODO: Delegate null check away from main init loop
         if(redis != null) {
             redis.connectToRedis();
