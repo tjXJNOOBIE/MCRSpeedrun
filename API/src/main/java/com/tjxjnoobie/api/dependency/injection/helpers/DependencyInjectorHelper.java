@@ -93,12 +93,10 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     private void collectPackagesFromInjectMembers(Class<?> type, Set<String> packages) {
         Class<?> current = type;
         while (current != null && current != Object.class) {
-            for (Field field : current.getDeclaredFields()) {
-                if (field.isAnnotationPresent(DelegatesToInterface.class) || field.isAnnotationPresent(AutoInjectAll.class)) {
-                    addTypeHierarchyPackages(field.getType(), packages);
-                    addGenericTypePackages(field.getGenericType(), packages);
+                if (type.isAnnotationPresent(DelegatesToInterface.class)) {
+                    addTypeHierarchyPackages(type, packages);
                 }
-            }
+
 
             for (Method method : current.getDeclaredMethods()) {
                 if (method.isAnnotationPresent(DelegatesToInterface.class)) {
