@@ -68,7 +68,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
 
         packages.addAll(getAllowedPackagePrefixes());
-        packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
+         packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
 
         return packages;
     }
@@ -296,6 +296,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 + " Annotation registration complete. Total registered: " + registeredCount);
     }
 
+    // Use injectionConfig methods in scanDirectoryForClasses
     @Override
     public Set<Class<?>> scanDirectoryForClasses() {
         Set<Class<?>> discovered = new LinkedHashSet<>();
@@ -315,7 +316,21 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
             Log.info("[DI-Helper] " + LogColor.YELLOW + "SCAN" + LogColor.RESET
                     + " Searching package: " + basePackage);
-            discovered.addAll(findInjectableClasses(basePackage));
+            Set<Class<?>> packageClasses = findInjectableClasses(basePackage);
+
+            // Apply package exclusion filtering using InjectionConfig
+            Set<Class<?>> filteredClasses = new LinkedHashSet<>();
+            for (Class<?> clazz : packageClasses) {
+                if (clazz != null && isEligibleForInjection(clazz)) {
+                    filteredClasses.add(clazz);
+                } else if (clazz != null) {
+                    String packageName = clazz.getPackage() != null ? clazz.getPackage().getName() : "";
+                    Log.info("[DI-Helper] " + LogColor.YELLOW + "EXCLUDED" + LogColor.RESET
+                            + " Class " + clazz.getSimpleName() + " from package " + packageName);
+                }
+            }
+
+            discovered.addAll(filteredClasses);
         }
 
         Log.info("[DI-Helper] " + LogColor.YELLOW + "SUMMARY" + LogColor.RESET
@@ -323,7 +338,6 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 
         return discovered;
     }
-
     /**
      * Logs the binding relationship established between a contract and its resolved dependency.
      *
@@ -441,7 +455,9 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      *
      * @throws Exception when graph construction or injection fails
      */
+    //TODO: Investigate method responsibility
     public void initialize() throws Exception {
+
         Set<Class<?>> scannedClasses = scanDirectoryForClasses();
         registerDependenciesViaAnnotation(scannedClasses);
 
