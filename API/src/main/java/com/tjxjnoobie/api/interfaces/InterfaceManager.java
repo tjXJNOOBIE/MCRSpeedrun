@@ -4,7 +4,6 @@ import com.tjxjnoobie.api.internal.utils.Utils;
 import com.tjxjnoobie.api.managers.Debugger;
 import com.tjxjnoobie.api.platform.cache.RankCache;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.minecraft.RankMC;
 
 import java.lang.reflect.Constructor;
@@ -12,7 +11,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Injectable("Manager for cross-interface implementation")
 public class InterfaceManager implements MainInterFace {
     //TODO: Remove static from methods and fields
     private static MainInterFace mainInterFace;
