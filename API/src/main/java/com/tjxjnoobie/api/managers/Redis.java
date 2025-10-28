@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.abstracts.AbstractManager;
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
@@ -9,6 +10,7 @@ import com.tjxjnoobie.api.platform.minecraft.HandleBlocks;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
+@DelegatesToInterface(IRedis.class)
 public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     public static Jedis jedis;
     public static String host = Config.redis_host;
