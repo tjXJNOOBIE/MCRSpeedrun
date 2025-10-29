@@ -107,7 +107,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // We create a temporary helper just to run autoBind on Main
         try {
             // AutoBind Main class to scan its fields and prepare for injection
-            dependencyInjectorHelper.autoBind(this);
+            // dependencyInjectorHelper.autoBind(this);
             Log.info("[Main] Main class autoBind complete");
         } catch (Exception e) {
             Log.error("[Main] Failed to autoBind Main class: " + e.getMessage());
