@@ -28,7 +28,6 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -41,11 +40,11 @@ import java.util.jar.JarFile;
  */
 public class DependencyInjectorHelper extends AbstractContext<IContext<?>> implements IDependencyInjectorHelper {
 
-    private final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
-    private final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
+    // private final Set<String> SCANNED_PACKAGES = ConcurrentHashMap.newKeySet();
+  //  private final Set<Class<?>> AUTO_BOUND_TARGETS = ConcurrentHashMap.newKeySet();
     public final Set<Class<?>> LOADED_CLASSES = ConcurrentHashMap.newKeySet();
 
-    public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
+   // public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
 
 
