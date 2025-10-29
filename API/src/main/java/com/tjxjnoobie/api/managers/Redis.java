@@ -25,7 +25,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     //TODO: Testing method fire without annotation
     @PostConstruct
     @Override
-    public void connectToRedis() throws ClassNotFoundException {
+    public void connectToRedis() {
 
         jedis = new Jedis(host, Integer.parseInt(port)); // Change this if your Redis server is different
         jedis.auth(password);
@@ -78,7 +78,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     protected void doInitialize() throws Exception {
         connectToRedis();
     }
-
+    //TODO: Remove inner class and imporve sub functions
     private class RedisSubscriber extends JedisPubSub {
         @Override
         public void onMessage(String channel, String message) {
