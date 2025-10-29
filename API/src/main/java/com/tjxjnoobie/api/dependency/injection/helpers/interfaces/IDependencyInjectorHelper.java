@@ -34,6 +34,13 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
 
 
+    default void scanJar(File jarFile, String basePackage, ClassLoader loader){
+
+    }
+
+    default Set<Class<?>> scanFromBasePackage(String basePackage, ClassLoader loader){
+        return new HashSet<>();
+    }
 
     @PreConstruct(priority = 0)
     default void initializeDependencySystem(){
@@ -41,16 +48,16 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     }
 
 
-    /**
-     * Initializes the dependency injection system.
-     * This method builds the dependency graph, computes depth levels,
-     * performs injection, and processes any retry queues.
-     *
-     * @throws Exception if initialization fails
-     */
-    default void initialize() throws Exception {
-        // Default no-op implementation - override in concrete class
-    }
+//    /**
+//     * Initializes the dependency injection system.
+//     * This method builds the dependency graph, computes depth levels,
+//     * performs injection, and processes any retry queues.
+//     *
+//     * @throws Exception if initialization fails
+//     */
+//    default void initialize() throws Exception {
+//        // Default no-op implementation - override in concrete class
+//    }
 
     /**
      * Registers dependencies based on annotations present in the specified set of classes.
@@ -77,25 +84,41 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     default void registerImportant(Class<?> clazz, Object instance, int priority) {
     }
 
-    /**
-     * Scans a directory for classes and retrieves a set of all discovered classes.
-     * This method provides a default implementation that returns an empty set.
-     *
-     * @return a set of discovered classes, or an empty set if no classes are found.
-     */
-    default Set<Class<?>> scanDirectoryForClasses(){
+    default void recursivelyLinkExtendedInterfaces(Class<?> iface, int depth){
+
+    }
+
+    default Set<Class<?>> findMatchingConcreteForInterface(Class<?> subIface){
+        return null;
+    }
+
+    default Set<Class<?>> getAllLoadedClasses(){
         return new HashSet<>();
     }
 
-    /**
-     * Automatically binds dependencies for all classes in the project, including type-level and instance-level bindings.
-     * Scans every class to detect fields and methods with dependency annotations (e.g., @Inject), and injects them.
-     * This method does not stop or fail if the dependency map already contains entries — it processes all classes regardless.
-     *
-     * @param target the target object or class to bind dependencies for (optional; can be null to scan entire project)
-     */
-    default void autoBind(Object target) {
+    default void scanDirectory(String pkg, File dir, ClassLoader loader){
+
     }
+
+//    /**
+//     * Scans a directory for classes and retrieves a set of all discovered classes.
+//     * This method provides a default implementation that returns an empty set.
+//     *
+//     * @return a set of discovered classes, or an empty set if no classes are found.
+//     */
+//    default Set<Class<?>> scanDirectoryForClasses(){
+//        return new HashSet<>();
+//    }
+//
+//    /**
+//     * Automatically binds dependencies for all classes in the project, including type-level and instance-level bindings.
+//     * Scans every class to detect fields and methods with dependency annotations (e.g., @Inject), and injects them.
+//     * This method does not stop or fail if the dependency map already contains entries — it processes all classes regardless.
+//     *
+//     * @param target the target object or class to bind dependencies for (optional; can be null to scan entire project)
+//     */
+//    default void autoBind(Object target) {
+//    }
 
     default boolean hasInjectableFields(Object obj){
         return false;
@@ -270,14 +293,14 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
     default void processPreConstructRetryQueue() throws InterruptedException {
     }
 
-    /**
-     * Scans the package hierarchy starting from the specified base package and registers all classes that are eligible for dependency injection.
-     *
-     * @param basePackage the base package path to start scanning; must not be null or empty. Classes within this package and its subpackages will be considered for registration.
-     */
-    default void scanAndRegisterInjectableClasses(String basePackage){
-
-    }
+//    /**
+//     * Scans the package hierarchy starting from the specified base package and registers all classes that are eligible for dependency injection.
+//     *
+//     * @param basePackage the base package path to start scanning; must not be null or empty. Classes within this package and its subpackages will be considered for registration.
+//     */
+//    default void scanAndRegisterInjectableClasses(String basePackage){
+//
+//    }
 
     /**
      * Searches for classes within the specified base package that are eligible for injection.
@@ -344,23 +367,23 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
 
     }
 
-    /**
-     * Binds a type-level dependency (for Class<?> objects).
-     *
-     * @param type the type to bind
-     * @throws Exception if binding fails
-     */
-    default void bindType(Class<?> type) throws Exception {
-    }
-
-    /**
-     * Binds a field-level dependency for an instance.
-     *
-     * @param target the target object
-     * @param field  the field to bind
-     */
-    default void bindField(Object target, java.lang.reflect.Field field) {
-    }
+//    /**
+//     * Binds a type-level dependency (for Class<?> objects).
+//     *
+//     * @param type the type to bind
+//     * @throws Exception if binding fails
+//     */
+//    default void bindType(Class<?> type) throws Exception {
+//    }
+//
+//    /**
+//     * Binds a field-level dependency for an instance.
+//     *
+//     * @param target the target object
+//     * @param field  the field to bind
+//     */
+//    default void bindField(Object target, java.lang.reflect.Field field) {
+//    }
 
     /**
      * Creates a self-proxy for an interface with default methods.
@@ -383,16 +406,16 @@ public interface IDependencyInjectorHelper extends InjectionConfig {
         return null;
     }
 
-    /**
-     * Finds implementations of an interface in the specified package.
-     *
-     * @param interfaceType the interface to find implementations for
-     * @param basePackage   the base package to search in
-     * @return set of implementation classes
-     */
-    default Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
-        return new HashSet<>();
-    }
+//    /**
+//     * Finds implementations of an interface in the specified package.
+//     *
+//     * @param interfaceType the interface to find implementations for
+//     * @param basePackage   the base package to search in
+//     * @return set of implementation classes
+//     */
+//    default Set<Class<?>> findImplementations(Class<?> interfaceType, String basePackage) {
+//        return new HashSet<>();
+//    }
 
     /**
      * Gets the dependency map for direct access.
