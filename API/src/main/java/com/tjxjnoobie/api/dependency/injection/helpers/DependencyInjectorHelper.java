@@ -123,8 +123,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
             }
 
             dependencyMap.registerDependency(targetInterface, candidate);
-            Log.success("[DI-Helper] " + LogColor.GREEN + "REGISTERED " + LogColor.RESET +
-                    targetInterface.getSimpleName() + " -> " + candidate.getSimpleName());
+
             registeredCount++;
         }
 
@@ -640,19 +639,19 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 //        injectFieldsForClass(null, clazz, autoInject, true, false, null);
 //    }
 
-    /**
-     * Executes a lifecycle method (PreConstruct or PostConstruct) with error handling.
-     */
-    @Override
-    public void executeLifecycleMethod(Method method, Object target, Class<?> clazz, String lifecycleType) {
-        try {
-            method.setAccessible(true);
-            method.invoke(target);
-        } catch (Exception e) {
-            Log.error("[DI] " + lifecycleType + " failed for " + clazz.getSimpleName());
-            Log.exception(e);
-        }
-    }
+//    /**
+//     * Executes a lifecycle method (PreConstruct or PostConstruct) with error handling.
+//     */
+//    @Override
+//    public void executeLifecycleMethod(Method method, Object target, Class<?> clazz, String lifecycleType) {
+//        try {
+//            method.setAccessible(true);
+//            method.invoke(target);
+//        } catch (Exception e) {
+//            Log.error("[DI] " + lifecycleType + " failed for " + clazz.getSimpleName());
+//            Log.exception(e);
+//        }
+//    }
 
 
     //TODO: Compare usage with calculateDepthFor in this class
