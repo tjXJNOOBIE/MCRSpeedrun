@@ -7,8 +7,6 @@ import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.console.Log;
-import com.tjxjnoobie.api.platform.global.console.style.LogColors;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.proxy.Commands.*;
 import com.tjxjnoobie.proxy.Events.VelocityLoginEvent;
@@ -21,6 +19,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
 import org.slf4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 
 @Plugin(
@@ -28,7 +27,7 @@ import java.sql.SQLException;
     name = "VelocityCore",
     version = "1.0"
 )
-public class VelocityMain  {
+public class VelocityMain implements IRedis {
 
     @com.google.inject.Inject private Logger logger;
     @com.google.inject.Inject
@@ -44,13 +43,12 @@ public class VelocityMain  {
     @Inject private IPunishLog punishLog;
 
     //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
-    private IRedis redis;
 
 
 
 
     @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException {
+    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         //TODO: Add main method logging
         //TODO: Remove from main method
         ReflectUtil.loadLibs();
@@ -61,12 +59,8 @@ public class VelocityMain  {
         Config.loadConfig();
         injectionHelper.injectAllContextsGlobally(globalContext);
         //TODO: Delegate null check away from main init loop
-        if(redis != null) {
-            redis.connectToRedis();
-        } else {
-            //TODO: Testing log color inline text
-            Log.error(LogColors.RED+"Redis "+LogColors.RESET+" instance is null, skipping");
-        }
+        connectToRedis();
+
         MySQL.connect();
         //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
 //        redis = Redis.jedis;
