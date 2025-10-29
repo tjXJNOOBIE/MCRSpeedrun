@@ -15,13 +15,11 @@ import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.console.style.LogColor;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -50,111 +48,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     public final Queue<Class<?>> preConstructRetryQueue = new ConcurrentLinkedQueue<>();
 
 
-//    /**
-//     * Collects package prefixes that should be scanned for dependency injection targets.
-//     *
-//     * @param targetClass the class requesting auto-bind operations
-//     * @return a set of package prefixes to scan
-//     */
-//    private Set<String> collectPackages(Class<?> targetClass) {
-//        LinkedHashSet<String> packages = new LinkedHashSet<>();
-//
-//        if (targetClass != null) {
-//            collectPackagesFromTypeHierarchy(targetClass, packages);
-//            collectPackagesViaAnnotation(targetClass, packages);
-//            Log.success("[DI-Helper] " + LogColor.GREEN + "Collected packages for " + targetClass.getSimpleName() + ": " + packages.size());
-//        } else{
-//            Log.warn("[DI-Helper] " + LogColor.YELLOW + "No target class provided to scan for dependencies");
-//        }
-//
-//         packages.addAll(getAllowedPackagePrefixes());
-//         packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
-//
-//        return packages;
-//    }
-//
-//    private void collectPackagesFromTypeHierarchy(Class<?> type, Set<String> packages) {
-//        if (type == null || type == Object.class) {
-//            return;
-//        }
-//
-//        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
-//
-//        for (Class<?> iface : type.getInterfaces()) {
-//            collectPackagesFromTypeHierarchy(iface, packages);
-//        }
-//
-//        collectPackagesFromTypeHierarchy(type.getSuperclass(), packages);
-//    }
 
-//    private void collectPackagesViaAnnotation(Class<?> type, Set<String> packages) {
-//        Class<?> current = type;
-//        while (current != null && current != Object.class) {
-//                if (type.isAnnotationPresent(DelegatesToInterface.class)) {
-//                    addTypeHierarchyPackages(type, packages);
-//                }
-//
-//
-////            for (Method method : current.getDeclaredMethods()) {
-////                if (method.isAnnotationPresent(DelegatesToInterface.class)) {
-////                    for (Class<?> paramType : method.getParameterTypes()) {
-////                        addTypeHierarchyPackages(paramType, packages);
-////                    }
-////                    Type[] genericParams = method.getGenericParameterTypes();
-////                    for (Type genericType : genericParams) {
-////                        addGenericTypePackages(genericType, packages);
-////                    }
-////                }
-////            }
-//
-//            current = current.getSuperclass();
-//        }
-//    }
-
-//    private void addTypeHierarchyPackages(Class<?> type, Set<String> packages) {
-//        if (type == null) {
-//            return;
-//        }
-//
-//        if (type.isArray()) {
-//            addTypeHierarchyPackages(type.getComponentType(), packages);
-//            return;
-//        }
-//
-//        if (type.isPrimitive()) {
-//            return;
-//        }
-//
-//        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
-//
-//        for (Class<?> iface : type.getInterfaces()) {
-//            addTypeHierarchyPackages(iface, packages);
-//        }
-//
-//        addTypeHierarchyPackages(type.getSuperclass(), packages);
-//    }
-
-//    private void addGenericTypePackages(Type type, Set<String> packages) {
-//        if (type instanceof ParameterizedType parameterizedType) {
-//            for (Type arg : parameterizedType.getActualTypeArguments()) {
-//                if (arg instanceof Class<?> clazz) {
-//                    addTypeHierarchyPackages(clazz, packages);
-//                }
-//            }
-//        }
-//    }
-
-    private void addPackageCandidate(String packageName, Set<String> packages) {
-        if (packageName == null || packageName.isBlank()) {
-            return;
-        }
-
-        if (!shouldConsiderPackage(packageName)) {
-            return;
-        }
-
-        packages.add(packageName);
-    }
 
     private boolean shouldConsiderPackage(String packageName) {
         if (packageName == null || packageName.isBlank()) {
@@ -421,6 +315,104 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
                 " classes under base package " + basePackage);
         return LOADED_CLASSES;
     }
+    @Override
+    public EnumMap<LifecycleType, Method> detectLifecycleForClass(Class<?> clazz) {
+        EnumMap<LifecycleType, Method> map = new EnumMap<>(LifecycleType.class);
+        for (LifecycleType lifecycle : LifecycleType.values()) {
+            lifecycle.findIn(clazz).ifPresent(m -> map.put(lifecycle, m));
+        }
+        return map;
+    }
+
+
+
+    /**
+     * Gets all instances from the map.
+     *
+     * @return Collection of all dependency instances
+     */
+    @Override
+    //TODO: Move to DependencyMetaData
+    public List<Object> getAllInstances() {
+        return dependencyMap.getAllInstances();
+    }
+
+
+
+
+    // ===== Fluent priority builder =====
+
+    /**
+     * Registers a dependency instance as important with a specified priority.
+     * <p>
+     * This method registers the given class and instance as an important dependency,
+     * meaning it will be processed during injection with high priority. It first
+     * registers the dependency using the standard registration mechanism, then sets
+     * metadata to associate the class with its dependency type and priority level.
+     *
+     * @param clazz    the class of the dependency to register
+     * @param instance the instance object that represents this dependency
+     * @param priority the priority value for injection; higher values indicate earlier processing during injection
+     * @return null - this method does not return a meaningful value
+     */
+    //TODO: Move method to DependencyMap
+    @Override
+    public void registerImportant(Class<?> clazz, Object instance, int priority) {
+        registerDependency(clazz, instance);
+
+        getMetaData(clazz).setDependencyClass(clazz);
+        getMetaData(clazz).setPriority(priority);
+
+    }
+    //
+    // TODO: Lots of unneeded/redundnat methods here, go through to keep useful ones
+
+    //    /**
+//     * Finds a field in a target class that matches the dependency class.
+//     */
+//    @Override
+//    public Field findField(Class<?> target, Class<?> depClass) {
+//        for (Field field : target.getDeclaredFields()) {
+//            if (field.getType().equals(depClass)) {
+//                return field;
+//            }
+//        }
+//        return null;
+//    }
+    //    /**
+//     * PreConstruct initialization method with highest priority (0).
+//     * This ensures the DI system is initialized before any other components.
+//     * Called automatically after dependency injection but before other classes.
+//     */
+//    @PreConstruct(priority = 0)
+//    @Override
+//    public void initializeDependencySystem() {
+//        Log.info("[DI-Helper] ===== Initializing Dependency Injection System =====");
+//        Log.info("[DI-Helper] Injectable classes count: " + dependencyGraph.size());
+//
+//        try {
+//            // Build the dependency graph first
+//            if (!dependencyGraph.isEmpty()) {
+//                Log.info("[DI-Helper] Building dependency graph...");
+//                buildDependencyGraph();
+//                Log.info("[DI-Helper] Computing depth levels...");
+//                computeDepthLevels();
+//                Log.info("[DI-Helper] Dependency graph built successfully");
+//            }
+//
+//            // Initialize the injection map
+//            Log.info("[DI-Helper] Injection map initialized");
+//
+//            // Log summary
+//            Log.success("[DI-Helper] Dependency Injection System initialized successfully");
+//            Log.info("[DI-Helper] Graph nodes: " + dependencyGraph.size());
+//            Log.info("[DI-Helper] Registered dependencies: " + dependencyMap.getDependencyMapSize());
+//
+//        } catch (Exception e) {
+//            Log.critical("[DI-Helper] Failed to initialize DI system: " + e.getMessage());
+//            throw new RuntimeException("DI System initialization failed", e);
+//        }
+//    }
     // Use injectionConfig methods in scanDirectoryForClasses
 //    @Override
 //    public Set<Class<?>> scanDirectoryForClasses() {
@@ -463,80 +455,111 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 //
 //        return discovered;
 //    }
-
-
-
-    /**
-     * Gets all instances from the map.
-     *
-     * @return Collection of all dependency instances
-     */
-    @Override
-    //TODO: Move to DependencyMetaData
-    public List<Object> getAllInstances() {
-        return dependencyMap.getAllInstances();
-    }
-
 //    /**
-//     * PreConstruct initialization method with highest priority (0).
-//     * This ensures the DI system is initialized before any other components.
-//     * Called automatically after dependency injection but before other classes.
+//     * Collects package prefixes that should be scanned for dependency injection targets.
+//     *
+//     * @param targetClass the class requesting auto-bind operations
+//     * @return a set of package prefixes to scan
 //     */
-//    @PreConstruct(priority = 0)
-//    @Override
-//    public void initializeDependencySystem() {
-//        Log.info("[DI-Helper] ===== Initializing Dependency Injection System =====");
-//        Log.info("[DI-Helper] Injectable classes count: " + dependencyGraph.size());
+//    private Set<String> collectPackages(Class<?> targetClass) {
+//        LinkedHashSet<String> packages = new LinkedHashSet<>();
 //
-//        try {
-//            // Build the dependency graph first
-//            if (!dependencyGraph.isEmpty()) {
-//                Log.info("[DI-Helper] Building dependency graph...");
-//                buildDependencyGraph();
-//                Log.info("[DI-Helper] Computing depth levels...");
-//                computeDepthLevels();
-//                Log.info("[DI-Helper] Dependency graph built successfully");
-//            }
+//        if (targetClass != null) {
+//            collectPackagesFromTypeHierarchy(targetClass, packages);
+//            collectPackagesViaAnnotation(targetClass, packages);
+//            Log.success("[DI-Helper] " + LogColor.GREEN + "Collected packages for " + targetClass.getSimpleName() + ": " + packages.size());
+//        } else{
+//            Log.warn("[DI-Helper] " + LogColor.YELLOW + "No target class provided to scan for dependencies");
+//        }
 //
-//            // Initialize the injection map
-//            Log.info("[DI-Helper] Injection map initialized");
+//         packages.addAll(getAllowedPackagePrefixes());
+//         packages.removeIf(pkg -> pkg == null || pkg.isBlank() || !shouldConsiderPackage(pkg));
 //
-//            // Log summary
-//            Log.success("[DI-Helper] Dependency Injection System initialized successfully");
-//            Log.info("[DI-Helper] Graph nodes: " + dependencyGraph.size());
-//            Log.info("[DI-Helper] Registered dependencies: " + dependencyMap.getDependencyMapSize());
+//        return packages;
+//    }
 //
-//        } catch (Exception e) {
-//            Log.critical("[DI-Helper] Failed to initialize DI system: " + e.getMessage());
-//            throw new RuntimeException("DI System initialization failed", e);
+//    private void collectPackagesFromTypeHierarchy(Class<?> type, Set<String> packages) {
+//        if (type == null || type == Object.class) {
+//            return;
+//        }
+//
+//        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
+//
+//        for (Class<?> iface : type.getInterfaces()) {
+//            collectPackagesFromTypeHierarchy(iface, packages);
+//        }
+//
+//        collectPackagesFromTypeHierarchy(type.getSuperclass(), packages);
+//    }
+
+//    private void collectPackagesViaAnnotation(Class<?> type, Set<String> packages) {
+//        Class<?> current = type;
+//        while (current != null && current != Object.class) {
+//                if (type.isAnnotationPresent(DelegatesToInterface.class)) {
+//                    addTypeHierarchyPackages(type, packages);
+//                }
+//
+//
+////            for (Method method : current.getDeclaredMethods()) {
+////                if (method.isAnnotationPresent(DelegatesToInterface.class)) {
+////                    for (Class<?> paramType : method.getParameterTypes()) {
+////                        addTypeHierarchyPackages(paramType, packages);
+////                    }
+////                    Type[] genericParams = method.getGenericParameterTypes();
+////                    for (Type genericType : genericParams) {
+////                        addGenericTypePackages(genericType, packages);
+////                    }
+////                }
+////            }
+//
+//            current = current.getSuperclass();
 //        }
 //    }
 
+//    private void addTypeHierarchyPackages(Class<?> type, Set<String> packages) {
+//        if (type == null) {
+//            return;
+//        }
+//
+//        if (type.isArray()) {
+//            addTypeHierarchyPackages(type.getComponentType(), packages);
+//            return;
+//        }
+//
+//        if (type.isPrimitive()) {
+//            return;
+//        }
+//
+//        addPackageCandidate(type.getPackage() != null ? type.getPackage().getName() : null, packages);
+//
+//        for (Class<?> iface : type.getInterfaces()) {
+//            addTypeHierarchyPackages(iface, packages);
+//        }
+//
+//        addTypeHierarchyPackages(type.getSuperclass(), packages);
+//    }
 
-    // ===== Fluent priority builder =====
+//    private void addGenericTypePackages(Type type, Set<String> packages) {
+//        if (type instanceof ParameterizedType parameterizedType) {
+//            for (Type arg : parameterizedType.getActualTypeArguments()) {
+//                if (arg instanceof Class<?> clazz) {
+//                    addTypeHierarchyPackages(clazz, packages);
+//                }
+//            }
+//        }
+//    }
 
-    /**
-     * Registers a dependency instance as important with a specified priority.
-     * <p>
-     * This method registers the given class and instance as an important dependency,
-     * meaning it will be processed during injection with high priority. It first
-     * registers the dependency using the standard registration mechanism, then sets
-     * metadata to associate the class with its dependency type and priority level.
-     *
-     * @param clazz    the class of the dependency to register
-     * @param instance the instance object that represents this dependency
-     * @param priority the priority value for injection; higher values indicate earlier processing during injection
-     * @return null - this method does not return a meaningful value
-     */
-    @Override
-    public void registerImportant(Class<?> clazz, Object instance, int priority) {
-        registerDependency(clazz, instance);
-
-        getMetaData(clazz).setDependencyClass(clazz);
-        getMetaData(clazz).setPriority(priority);
-
-    }
-
+//    private void addPackageCandidate(String packageName, Set<String> packages) {
+//        if (packageName == null || packageName.isBlank()) {
+//            return;
+//        }
+//
+//        if (!shouldConsiderPackage(packageName)) {
+//            return;
+//        }
+//
+//        packages.add(packageName);
+//    }
     /**
      * Initializes the dependency graph, resolves injection order, and processes pending hooks.
      *
@@ -561,62 +584,62 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
     // ===== Helper methods for DI System ===== \\
 
 
-    /**
-     * Injects a value into a field with error handling.
-     */
-    @Override
-    public void injectFieldValue(Object target, Field field, Object value, boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
-        field.setAccessible(true);
-        try {
-            if (value != null) {
-                if (isStatic) field.set(null, value);
-                else field.set(target, value);
-            } else if (!optional) {
-                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() + " | Needed by: " + clazz.getSimpleName() + " | Field: " + field.getName() + " | Static: " + isStatic);
-            }
-        } catch (Exception e) {
-            Log.error("[DI] Failed injecting " + depClass.getName() + " into " + clazz.getName());
-            Log.exception(e);
-        }
-    }
-
-    /**
-     * Injects a value via method invocation with error handling.
-     */
-    @Override
-    public void injectMethodValue(Object target, Method method, Object value, boolean optional, Class<?> depClass, Class<?> clazz) {
-        try {
-            if (value != null) method.invoke(target, value);
-            else if (!optional)
-                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() + " | Needed by: " + clazz.getSimpleName() + " | Method: " + method.getName());
-        } catch (Exception e) {
-            Log.error("[DI] Failed injecting via method " + method.getName() + " in " + clazz.getName());
-            Log.exception(e);
-        }
-    }
-
-    /**
-     * Injects static fields of a class using the current owner's dependency map.
-     * This is useful for utility/manager classes with static fields.
-     */
-    @Override
-    public void injectStaticFields(Class<?> clazz) {
-        injectStaticFields(clazz, false);
-    }
-
-    public void injectStaticFields(Class<?> clazz, boolean autoInject) {
-        if (clazz == null) {
-            Log.warn("[DI] Cannot inject static fields of null class");
-            return;
-        }
-        // TODO: Wire all DI classes with @Injectable annotation before re-enabling this check
-        // Currently commented out to allow injection without @Injectable requirement
-        // if (isRequireInjectableAnnotation() && !clazz.isAnnotationPresent(Injectable.class)) {
-        //     Log.info("[DI] Skipping static injection for non-@Injectable class: " + clazz.getName());
-        //     return;
-        // }
-        injectFieldsForClass(null, clazz, autoInject, true, false, null);
-    }
+//    /**
+//     * Injects a value into a field with error handling.
+//     */
+//    @Override
+//    public void injectFieldValue(Object target, Field field, Object value, boolean optional, boolean isStatic, Class<?> depClass, Class<?> clazz) {
+//        field.setAccessible(true);
+//        try {
+//            if (value != null) {
+//                if (isStatic) field.set(null, value);
+//                else field.set(target, value);
+//            } else if (!optional) {
+//                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() + " | Needed by: " + clazz.getSimpleName() + " | Field: " + field.getName() + " | Static: " + isStatic);
+//            }
+//        } catch (Exception e) {
+//            Log.error("[DI] Failed injecting " + depClass.getName() + " into " + clazz.getName());
+//            Log.exception(e);
+//        }
+//    }
+//
+//    /**
+//     * Injects a value via method invocation with error handling.
+//     */
+//    @Override
+//    public void injectMethodValue(Object target, Method method, Object value, boolean optional, Class<?> depClass, Class<?> clazz) {
+//        try {
+//            if (value != null) method.invoke(target, value);
+//            else if (!optional)
+//                Log.error("[DI] ❌ Missing required dependency: " + depClass.getSimpleName() + " | Needed by: " + clazz.getSimpleName() + " | Method: " + method.getName());
+//        } catch (Exception e) {
+//            Log.error("[DI] Failed injecting via method " + method.getName() + " in " + clazz.getName());
+//            Log.exception(e);
+//        }
+//    }
+//
+//    /**
+//     * Injects static fields of a class using the current owner's dependency map.
+//     * This is useful for utility/manager classes with static fields.
+//     */
+//    @Override
+//    public void injectStaticFields(Class<?> clazz) {
+//        injectStaticFields(clazz, false);
+//    }
+//
+//    public void injectStaticFields(Class<?> clazz, boolean autoInject) {
+//        if (clazz == null) {
+//            Log.warn("[DI] Cannot inject static fields of null class");
+//            return;
+//        }
+//        // TODO: Wire all DI classes with @Injectable annotation before re-enabling this check
+//        // Currently commented out to allow injection without @Injectable requirement
+//        // if (isRequireInjectableAnnotation() && !clazz.isAnnotationPresent(Injectable.class)) {
+//        //     Log.info("[DI] Skipping static injection for non-@Injectable class: " + clazz.getName());
+//        //     return;
+//        // }
+//        injectFieldsForClass(null, clazz, autoInject, true, false, null);
+//    }
 
     /**
      * Executes a lifecycle method (PreConstruct or PostConstruct) with error handling.
@@ -632,18 +655,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
         }
     }
 
-//    /**
-//     * Finds a field in a target class that matches the dependency class.
-//     */
-//    @Override
-//    public Field findField(Class<?> target, Class<?> depClass) {
-//        for (Field field : target.getDeclaredFields()) {
-//            if (field.getType().equals(depClass)) {
-//                return field;
-//            }
-//        }
-//        return null;
-//    }
+
     //TODO: Compare usage with calculateDepthFor in this class
 
     /**
@@ -776,21 +788,21 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
 //        return false;
 //    }
 
-    /**
-     * Determines if a field should be injected based on annotations.
-     */
-    @Override
-    public boolean shouldInjectField(Field field, boolean autoInject) {
-        return autoInject || field.isAnnotationPresent(Inject.class);
-    }
-
-    /**
-     * Determines if a method should be injected based on annotations.
-     */
-    @Override
-    public boolean shouldInjectMethod(Method method, boolean autoInject) {
-        return (autoInject || method.isAnnotationPresent(Inject.class)) && method.getParameterCount() == 1;
-    }
+//    /**
+//     * Determines if a field should be injected based on annotations.
+//     */
+//    @Override
+//    public boolean shouldInjectField(Field field, boolean autoInject) {
+//        return autoInject || field.isAnnotationPresent(Inject.class);
+//    }
+//
+//    /**
+//     * Determines if a method should be injected based on annotations.
+//     */
+//    @Override
+//    public boolean shouldInjectMethod(Method method, boolean autoInject) {
+//        return (autoInject || method.isAnnotationPresent(Inject.class)) && method.getParameterCount() == 1;
+//    }
 
 //    /**
 //     * Common field injection routine used by both static and instance injection paths.
@@ -863,14 +875,7 @@ public class DependencyInjectorHelper extends AbstractContext<IContext<?>> imple
      * @param clazz class to inspect for lifecycle annotations
      * @return mapping of LifecycleType to discovered Method; empty if none found
      */
-    @Override
-    public EnumMap<LifecycleType, Method> detectLifecycleForClass(Class<?> clazz) {
-        EnumMap<LifecycleType, Method> map = new EnumMap<>(LifecycleType.class);
-        for (LifecycleType lifecycle : LifecycleType.values()) {
-            lifecycle.findIn(clazz).ifPresent(m -> map.put(lifecycle, m));
-        }
-        return map;
-    }
+
 
     // ===== Top-level injection =====
 //    @Override
