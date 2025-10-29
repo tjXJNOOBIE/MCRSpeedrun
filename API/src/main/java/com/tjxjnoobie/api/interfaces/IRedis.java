@@ -8,14 +8,21 @@ public interface IRedis {
 
 
 
-    void connectToRedis() throws ClassNotFoundException;
+    default void connectToRedis() throws ClassNotFoundException{
+    }
 
+    default void disconnectFromRedis(){
 
-    void disconnectFromRedis();
+    }
 
-    void publishToRedis(String message);
+    default void publishToRedis(String message){
 
-    void publishRedisUpdate(String message);
+    }
 
-    void handleRedisMessage(String message);
+    default void publishRedisUpdate(String message){
+
+    }
+
+    default void handleRedisMessage(String message){
+}
 }
