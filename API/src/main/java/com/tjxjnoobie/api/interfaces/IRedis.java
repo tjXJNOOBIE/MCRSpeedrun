@@ -8,7 +8,7 @@ public interface IRedis {
 
 
 
-    default void connectToRedis() throws ClassNotFoundException{
+    default void connectToRedis() {
     }
 
     default void disconnectFromRedis(){
