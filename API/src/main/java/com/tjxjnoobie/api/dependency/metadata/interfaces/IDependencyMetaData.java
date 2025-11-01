@@ -268,4 +268,7 @@ public interface IDependencyMetaData  {
         return false;
     }
 
+    default String getDependencyMetaDataSummary(){
+        return "";
+    }
 }
