@@ -115,7 +115,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 Log.info("[DependencyMap] No source context provided for: " + clazz.getSimpleName());
             }
 
-            computeIfAbsent(clazz, c -> metaData);
+            computeIfAbsent(clazz, c ->metaData);
 
             Log.success("[DependencyMap] Successfully registered: " + clazz.getSimpleName() +
                     (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)") +
@@ -400,7 +400,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         
         // Check direct registration
         if (containsKey(clazz)) {
-            Log.success("[DependencyMap] " + LogColor.GREEN + "FOUND" + LogColor.RESET + " direct registration: " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET);
+            Log.success("[DependencyMap] Already registered in DependencyMap -> " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET);
             return true;
         }
         
