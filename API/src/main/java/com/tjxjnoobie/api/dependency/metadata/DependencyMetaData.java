@@ -14,6 +14,7 @@ import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInj
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.lang.reflect.Method;
@@ -53,7 +54,9 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
 //                dependencies.add(field.getType());
 //            }
 //        }
+        if (!isClassLoadable(clazz)) Log.error("Class not loadable: " + clazz.getName());
         // Track inheritance
+        //TODO: We can probably populate this in recursivelyLinkExtendedInterfaces
         if (clazz.getSuperclass() != null && clazz.getSuperclass() != Object.class) {
             dependencies.add(clazz.getSuperclass());
         }
@@ -63,8 +66,19 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
         this.depth = calculateDepth(clazz, dependencies);
         this.role = determineRole(dependencies);
         // Detect lifecycle methods via enum
-        for (LifecycleType type : LifecycleType.values()) {
-            type.findIn(clazz).ifPresent(m -> lifecycleMethods.put(type, m));
+//        for (LifecycleType type : LifecycleType.values()) {
+//            type.findIn(clazz).ifPresent(m -> lifecycleMethods.put(type, m));
+//        }
+
+    }
+
+    //TODO: Move to injection helper if working
+    private boolean isClassLoadable(Class<?> clazz) {
+        try {
+            clazz.getDeclaredMethods(); // will throw NoClassDefFoundError if deps missing
+            return true;
+        } catch (NoClassDefFoundError e) {
+            return false;
         }
     }
 
@@ -83,6 +97,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
         }
         return dependencyClass.equals(clazz) ? this : null;
     }
+
     /**
      * Returns the class of the dependency that this metadata represents.
      * This is the primary type being managed by the dependency graph.
@@ -120,6 +135,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
         }
         return instance;
     }
+
     /**
      * Sets the direct dependencies of this component.
      * This allows configuration of which types must be resolved prior to this component's initialization.
@@ -152,9 +168,8 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
      * <p>The returned list contains real objects that have been injected into the system (either directly or via factory),
      * and does not include placeholders or null references.</p>
      *
-     *
      * @return A list of all currently registered and instantiated dependency objects (never null)
-     *         The list may be empty if no instances have been created.
+     * The list may be empty if no instances have been created.
      */
     @Override
     public List<Object> getAllInstances() {
@@ -163,6 +178,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
+
     /**
      * Sets the depth level of this component within the dependency resolution graph.
      * This influences the order in which components are resolved and initialized.
@@ -381,9 +397,9 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
     /**
      * Calculates the depth level of a component based on its dependency nesting.
      * Depth is determined by examining the declaring class hierarchy of dependencies.
-     * 
+     *
      * @param clazz the class being analyzed
-     * @param deps the set of dependencies for this class
+     * @param deps  the set of dependencies for this class
      * @return the calculated depth level (0 for no dependencies, higher for nested dependencies)
      */
     public int calculateDepth(Class<?> clazz, Set<Class<?>> deps) {
@@ -400,7 +416,7 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
     /**
      * Determines the role of a component within the dependency graph based on its dependency count.
      * Roles help categorize components by their position and responsibility in the dependency hierarchy.
-     * 
+     *
      * @param deps the set of dependencies for this component
      * @return BASE if no dependencies, INTERMEDIATE if one dependency, ISOLATED otherwise
      */
@@ -424,6 +440,175 @@ public class DependencyMetaData implements IDependencyMetaData, IDependencyInjec
         return clazz == null || clazz.isInstance(instance);
     }
 
+    /**
+     * Generates a comprehensive summary of this dependency's metadata.
+     * Includes all relevant information about the dependency's state, relationships,
+     * lifecycle, and configuration in a human-readable format.
+     *
+     * @return A formatted string containing the complete metadata summary
+     */
+    @Override
+    public String getDependencyMetaDataSummary() {
+        if (dependencyClass == null) {
+            return "DependencyMetaData Summary: [NULL DEPENDENCY CLASS]";
+        }
+
+        StringBuilder summary = new StringBuilder();
+        String className = dependencyClass.getSimpleName();
+        String fullClassName = dependencyClass.getName();
+
+        // Header
+        summary.append("=== Dependency Metadata Summary: ").append(className).append(" ===\n");
+
+        // Basic Information
+        summary.append("Class Information:\n");
+        summary.append("  • Class Name: ").append(className).append("\n");
+        summary.append("  • Full Name: ").append(fullClassName).append("\n");
+        summary.append("  • Is Interface: ").append(dependencyClass.isInterface()).append("\n");
+        summary.append("  • Is Abstract: ").append(java.lang.reflect.Modifier.isAbstract(dependencyClass.getModifiers())).append("\n");
+        summary.append("  • Is Enum: ").append(dependencyClass.isEnum()).append("\n");
+        summary.append("  • Loadable: ").append(isClassLoadable(dependencyClass) ? "✓" : "✗").append("\n");
+
+        // Dependency Graph Information
+        summary.append("\nDependency Graph:\n");
+        summary.append("  • Role: ").append(role != null ? role : "UNASSIGNED").append("\n");
+        summary.append("  • Depth: ").append(depth).append("\n");
+        summary.append("  • Priority: ").append(priority).append("\n");
+        summary.append("  • Retry Count: ").append(retryCount).append("\n");
+
+        // Dependencies
+        summary.append("\nDirect Dependencies (").append(dependencies.size()).append("):\n");
+        if (dependencies.isEmpty()) {
+            summary.append("  • None (BASE dependency)\n");
+        } else {
+            dependencies.stream()
+                    .sorted(Comparator.comparing(Class::getSimpleName))
+                    .forEach(dep -> summary.append("  • ").append(dep.getSimpleName()).append("\n"));
+        }
+
+        // Instance Information
+        summary.append("\nInstance Management:\n");
+        if (instance != null) {
+            summary.append("  • Instance: ✓ (").append(instance.getClass().getSimpleName()).append(")\n");
+            summary.append("  • Instance Type: ").append(instance.getClass().getName()).append("\n");
+            summary.append("  • Is Proxy: ").append(instance.getClass().getName().contains("$Proxy") ? "✓" : "✗").append("\n");
+        } else {
+            summary.append("  • Instance: ✗ (Not instantiated)\n");
+        }
+        summary.append("  • Has Factory: ").append(factory != null ? "✓" : "✗").append("\n");
+
+        // Lifecycle Methods
+        summary.append("\nLifecycle Methods:\n");
+        Method preConstruct = lifecycleMethods.get(LifecycleType.PRE_CONSTRUCT);
+        Method postConstruct = lifecycleMethods.get(LifecycleType.POST_CONSTRUCT);
+
+        if (preConstruct != null) {
+            summary.append("  • PreConstruct: ✓ ").append(preConstruct.getName()).append("()\n");
+            Boolean preSuccess = lifecycleSuccess.get(LifecycleType.PRE_CONSTRUCT);
+            summary.append("    - Executed Successfully: ").append(preSuccess != null && preSuccess ? "✓" : "✗").append("\n");
+        } else {
+            summary.append("  • PreConstruct: ✗ (Not defined)\n");
+        }
+
+        if (postConstruct != null) {
+            summary.append("  • PostConstruct: ✓ ").append(postConstruct.getName()).append("()\n");
+            Boolean postSuccess = lifecycleSuccess.get(LifecycleType.POST_CONSTRUCT);
+            summary.append("    - Executed Successfully: ").append(postSuccess != null && postSuccess ? "✓" : "✗").append("\n");
+        } else {
+            summary.append("  • PostConstruct: ✗ (Not defined)\n");
+        }
+
+        // Context Information
+        summary.append("\nContext Management:\n");
+        if (sourceContext != null) {
+            summary.append("  • Source Context: ✓ (").append(sourceContext.getClass().getSimpleName()).append(")\n");
+            summary.append("  • Context Type: ").append(sourceContext.getClass().getName()).append("\n");
+        } else {
+            summary.append("  • Source Context: ✗ (Not assigned)\n");
+        }
+
+        // Factory Information
+        if (factory != null) {
+            summary.append("\nFactory Information:\n");
+            summary.append("  • Factory Type: ").append(factory.getClass().getSimpleName()).append("\n");
+            summary.append("  • Can Create Instance: ✓\n");
+
+            // Test factory if no instance exists
+            if (instance == null) {
+                try {
+                    Object testInstance = factory.get();
+                    summary.append("  • Factory Test: ").append(testInstance != null ? "✓ (Success)" : "✗ (Returns null)").append("\n");
+                } catch (Exception e) {
+                    summary.append("  • Factory Test: ✗ (Exception: ").append(e.getClass().getSimpleName()).append(")\n");
+                }
+            }
+        }
+
+        // Inheritance Hierarchy (if available)
+        summary.append("\nClass Hierarchy:\n");
+        Class<?> superClass = dependencyClass.getSuperclass();
+        if (superClass != null && superClass != Object.class) {
+            summary.append("  • Parent Class: ").append(superClass.getSimpleName()).append("\n");
+        }
+
+        Class<?>[] interfaces = dependencyClass.getInterfaces();
+        if (interfaces.length > 0) {
+            summary.append("  • Implements (").append(interfaces.length).append("):\n");
+            Arrays.stream(interfaces)
+                    .sorted(Comparator.comparing(Class::getSimpleName))
+                    .forEach(iface -> summary.append("    - ").append(iface.getSimpleName()).append("\n"));
+        }
+
+        // Statistics
+        summary.append("\nStatistics:\n");
+        summary.append("  • All Instances Count: ").append(getAllInstances().size()).append("\n");
+        summary.append("  • Dependency Map Size: ").append(getDependencyMapSize()).append("\n");
+
+        // Status Summary
+        summary.append("\nStatus Summary:\n");
+        summary.append("  • Ready for Injection: ").append(isReadyForInjection() ? "✓" : "✗").append("\n");
+        summary.append("  • Has Dependencies: ").append(dependencies.isEmpty() ? "✗" : "✓").append("\n");
+        summary.append("  • Instance Available: ").append(instance != null ? "✓" : "✗").append("\n");
+        summary.append("  • Lifecycle Complete: ").append(isLifecycleComplete() ? "✓" : "✗").append("\n");
+
+        summary.append("=====================================");
+
+        return summary.toString();
+    }
+
+    /**
+     * Helper method to determine if this dependency is ready for injection.
+     *
+     * @return true if the dependency can be injected into other components
+     */
+    private boolean isReadyForInjection() {
+        return instance != null || factory != null;
+    }
+
+    /**
+     * Helper method to determine if lifecycle methods have been executed successfully.
+     *
+     * @return true if all defined lifecycle methods have executed successfully
+     */
+    private boolean isLifecycleComplete() {
+        // Check PreConstruct
+        if (lifecycleMethods.containsKey(LifecycleType.PRE_CONSTRUCT)) {
+            Boolean preSuccess = lifecycleSuccess.get(LifecycleType.PRE_CONSTRUCT);
+            if (preSuccess == null || !preSuccess) {
+                return false;
+            }
+        }
+
+        // Check PostConstruct
+        if (lifecycleMethods.containsKey(LifecycleType.POST_CONSTRUCT)) {
+            Boolean postSuccess = lifecycleSuccess.get(LifecycleType.POST_CONSTRUCT);
+            if (postSuccess == null || !postSuccess) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }
 
 
