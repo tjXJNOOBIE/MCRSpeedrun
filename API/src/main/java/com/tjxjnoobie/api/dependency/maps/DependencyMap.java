@@ -9,6 +9,7 @@
 
 package com.tjxjnoobie.api.dependency.maps;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * @author TJ
  * @since 2025
  */
+@DelegatesToInterface(getClassForDelegation = IDependencyMap.class)
 public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaData> implements IDependencyMap {
 
 
@@ -452,8 +454,8 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     @Override
     public boolean isRegistered(Class<?> clazz) {
         Log.info("[DependencyMap] isRegistered called for " + LogColor.CYAN + clazz.getSimpleName() + LogColor.RESET 
-                + " (defaulting to " + LogColor.BOLD + "ensureInstance=true" + LogColor.RESET + ")");
-        return isRegistered(clazz, true);
+                + " (defaulting to " + LogColor.BOLD + "ensureInstance=false" + LogColor.RESET + ")");
+        return isRegistered(clazz, false);
     }
 
     @Override
