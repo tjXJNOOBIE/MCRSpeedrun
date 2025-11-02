@@ -26,11 +26,11 @@ public class DependencyInstance<T> implements IDependencyInstance<T> {
 
 
     @Override
-    public Supplier<? extends T> getDependencyFactory() {
+    public Supplier<? extends T> getDependencyInstanceWithFactory() {
         return dependencyFactory;
     }
     @Override
-    public void setDependencyFactory(Supplier<? extends T> dependencyInstance) {
+    public void setDependencyInstanceWithFactory(Supplier<? extends T> dependencyInstance) {
         this.dependencyFactory = dependencyInstance;
     }
 
