@@ -11,7 +11,9 @@ package com.tjxjnoobie.api.dependency.maps;
 
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.DependencyClass;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.console.Log;
@@ -32,102 +34,107 @@ import java.util.stream.Collectors;
  * @since 2025
  */
 @DelegatesToInterface(getClassForDelegation = IDependencyMap.class)
-public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaData> implements IDependencyMap {
+public class DependencyMap<T> extends ConcurrentHashMap<IDependencyClass<T>, IDependencyMetaData<T>> implements IDependencyMap<T>, IDependencyClass<T>{
 
-
-
-
-
+    public IDependencyClass<T> dependencyClass = new DependencyClass<>();
+    public IDependencyMetaData<T> classMetaData = getDependencyMetadata();
+    public Supplier<? extends T> dependencyFactory = getDependencyInstanceWithFactory();
 
     /**
-     * Registers a dependency with its instance, factory, and source context.
+     * Registers a dependency with its dependencyInstance, dependencyFactory, and source context.
      * Creates and populates metadata automatically.
      *
      * @param clazz The class type of the dependency
-     * @param instance The actual instance of the dependency
-     * @param factory The factory supplier for creating new instances
-     * @param sourceContext The context that owns this dependency
+     * @param dependencyInstance The actual dependencyInstance of the dependency
+     * @param dependencyFactory The dependencyFactory supplier for creating new instances
+     * @param dependencyContext The context that owns this dependency
      */
     @Override
-    public void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {
-        Log.info("[DependencyMap] Attempting to register dependency: clazz=" + (clazz != null ? clazz.getName() : "null") +
-                ", hasInstance=" + (instance != null) + ", hasFactory=" + (factory != null) + 
-                ", hasContext=" + (sourceContext != null));
-        
+    public void registerDependency(IDependencyClass<T> dependencyClass) {
+
+        if (clazzMeta == null || clazzMeta.getDependencyClass() == null) {
+            Log.error("[DependencyMap] Registration failed: IDependencyMetaData or its dependencyClass is null");
+            throw new IllegalArgumentException("IDependencyMetaData and its dependencyClass must be non-null");
+        }
+
         if (clazz == null) {
             Log.error("[DependencyMap] Registration failed: Class parameter is null");
             throw new IllegalArgumentException("Class must be non-null");
         }
+        //TODO: Replace these interface calls with our global fields in the class since they're type safe via T parameter
+        IDependencyClass depClass = clazzMeta.getDependencyClass();
+        IDependencyMetaData storedMeta = computeIfAbsent(depClass, c -> clazzMeta);
+        if (storedMeta != clazzMeta) {
+            // Merge essential fields from the provided metadata if caller passed a fresh one
+            if (getFactory() != null) storedMeta.setFactory(getFactory());
+            //TODO: Make getSourceContext have methods parameters so we can search for the source context if we have one,
+            // if we don't have one, fail gracefully and log.
+            if (getSourceContext() != null) storedMeta.setSourceContext(getSourceContext());
+            if (getPriority() != 0) storedMeta.setPriority(getPriority());
+        }
 
         try {
-            // Allow null instance to support factory-only registration
-            Log.info("[DependencyMap] Creating metadata for: " + clazz.getSimpleName());
-            IDependencyMetaData metaData = new DependencyMetaData(clazz);
-            
-            if (instance != null) {
-                // Get detailed instance information
-                String instanceClassName = instance.getClass().getName();
-                String instanceSimpleName = instance.getClass().getSimpleName();
-                boolean isProxy = instanceClassName.contains("$Proxy");
-                
-                // Build detailed log message
-                StringBuilder logMsg = new StringBuilder();
-                logMsg.append("[DependencyMap] Setting instance for ").append(clazz.getSimpleName());
-                logMsg.append(" -> ").append(instanceClassName);
-                
-                if (isProxy) {
-                    // For proxies, also show the interfaces they implement
-                    Class<?>[] interfaces = instance.getClass().getInterfaces();
-                    if (interfaces.length > 0) {
-                        logMsg.append(" (Proxy implementing: ");
-                        for (int i = 0; i < interfaces.length; i++) {
-                            logMsg.append(interfaces[i].getSimpleName());
-                            if (i < interfaces.length - 1) logMsg.append(", ");
-                        }
-                        logMsg.append(")");
-                    } else {
-                        logMsg.append(" (Proxy)");
-                    }
+            // Allow null dependencyInstance to support dependencyFactory-only registration
+            Log.info("[DependencyMap] Creating metadata for: " + getSimpleName());
+            IDependencyMetaData metaData = new DependencyMetaData(storedMeta);
+            // Attach dependencyInstance if provided
+            if (dependencyClass != null) {
+                storedMeta.setInstance(dependencyInstance);
+
+                // Populate metadata using the most specific available class:
+                // - Prefer dependencyInstance class (captures concrete type, including proxies/impls)
+                // - Fallback to declared dependency class
+                Class<?> toPopulateFrom = dependencyInstance.getClass() != null ? dependencyInstance.getClass() : depClass;
+                try {
+                    storedMeta.populateMetaData(toPopulateFrom);
+                    Log.success("[DependencyMap] Populated metadata for " + depClass.getSimpleName() +
+                            " from " + toPopulateFrom.getSimpleName());
+                } catch (Throwable t) {
+                    Log.error("[DependencyMap] Failed to populate metadata for " + depClass.getSimpleName() +
+                            " from " + toPopulateFrom.getSimpleName() + ": " + t.getMessage());
                 }
-                
-                Log.info(logMsg.toString());
-                metaData.setInstance(instance);
-                
-                Log.info("[DependencyMap] Populating metadata from instance class: " + instanceClassName);
-                metaData.populateMetaData(instance.getClass());
-                Log.info("[DependencyMap] Metadata population completed for: " + clazz.getSimpleName());
             } else {
-                Log.info("[DependencyMap] No instance provided - factory-only registration for: " + clazz.getSimpleName());
+                // No dependencyInstance yet — still populate from the declared dependency class to establish basic graph info
+                try {
+                    storedMeta.populateMetaData(depClass);
+                    Log.success("[DependencyMap] Populated metadata (no dependencyInstance) for " + depClass.getSimpleName());
+                } catch (Throwable t) {
+                    Log.error("[DependencyMap] Failed to populate metadata for " + depClass.getSimpleName() +
+                            " (no dependencyInstance): " + t.getMessage());
+                }
             }
             
-            if (factory != null) {
-                Log.info("[DependencyMap] Setting factory supplier for: " + clazz.getSimpleName());
-                metaData.setFactory(factory);
+            if (dependencyFactory != null) {
+                Log.info("[DependencyMap] Setting dependencyFactory supplier for: " + getSimpleName());
+                metaData.setFactory(dependencyFactory);
             } else {
-                Log.info("[DependencyMap] No factory supplier provided for: " + clazz.getSimpleName());
+                Log.info("[DependencyMap] No dependencyFactory supplier provided for: " + getSimpleName());
             }
             
-            if (sourceContext != null) {
-                Log.info("[DependencyMap] Setting source context for: " + clazz.getSimpleName() + 
-                        " from context: " + sourceContext.getClass().getSimpleName());
-                metaData.setSourceContext(sourceContext);
+            if (dependencyContext != null) {
+                Log.info("[DependencyMap] Setting source context for: " + getSimpleName() +
+                        " from context: " + dependencyContext.getClass().getSimpleName());
+                metaData.setSourceContext(dependencyContext);
             } else {
-                Log.info("[DependencyMap] No source context provided for: " + clazz.getSimpleName());
+                Log.info("[DependencyMap] No source context provided for: " + getSimpleName());
             }
 
-            computeIfAbsent(clazz, c ->metaData);
+            computeIfAbsent(dependencyClass, c ->metaData);
 
-            Log.success("[DependencyMap] Successfully registered: " + clazz.getSimpleName() +
-                    (instance != null ? " -> " + instance.getClass().getSimpleName() : " (factory only)") +
-                    (factory != null ? " [with factory]" : "") +
-                    (sourceContext != null ? " [from " + sourceContext.getClass().getSimpleName() + "]" : ""));
+            Log.success("[DependencyMap] Successfully registered: " + getSimpleName() +
+                    (dependencyInstance != null ? " -> " + dependencyInstance.getClass().getSimpleName() : " (dependencyFactory only)") +
+                    (dependencyFactory != null ? " [with dependencyFactory]" : "") +
+                    (dependencyContext != null ? " [from " + dependencyContext.getClass().getSimpleName() + "]" : ""));
         } catch (Exception e) {
-            Log.error("[DependencyMap] Failed to register dependency: " + clazz.getSimpleName() + 
+            Log.error("[DependencyMap] Failed to register dependency: " + getSimpleName() +
                     " - Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             throw e;
         }
     }
-
+    @Override
+    public DependencyMap<T> getDependencyMap() {
+        return this;
+    }
 
     /**
      * Registers a dependency with minimal information.
@@ -137,7 +144,8 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * @param instance The actual instance of the dependency
      */
     @Override
-    public void registerDependency(Class<?> clazz, Object instance) {
+    public void registerDependency(IDependencyMetaData clazz, Object instance) {
+        getDependencyMap().comp
         registerDependency(clazz, instance, null, null);
     }
 
@@ -145,7 +153,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * Registers a dependency with optional factory but without a source context.
      */
     @Override
-    public void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory) {
+    public void registerDependency(IDependencyMetaData clazz, Object instance, Supplier<?> factory) {
         registerDependency(clazz, instance, factory, null);
     }
 
@@ -188,7 +196,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * @return The metadata associated with the given class, or null if no such dependency is registered
      */
     @Override
-    public IDependencyMetaData getDependency(Class<?> clazz){
+    public IDependencyMetaData getDependency(IDependencyClass<?> clazz){
         return get(clazz);
     }
 
@@ -233,21 +241,22 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     }
 
     @Override
-    public Object ensureAndGetInstance(IDependencyMetaData metaData) {
-        if (metaData == null) {
+    public IDependencyMetaData ensureAndGetInstance(IDependencyMetaData classToEnsure) {
+        if (classToEnsure == null) {
             return null;
         }
 
-        Object instance = metaData.getDependencyInstance(metaData.getDependencyClass());
+        IDependencyMetaData instance = getDependencyMap().getDependencyInstanceWithFactory(getDependencyClass());
         if (instance != null) {
             return instance;
         }
 
-        Supplier<?> factory = metaData.getFactory();
+        Supplier<?> factory = getDependencyMap().getDependency(classToEnsure.getClass()).getFactory();
         if (factory != null) {
-            Object created = factory.get();
+            IDependencyMetaData created = (IDependencyMetaData) factory.get();
             if (created != null) {
-                metaData.setInstance(created);
+                IDependencyMetaData ensuredInstance = new DependencyMetaData(classToEnsure.getClass());
+                ensuredInstance.setInstance(created);
                 return created;
             }
         }
@@ -259,30 +268,29 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
      * Finds a dependency by assignable type.
      * Searches for a registered class that is assignable from the given class.
      *
-     * @param clazz The class type to search for
+     * @param dependencyToFind The dependency class type to search for
      * @return The instance if found, null otherwise
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public IDependencyMetaData findByAssignableType(Class<?> clazz) {
-        if (clazz == null) {
+    public Class<?> findByAssignableType(IDependencyMetaData<T> dependencyToFind) {
+        if (dependencyToFind == null) {
             return null;
         }
 
-        IDependencyMetaData direct = getDependency(clazz);
+        Class<?> direct = getRawDependencyClass();
         if (direct != null) {
             return direct;
         }
 
-        for (Map.Entry<Class<?>, IDependencyMetaData> entry : entrySet()) {
-            Class<?> registeredType = entry.getKey();
-            IDependencyMetaData meta = entry.getValue();
-            if (registeredType != null && clazz.isAssignableFrom(registeredType)) {
+        for (IDependencyMetaData dependency : getMetaData(dependencyToFind)) {
+            Class<?> registeredType = getDependency(dependency.getDependencyClass()).getDependencyClass();
+            Class<?> meta = getDependencyMap().getMetaData(getDe();
+            if (registeredType != null && dependencyToFind.isAssignableFrom(registeredType)) {
                 return meta;
             }
 
-            Object instance = ensureAndGetInstance(meta);
-            if (instance != null && clazz.isInstance(instance)) {
+            Object instance = getDependencyMap().getDependencyInstanceWithFactory(meta);
+            if (dependencyToFind.isInstance(instance)) {
                 return meta;
             }
         }
@@ -290,15 +298,15 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
         return null;
     }
 
-    @Override
-    public Object getDependencyInstance(Class<?> clazz) {
-        if (clazz == null) {
-            return null;
-        }
-
-        IDependencyMetaData compatible = findByAssignableType(clazz);
-        return compatible != null ? ensureAndGetInstance(compatible) : null;
-    }
+//    @Override
+//    public IDependencyMetaData getDependencyInstance(Class<?> clazz) {
+//        if (clazz == null) {
+//            return null;
+//        }
+//
+//        Class<?> compatible = findByAssignableType(clazz);
+//        return compatible != null ? ensureAndGetInstance(compatible) : null;
+//    }
 
 
     /**
