@@ -9,6 +9,8 @@
 
 package com.tjxjnoobie.api.dependency.metadata;
 
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
+
 import java.util.function.Supplier;
 
 /**
@@ -18,20 +20,19 @@ import java.util.function.Supplier;
  * @author TJ
  * @since 11/2/2025
  */
-public class DependencyInstance<T> {
+public class DependencyInstance<T> implements IDependencyInstance<T> {
 
     private Supplier<? extends T> dependencyFactory;
-    private T rawDependencyInstance;
 
-    public Supplier<? extends T> getDependencyInstance() {
+
+    @Override
+    public Supplier<? extends T> getDependencyFactory() {
         return dependencyFactory;
     }
-
-    public void setDependencyInstance(Supplier<? extends T> dependencyInstance) {
+    @Override
+    public void setDependencyFactory(Supplier<? extends T> dependencyInstance) {
         this.dependencyFactory = dependencyInstance;
     }
-    public T getRawDependencyInstance() {
-        return rawDependencyInstance;
-    }
+
 
 }
