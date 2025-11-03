@@ -9,15 +9,15 @@
 
 package com.tjxjnoobie.api.dependency.metadata.interfaces;
 
-public interface IDependencyInstance<INSTANCE extends IDependencyInstance<?>>
-        extends IDependencyFactory<INSTANCE> {
+import java.util.function.Supplier;
 
-
-    default IDependencyInstance<INSTANCE> getDependencyInstance() {
+public interface IDependencyFactory<INSTANCE>
+{
+    default IDependencyFactory<Supplier<INSTANCE>> getDependencyFactory(){
         return null;
     }
 
-    default void setDependencyInstance(IDependencyInstance<INSTANCE>  dependencyInstance) {
+    default void setDependencyFactory(IDependencyFactory<Supplier<INSTANCE>> dependencyFactory){
 
     }
 }

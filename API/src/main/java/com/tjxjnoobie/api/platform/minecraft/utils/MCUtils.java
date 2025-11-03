@@ -13,7 +13,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.UUID;
 
-@DelegatesToInterface(IMCUtils.class)
+@DelegatesToInterface(getClassForDelegation = IMCUtils.class)
 public class MCUtils implements IMCUtils {
     //TODO: First test candidate for our new injection system
     private Plugin plugin;

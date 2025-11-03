@@ -5,23 +5,26 @@ import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.HandleBlocks;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-@DelegatesToInterface(IRedis.class)
+@DelegatesToInterface(getClassForDelegation = IRedis.class)
 public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
+
     public static Jedis jedis;
-    public static String host = Config.redis_host;
-    public static String port = Config.redis_port;
-    public static String password = Config.redis_password;
-    public static Thread subscriberThread;
-    public static String REDIS_CHANNEL = "global:all_data";
-    private static HandleBlocks handleBlocks;
+    public String host = Config.redis_host;
+    public String port = Config.redis_port;
+    public String password = Config.redis_password;
+    public Thread subscriberThread;
+    public String REDIS_CHANNEL = "global:all_data";
+    private HandleBlocks handleBlocks;
 
+    public Redis(){
 
-
+    }
     //TODO: Testing method fire without annotation
     @PostConstruct
     @Override
@@ -29,18 +32,19 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
 
         jedis = new Jedis(host, Integer.parseInt(port)); // Change this if your Redis server is different
         jedis.auth(password);
-        System.out.println("Connecting to Redis");
+        Log.info("Connecting to Redis...");
 
         subscriberThread = new Thread(() -> {
             try (Jedis subJedis = new Jedis(host, 6379)) {
                 subJedis.auth(password);
                 subJedis.subscribe(new RedisSubscriber() {
-                    }, REDIS_CHANNEL);
+                }, REDIS_CHANNEL);
             }
         });
         subscriberThread.start();
-        System.out.println("Connected to Redis. Redis started on new thread: " +subscriberThread.getName());
+        Log.success("Connected to Redis on Thread " + subscriberThread.getName());
     }
+
     @Override
     public void disconnectFromRedis() {
         if (jedis != null) {
@@ -48,17 +52,20 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
             System.out.println("Disconnected from Redis");
         }
     }
+
     @Override
     public void publishToRedis(String message) {
         try (Jedis pubJedis = new Jedis("localhost", 6379)) {
             pubJedis.publish(REDIS_CHANNEL, message);
         }
     }
+
     @Override
     public void publishRedisUpdate(String message) {
         jedis.publish(REDIS_CHANNEL, message);
         System.out.println("Published message: " + message + " to channel: " + REDIS_CHANNEL);
     }
+
     @Override
     public void handleRedisMessage(String message) {
         String[] parts = message.split(",");
@@ -78,6 +85,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     protected void doInitialize() throws Exception {
         connectToRedis();
     }
+
     //TODO: Remove inner class and imporve sub functions
     private class RedisSubscriber extends JedisPubSub {
         @Override

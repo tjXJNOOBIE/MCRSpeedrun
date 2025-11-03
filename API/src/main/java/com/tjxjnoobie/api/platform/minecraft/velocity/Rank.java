@@ -11,7 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-@DelegatesToInterface(IRank.class)
+@DelegatesToInterface(getClassForDelegation = IRank.class)
 public class Rank implements IRank {
 
     @Inject private PlayerProfile playerProfile;

@@ -10,19 +10,13 @@
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
-import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
-import com.tjxjnoobie.api.interfaces.IContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -38,10 +32,13 @@ import java.util.Set;
  * @author TJ
  * @since 10/17/2025
  */
-public class ContextInjectionHelper implements IContextInjectionHelper, IDependencyMap, IDependencyGraphMap {
+public class ContextInjectionHelper<CLASS extends IDependencyClass<CLASS>,
+        INSTANCE extends IDependencyInstance<INSTANCE>>
+        implements IContextInjectionHelper<CLASS,INSTANCE> {
+
+        IDependencyClass<CLASS> dependencyClass;
 
     //TODO: Remove concrete delegation
-    IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
 
     /**
      * Injects all dependencies from all registered contexts with full initialization.
@@ -54,23 +51,28 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      *
      * @param target Optional target object to inject after context initialization (e.g., Main plugin instance)
      */
+    //TODO: We can probably suspend context injection for now until we can rework
+    // or get rid of the system entirely.
     @Override
-    public void injectAllContextsGlobally(Object target) throws IllegalAccessException {
+    public void injectAllContextsGlobally(Object target) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
         Log.info("[DI] ===== Context Based Injection Started =====");
-        Log.info("[DI] Total contexts registered: " + contextRegistry.size());
+        Log.info("[DI] Total contexts registered: DISABLED ");
 
         // ===== PHASE 1: AutoBind - Register all dependencies (WAIT GATE) =====
         Log.info("[DI] --- Phase 1: AutoBind - Scanning and registering dependencies ---");
 
-        Log.info("[DI] DependencyMap size: " + getDependencyMap().getDependencies().size());
+        Log.info("[DI] DependencyMap size: " + getDependencyMap().getSubDependenciesForBase().size());
         Class<?> clazz = target != null ? target.getClass() : null;
             // Suspend autoBind method usage to test the new annotation system
             // dependencyInjectorHelper.autoBind(allClasses);
-            dependencyInjectorHelper.registerDependenciesViaAnnotation(findAllImplementations(clazz));
-            // WAIT: autoBind must complete for this context before moving to next
+        //TODO: Add scanFromBasePackage to its interface
+            Set<Class<?extends CLASS>> classes = scanFromBasePackage("com.tjxjnoobie", target.getClass().getClassLoader());
+               registerDependenciesViaAnnotation(classes);
+
+               // WAIT: autoBind must complete for this context before moving to next
 
 
-        Log.info("[DI] ✓ AutoBind phase complete. Total registered: " + dependencyMap.getDependencyMapSize());
+        Log.info("[DI] ✓ AutoBind phase complete. Total registered: " + getDependencyMapSize());
 
         // ===== PHASE 2: Role Calculation (WAIT GATE) =====
         Log.info("[DI] --- Phase 2: Calculating dependency roles ---");
@@ -94,7 +96,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
             Log.info("[DI] Target: " + target.getClass().getSimpleName());
 
             // Inject from all contexts
-            for (Class<?> context : getDependencyMap().getDependencies()) {
+            for (IDependencyClass<CLASS> context : getDependencyMap().getSubDependenciesForBase()) {
                 if (context != null) {
                     //TODO: Inject annotation paused for testing
                   //  dependencyInjectorHelper.injectAndRecordMetaData(target);
@@ -111,7 +113,7 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
 
         // dependencyInjectorHelper.injectStaticFields(InterfaceManager.class);
 
-        generateInjectableReport();
+        // generateInjectableReport();
     }
 
     /**
@@ -119,136 +121,104 @@ public class ContextInjectionHelper implements IContextInjectionHelper, IDepende
      * This must complete before graph registration.
      */
     private void calculateAndAssignRoles() {
-        for (IDependencyMetaData meta : dependencyMap.getDependencyMapValues()) {
-            if (meta != null && meta.getDependencyClass() != null) {
+            if (getDependencyClass() != null) {
                 // Role is already calculated during autoBind, but we verify here
-                if (meta.getRole() == null) {
-                    Set<Class<?>> deps = meta.getDependencies();
+                if (getDependencyRole() == null) {
+                    Set<IDependencyClass<CLASS>> deps = getSubDependenciesForBase();
                     DependencyRole role = determineRole(deps != null ? deps : new HashSet<>());
-                    meta.setRole(role);
-                    Log.info("[DI-ROLE] Assigned role " + role + " to " + meta.getDependencyClass().getSimpleName());
+                    setDependencyRole(role);
+                    Log.info("[DI-ROLE] Assigned role " + role + " to " + getDependencyClass().getSimpleName());
                 }
             }
-        }
     }
 
     /**
      * Phase 3: Register all dependencies in the dependency graph with their roles.
      * This must complete before injection begins.
      */
+   //TODO: Move this method into the DependencyGraphMap class
     private void registerDependenciesInGraph() {
-        for (IDependencyMetaData meta : dependencyMap.getDependencyMapValues()) {
-            if (meta != null && meta.getDependencyClass() != null) {
-                Class<?> clazz = meta.getDependencyClass();
-                if (!dependencyGraph.containsKey(clazz)) {
-                    dependencyGraph.registerDependencyToGraph(clazz);
+            if (getDependencyClass() != null && getDependencyInstance() != null) {
+
+                if (!getDependencyGraph().isRegisteredinDependencyGraph(dependencyClass)) {
+                    registerDependencyToGraph(dependencyClass);
                     // Copy metadata to graph
-                    IDependencyMetaData graphMeta = dependencyGraph.get(clazz);
-                    if (graphMeta != null) {
-                        graphMeta.setRole(meta.getRole());
-                        graphMeta.setDependencies(meta.getDependencies());
-                        graphMeta.setDepth(meta.getDepth());
+                    //TODO: We can probaby get all graph map activices done in our first map since we
+                    // delegate the methods to meta data
+//                    IDependencyMetaData graphMeta = dependencyGraph.get(clazz);
+//                    if (graphMeta != null) {
+//                        graphMeta.setDependencyRole(meta.getDependencyRole());
+//                        graphMeta.setSubDependenciesForBase(meta.getSubDependenciesForBase());
+//                        graphMeta.setDepth(meta.getDepth());
                     }
                 }
             }
         }
-    }
 
-    /**
-     * Helper method to determine role based on dependency count.
-     */
-    public DependencyRole determineRole(Set<Class<?>> dependencies) {
-        if (dependencies.isEmpty()) return DependencyRole.BASE;
-        if (dependencies.size() <= 2) return DependencyRole.INTERMEDIATE;
-        return DependencyRole.ISOLATED;
-    }
 
-    /**
-     * Performs wave-based injection across provided contexts using metadata roles.
-     * Wave 1: inject BASE role dependencies (no dependencies)
-     * Wave 2: inject INTERMEDIATE and other role dependencies
-     *
-     * @param contexts list of contexts
-     * @return set of objects injected in wave 1
-     */
-    @Override
-    public Set<Object> performWaveInjection(List<IContext<?>> contexts) {
-        if (contexts == null || contexts.isEmpty()) {
-            Log.warn("[DI-WAVE] No contexts provided for wave injection");
-            return new HashSet<>();
-        }
 
-        Log.info("[DI-WAVE] ===== Starting wave-based injection =====");
-        Set<Object> wave1 = new HashSet<>();
 
-        // Collect all metadata from all contexts
-        List<IDependencyMetaData> allMetaData = new ArrayList<>();
-        for (IContext<?> context : contexts) {
-            if (context != null) {
-                IDependencyMap ctxMap = context.getDependencyMap();
-                allMetaData.addAll(ctxMap.getDependencyMapValues());
-            } else {
-                Log.critical("[DI-WAVE] Cannot inject from null context");
-            }
-        }
-        Log.info("[DI-WAVE] Collected " + allMetaData.size() + " dependencies from " + contexts.size() + " contexts");
+//    /**
+//     * Performs wave-based injection across provided contexts using metadata roles.
+//     * Wave 1: inject BASE role dependencies (no dependencies)
+//     * Wave 2: inject INTERMEDIATE and other role dependencies
+//     *
+//     * @param contexts list of contexts
+//     * @return set of objects injected in wave 1
+//     */
+//    @Override
+//    public Set<Object> performWaveInjection(List<IContext<?>> contexts) {
+//        if (contexts == null || contexts.isEmpty()) {
+//            Log.warn("[DI-WAVE] No contexts provided for wave injection");
+//            return new HashSet<>();
+//        }
+//
+//        Log.info("[DI-WAVE] ===== Starting wave-based injection =====");
+//        Set<Object> wave1 = new HashSet<>();
+//
+//        // Collect all metadata from all contexts
+//        List<IDependencyMetaData> allMetaData = new ArrayList<>();
+//        for (IContext<?> context : contexts) {
+//            if (context != null) {
+//                IDependencyMap ctxMap = context.getDependencyMap();
+//                allMetaData.addAll(ctxMap.getDependencyMapValues());
+//            } else {
+//                Log.critical("[DI-WAVE] Cannot inject from null context");
+//            }
+//        }
+//        Log.info("[DI-WAVE] Collected " + allMetaData.size() + " dependencies from " + contexts.size() + " contexts");
+//
+//        // ===== WAVE 1: Inject BASE role dependencies (no dependencies) =====
+//        Log.info("[DI-WAVE] --- Wave 1: Injecting BASE role dependencies ---");
+//        for (IDependencyMetaData meta : allMetaData) {
+//            if (meta != null && meta.getRole() == DependencyRole.BASE) {
+//                Object inst = meta.ensureAndGetInstance(meta);
+//                if (inst != null) {
+//                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
+//                    wave1.add(inst);
+//                    Log.info("[DI-WAVE] Wave 1 injected: " + inst.getClass().getSimpleName() + " (BASE)");
+//                }
+//            }
+//        }
+//        Log.info("[DI-WAVE] Wave 1 complete: " + wave1.size() + " BASE dependencies injected");
+//
+//        // ===== WAVE 2: Inject INTERMEDIATE and other role dependencies =====
+//        Log.info("[DI-WAVE] --- Wave 2: Injecting INTERMEDIATE and other dependencies ---");
+//        int wave2Count = 0;
+//        for (IDependencyMetaData meta : allMetaData) {
+//            if (meta != null && meta.getRole() != DependencyRole.BASE) {
+//                Object inst = meta.ensureAndGetInstance(meta);
+//                if (inst != null && !wave1.contains(inst)) {
+//                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
+//                    wave2Count++;
+//                    Log.info("[DI-WAVE] Wave 2 injected: " + inst.getClass().getSimpleName() + " (" + meta.getRole() + ")");
+//                }
+//            }
+//        }
+//        Log.info("[DI-WAVE] Wave 2 complete: " + wave2Count + " INTERMEDIATE/other dependencies injected");
+//        Log.info("[DI-WAVE] ===== Wave-based injection complete =====");
+//
+//        return wave1;
+//    }
 
-        // ===== WAVE 1: Inject BASE role dependencies (no dependencies) =====
-        Log.info("[DI-WAVE] --- Wave 1: Injecting BASE role dependencies ---");
-        for (IDependencyMetaData meta : allMetaData) {
-            if (meta != null && meta.getRole() == DependencyRole.BASE) {
-                Object inst = meta.ensureAndGetInstance(meta);
-                if (inst != null) {
-                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
-                    wave1.add(inst);
-                    Log.info("[DI-WAVE] Wave 1 injected: " + inst.getClass().getSimpleName() + " (BASE)");
-                }
-            }
-        }
-        Log.info("[DI-WAVE] Wave 1 complete: " + wave1.size() + " BASE dependencies injected");
 
-        // ===== WAVE 2: Inject INTERMEDIATE and other role dependencies =====
-        Log.info("[DI-WAVE] --- Wave 2: Injecting INTERMEDIATE and other dependencies ---");
-        int wave2Count = 0;
-        for (IDependencyMetaData meta : allMetaData) {
-            if (meta != null && meta.getRole() != DependencyRole.BASE) {
-                Object inst = meta.ensureAndGetInstance(meta);
-                if (inst != null && !wave1.contains(inst)) {
-                    dependencyInjectorHelper.injectAndRecordMetaData(inst);
-                    wave2Count++;
-                    Log.info("[DI-WAVE] Wave 2 injected: " + inst.getClass().getSimpleName() + " (" + meta.getRole() + ")");
-                }
-            }
-        }
-        Log.info("[DI-WAVE] Wave 2 complete: " + wave2Count + " INTERMEDIATE/other dependencies injected");
-        Log.info("[DI-WAVE] ===== Wave-based injection complete =====");
-
-        return wave1;
-    }
-
-    /**
-     * Injects static fields for the specified class.
-     */
-    @Override
-    public void injectStaticFields(Class<?> clazz) {
-        // Default no-op - can be overridden in subclasses
-    }
-
-    /**
-     * Checks if an object has no @Inject annotated fields (leaf dependency).
-     */
-    @Override
-    public boolean hasNoInjectFields(Object obj) {
-        if (obj == null) return true;
-        Class<?> clazz = obj.getClass();
-        while (clazz != null && clazz != Object.class) {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class)) {
-                    return false;
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return true;
-    }
-}

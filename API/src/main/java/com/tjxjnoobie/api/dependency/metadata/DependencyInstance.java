@@ -9,9 +9,8 @@
 
 package com.tjxjnoobie.api.dependency.metadata;
 
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyFactory;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
-
-import java.util.function.Supplier;
 
 /**
  * DependencyInstance – TODO: implement class functionality
@@ -20,19 +19,25 @@ import java.util.function.Supplier;
  * @author TJ
  * @since 11/2/2025
  */
-public class DependencyInstance<T> implements IDependencyInstance<T> {
+public class DependencyInstance<INSTANCE extends IDependencyInstance<?>>
+        implements IDependencyInstance<INSTANCE>  {
 
-    private Supplier<? extends T> dependencyFactory;
+    //TODO: Make a full factory with hot reload and rebinding functionality
+    IDependencyFactory<INSTANCE> dependencyFactory;
+    IDependencyInstance<INSTANCE> dependencyInstance;
 
 
     @Override
-    public Supplier<? extends T> getDependencyInstanceWithFactory() {
-        return dependencyFactory;
+    public IDependencyInstance<INSTANCE> getDependencyInstance() {
+        return dependencyInstance;
     }
+
     @Override
-    public void setDependencyInstanceWithFactory(Supplier<? extends T> dependencyInstance) {
-        this.dependencyFactory = dependencyInstance;
+    public void setDependencyInstance(IDependencyInstance<INSTANCE> dependencyInstance) {
+        this.dependencyInstance = dependencyInstance;
+
     }
+
 
 
 }

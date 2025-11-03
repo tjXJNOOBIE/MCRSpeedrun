@@ -9,18 +9,23 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers.interfaces;
 
-import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyGraphMap;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * IContextInjectionHelper – contract for context-based injection orchestration.
  * Provides default no-op implementations so callers can safely depend on the API
  * while concrete helpers override behavior.
  */
-public interface IContextInjectionHelper {
+public interface IContextInjectionHelper<CLASS extends IDependencyClass<?>,
+        INSTANCE extends IDependencyInstance<?>>
+        extends IDependencyMetaData<CLASS,INSTANCE>, IDependencyMap<CLASS,INSTANCE>,
+    IDependencyGraphMap<CLASS, INSTANCE>, IDependencyInjectorHelper<CLASS, INSTANCE> {
 
     /**
      * Injects context dependencies globally into the specified target object using all available contexts.
@@ -30,29 +35,9 @@ public interface IContextInjectionHelper {
      * @param target the object into which context-dependent fields should be injected
      * @throws IllegalAccessException if an illegal access exception occurs during field injection operations
      */
-    default void injectAllContextsGlobally(Object target) throws IllegalAccessException{
+    default void injectAllContextsGlobally(Object target) throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
 
     }
 
-    /**
-     * Performs wave-based injection across provided contexts.
-     * Returns the set of objects injected during the first wave.
-     */
-    default Set<Object> performWaveInjection(List<IContext<?>> contexts) {
-        return new HashSet<>();
-    }
 
-    /**
-     * Injects static fields for the specified class.
-     */
-    default void injectStaticFields(Class<?> clazz) {
-        // Default no-op
-    }
-
-    /**
-     * Determines whether the given object has no @Inject fields (leaf dependency).
-     */
-    default boolean hasNoInjectFields(Object obj) {
-        return true;
-    }
 }

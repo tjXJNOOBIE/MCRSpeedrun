@@ -134,7 +134,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
 
             // Use the concrete ContextInjectionHelper implementation
             injectionHelper.injectAllContextsGlobally(this);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
             throw new RuntimeException(e);
         }
 

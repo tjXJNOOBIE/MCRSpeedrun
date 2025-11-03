@@ -9,14 +9,17 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyFactory;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
-import java.util.*;
-import java.util.function.Supplier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Interface defining the contract for dependency management operations.
@@ -24,124 +27,33 @@ import java.util.function.Supplier;
  * implementations must define the actual behavior of registering, retrieving,
  * checking, and managing dependencies.
  */
-public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMetaData {
-    IDependencyMap dependencyMap = new DependencyMap(); //TODO: Replace usages with getDependencyMap()
-
-    List<IContext<?>> contextRegistry = new ArrayList<>(); //TODO: Move into a interface within the registry system (undone)
-
-    /**
-     * Registers a dependency instance with its class type and optional factory method.
-     * The factory supplier is used to create instances when needed, while direct
-     * registration allows for pre-constructed objects. This operation is typically
-     * performed during application startup or configuration phase.
-     *
-     * @param clazz the class type of the dependency being registered
-     * @param instance the instance object to register (or a factory that creates it)
-     * @param factory an optional supplier function that produces new instances of the dependency
-     * @param sourceContext context information about where this registration originated
-     */
-    default void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory, IContext<?> sourceContext) {
-    }
+public interface IDependencyMap<CLASS extends IDependencyClass<?>,
+        INSTANCE extends IDependencyInstance<?>>
+        extends IDependencyMetaData<CLASS,INSTANCE>,
+        IDependencyFactory<INSTANCE> {
 
 
-    /**
-     * Registers a dependency instance with its class type.
-     * This method stores an instance directly without requiring a factory.
-     *
-     * @param clazz the class type of the dependency being registered
-     * @param instance the instance object to register
-     */
 
 
-    default void registerDependency(Class<?> clazz, Object instance){
+    default void registerDependency(){
 
     }
 
-    default void registerDependency(Class<?> clazz, Object instance, Supplier<?> factory){
-
-    }
-
-    /**
-     * Updates the existing instance of a given class in the dependency registry.
-     * This allows for reassigning or refreshing a previously registered object.
-     *
-     * @param clazz the class type whose instance should be updated
-     * @param instance the new instance to replace the current one
-     */
-    default <U> void updateInstance(Class<U> clazz, U instance) {
-        //TODO: Change method params to match object instance
-    }
 
 
-    /**
-     * Checks whether an instance of the specified class is registered in the dependency registry.
-     * If {@code ensureInstance} is true, this method will create an instance using the factory if one does not already exist.
-     *
-     * @param clazz the class type to check for registration
-     * @param ensureInstance if true, attempts to create an instance from the factory if not already present
-     * @return true if the class is registered or an instance can be created; false otherwise
-     */
-    default boolean isRegistered(Class<?> clazz, boolean ensureInstance){
-        return false;
-    }
-
-    /**
-     * Checks whether an instance of a given class is currently registered in the registry.
-     * This method also creates an instance from the dependency factory of it does not exist
-     *
-     * @param clazz the class type to check for registration
-     * @return true if the class has been registered; false otherwise
-     */
-    default boolean isRegistered(Class<?> clazz) {
-        return false;
-    }
-
-    /**
-     * Determines if at least one instance exists for the given class in the registry.
-     * This method may differ slightly from isRegistered depending on implementation,
-     * but typically returns whether any instance of the specified type is present.
-     *
-     * @param clazz the class to check for existence
-     * @return true if an instance exists; false otherwise
-     */
-    default boolean hasInstance(Class<?> clazz) {
-        return false;
-    }
-
-    /**
-     * Returns a collection containing all registered dependency instances.
-     * This method may return a view or snapshot of current registrations and is useful
-     * during diagnostics, testing, or debugging phases.
-     *
-     * @return a list of all currently registered dependencies
-     */
     default List<Object> getAllInstances() {
         return Collections.emptyList();
     }
 
 
-    /**
-     * Retrieves a collection of {@link IDependencyMetaData} entries representing the registered dependencies in this map.
-     * Each entry contains metadata about a registered dependency, such as its class type, factory configuration, role, and context.
-     *
-     * @return a collection of dependency metadata entries for all currently registered dependencies
-     */
-    default Collection<IDependencyMetaData> getDependencyMapValues(){
+
+
+    default DependencyMap<CLASS, INSTANCE> getDependencyMap(){
         return null;
     }
 
-    default IDependencyMetaData getDependency(Class<?> clazz){
-        return null;
-    }
-
-    /**
-     * Retrieves a list of registered dependency metadata entries sorted by some defined criteria,
-     * such as creation time, priority, or type. This method is useful for ordered dependency resolution.
-     *
-     * @return a list of sorted dependency metadata entries
-     */
-    default List<IDependencyMetaData> getSortedMetaData() {
-        return Collections.emptyList();
+    default Collection<INSTANCE> getRawDependencyMapValues(){
+        return  null;
     }
 
     /**
@@ -151,7 +63,7 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      * @param role the role filter to apply
      * @return a list of metadata entries matching the given role
      */
-    default List<IDependencyMetaData> getByRole(DependencyRole role) {
+    default List<INSTANCE> getByRole(DependencyRole role) {
         return null;
     }
 
@@ -162,50 +74,84 @@ public interface IDependencyMap extends IDependencyInjectorHelper, IDependencyMe
      * @param context the context filter to apply
      * @return a list of metadata entries matching the given context
      */
-    default List<IDependencyMetaData> getByContext(IContext<?> context) {
+    default List<INSTANCE> getByContext(IContext<?> context) {
         return java.util.Collections.emptyList();
     }
 
-    /**
-     * Finds an instance that matches the specified class type, even if it's not exactly registered.
-     * This method supports upcasting or interface-based resolution through reflection.
-     *
-     * @param clazz the class type to match against
-     * @return an instance that can be cast to the specified type, or null if none found
-     */
-    @SuppressWarnings("unchecked")
-    default IDependencyMetaData findByAssignableType(Class<?> clazz) {
-        return null;
+
+    default void removeDependency(CLASS dependencyClass) {
+
     }
 
 
-    /**
-     * Removes a registered instance of the given class type from the registry.
-     * @param clazz the class type whose instance should be removed
-     * @return the removed dependency metadata if successfully deleted; null otherwise
-     */
-    default IDependencyMetaData removeDependency(Class<?> clazz) {
-        return null;
+
+    //    @Override
+//    public Map<String, Integer> getStatistics() {
+//        Map<String, Integer> stats = new HashMap<>();
+//        stats.put("total", size());
+//        stats.put("withInstances", (int) values().stream()
+//                .map(this::ensureAndGetInstance)
+//                .filter(Objects::nonNull)
+//                .count());
+//        stats.put("withFactories", (int) values().stream()
+//                .filter(m -> m.getFactory() != null)
+//                .count());
+//        stats.put("base", (int) values().stream()
+//                .filter(m -> m.getRole() == DependencyRole.BASE)
+//                .count());
+//        stats.put("intermediate", (int) values().stream()
+//                .filter(m -> m.getRole() == DependencyRole.INTERMEDIATE)
+//                .count());
+//        stats.put("terminal", (int) values().stream()
+//                .filter(m -> m.getRole() == DependencyRole.TERMINAL)
+//                .count());
+//        stats.put("isolated", (int) values().stream()
+//                .filter(m -> m.getRole() == DependencyRole.ISOLATED)
+//                .count());
+//
+//        return stats;
+//    }
+//
+//    /**
+//     * Generates a detailed report of all dependencies.
+//     *
+//     * @return String containing the formatted report
+//     */
+//    @Override
+//    public String generateReport() {
+//        StringBuilder report = new StringBuilder();
+//        report.append("=== Dependency MetaData Map Report ===\n");
+//        report.append("Total Dependencies: ").append(size()).append("\n\n");
+//
+//        Map<String, Integer> stats = getStatistics();
+//        report.append("Statistics:\n");
+//        stats.forEach((key, value) ->
+//                report.append("  ").append(key).append(": ").append(value).append("\n"));
+//
+//        report.append("\nDependencies by Role:\n");
+//        for (DependencyRole role : DependencyRole.values()) {
+//            List<IDependencyMetaData> byRole = getByRole(role);
+//            if (!byRole.isEmpty()) {
+//                report.append("  ").append(role).append(" (").append(byRole.size()).append("):\n");
+//                byRole.forEach(meta -> {
+//                    Class<?> clazz = meta.getDependencyClass();
+//                    Object instance = ensureAndGetInstance(meta);
+//                    report.append("    - ").append(clazz != null ? clazz.getSimpleName() : "Unknown")
+//                            .append(" -> ").append(instance != null ? instance.getClass().getSimpleName() : "NULL")
+//                            .append(" [depth=").append(meta.getDepth())
+//                            .append(", priority=").append(meta.getPriority()).append("]\n");
+//                });
+//            }
+//        }
+//
+//        return report.toString();
+//    }
+    default boolean isRegistered(IDependencyClass<CLASS> dependencyClass, boolean ensureInstance){
+        return false;
     }
 
-    /**
-     * Returns a map of statistics about the current state of the dependency registry,
-     * including counts by role, context, or registration source.
-     *
-     * @return a map containing key metrics (e.g., total entries, per-role count)
-     */
-    default Map<String, Integer> getStatistics() {
-        return new HashMap<>();
-    }
-
-    /**
-     * Generates a human-readable string representation of the current state of the dependency registry.
-     * This method is useful for logging, debugging, and monitoring purposes.
-     *
-     * @return a textual summary of all registered dependencies
-     */
-    default String generateReport() {
-        return "";
+    default boolean isRegistered(IDependencyClass<CLASS> dependencyClass){
+        return false;
     }
 
     /**

@@ -1,13 +1,17 @@
 package com.tjxjnoobie.proxy;
 
+import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
+import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.Config;
+import com.tjxjnoobie.api.platform.velocity.IVelocityMain;
 import com.tjxjnoobie.proxy.Commands.*;
 import com.tjxjnoobie.proxy.Events.VelocityLoginEvent;
 import com.tjxjnoobie.proxy.Events.VelocityPreLoginEvent;
@@ -27,28 +31,21 @@ import java.sql.SQLException;
     name = "VelocityCore",
     version = "1.0"
 )
-public class VelocityMain implements IRedis {
+@DelegatesToInterface(getClassForDelegation = IVelocityMain.class)
+public class VelocityMain implements IDependencyMetaData, IVelocityMain {
 
     @com.google.inject.Inject private Logger logger;
-    @com.google.inject.Inject
-    private ProxyServer proxyServer;
-    @Inject private IRank rank;
-    @Inject private IUtils utils;
-    @Inject private IProxyUtils proxyUtils;
-    @Inject private IRating rating;
-    @Inject private IPlayerProfile playerProfile;
+    @com.google.inject.Inject private ProxyServer proxyServer;
     private IContext<IGlobalContext> globalContext;
-    @Inject private IRankCache rankCache;
-    @Inject private IPunishManager punishManager;
-    @Inject private IPunishLog punishLog;
+
 
     //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
 
 
 
-
     @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException {
+    @Override
+    public void onProxyInitialization(ProxyInitializeEvent event) throws SQLException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, InstantiationException, InterruptedException {
         //TODO: Add main method logging
         //TODO: Remove from main method
         ReflectUtil.loadLibs();
@@ -57,9 +54,10 @@ public class VelocityMain implements IRedis {
         globalContext = new GlobalContext();
         Config.createConfig();
         Config.loadConfig();
+
         injectionHelper.injectAllContextsGlobally(globalContext);
         //TODO: Delegate null check away from main init loop
-        connectToRedis();
+        onVelocityEnable();
 
         MySQL.connect();
         //TODO: Testing to see if @PostConstruct can run without direct redis class method delegation
@@ -78,7 +76,7 @@ public class VelocityMain implements IRedis {
         proxyServer.getEventManager().register(this, new VelocityLoginEvent());
 
     }
-
+    @Override
     public void registerCommand(String command, Command commandClass, String... aliases){
         CommandManager commandManager = proxyServer.getCommandManager();
         commandManager.register(commandManager.metaBuilder(command).aliases(aliases).build(), commandClass);

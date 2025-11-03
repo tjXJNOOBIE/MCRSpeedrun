@@ -9,7 +9,8 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
-import com.tjxjnoobie.api.dependency.maps.DependencyGraphMap;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
 import java.util.List;
@@ -23,16 +24,24 @@ import java.util.Set;
  * @author TJ
  * @since 10/14/2025
  */
-public interface IDependencyGraphMap extends IDependencyMap {
+public interface IDependencyGraphMap<CLASS extends IDependencyClass<?>,
+        INSTANCE extends IDependencyInstance<?>>
+        extends IDependencyMetaData<CLASS,INSTANCE> {
 
-    DependencyGraphMap dependencyGraph = new DependencyGraphMap();
+
+    default IDependencyGraphMap<CLASS,INSTANCE> getDependencyGraph() {
+        return null;
+    }
 
     /**
      * Register a new dependency class into the graph.
      * Empty default method - implementation provided by concrete class.
      */
-    default void registerDependencyToGraph(Class<?> clazz) {
+    default void registerDependencyToGraph() {
         // Empty - concrete class provides implementation
+    }
+    default void registerDependencyToGraph(IDependencyClass<CLASS> dependencyClass){
+
     }
 
     /**
@@ -52,15 +61,18 @@ public interface IDependencyGraphMap extends IDependencyMap {
         return null;
     }
 
-    /**
-     * Print graph summary with dependency information.
-     * Empty default method - implementation provided by concrete class.
-     */
-    default void printSummary() {
-        // Empty - concrete class provides implementation
-    }
 
-    default Object resolveDependencyFromGraph(Class<?> depClass){
+    default Object resolveDependencyFromGraph(){
         return null;
     }
+
+    default boolean isRegisteredinDependencyGraph(IDependencyClass<CLASS> dependencyClass){
+        return false;
+    }
+
+
 }
+
+
+
+

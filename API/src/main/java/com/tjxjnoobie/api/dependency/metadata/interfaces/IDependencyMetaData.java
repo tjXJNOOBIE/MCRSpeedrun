@@ -15,7 +15,6 @@ import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
 /**
  * Contract interface for dependency metadata representing a component's role, depth, and relationships
@@ -23,26 +22,36 @@ import java.util.function.Supplier;
  * dependency resolution, lifecycle, and context ownership.
  *
  */
-public interface IDependencyMetaData  {
+public interface IDependencyMetaData
+        <CLASS extends IDependencyClass<?>,
+                INSTANCE extends IDependencyInstance<?>>
+        extends IDependencyClass<CLASS>, IDependencyInstance<INSTANCE>  {
 
-    default void populateMetaData(Class<?> clazz){
+
+
+    default void populateMetaData(){
 
     }
 
-    default IDependencyMetaData getMetaData(Class<?> clazz){
+
+//    default IDependencyMetaData<T> getMetaData(IDependencyClass<T> dependencyClass) {
+//        return null;
+//    }
+
+//    /**
+//     * Returns the class of the dependency that this metadata represents.
+//     * This is the primary type being managed by the dependency graph.
+//     *
+//     * @return the class of the dependency
+//     */
+//    default IDependencyClass<T> getDependencyClass() {
+//        return null;
+//    }
+
+
+    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(IDependencyClass<CLASS> dependencyClass){
         return null;
     }
-
-    /**
-     * Returns the class of the dependency that this metadata represents.
-     * This is the primary type being managed by the dependency graph.
-     *
-     * @return the class of the dependency
-     */
-    default Class<?> getDependencyClass() {
-        return null;
-    }
-
 
     /**
      * Returns the set of classes that this component directly depends on.
@@ -50,21 +59,22 @@ public interface IDependencyMetaData  {
      *
      * @return a read-only set of dependency classes
      */
-    default Set<Class<?>> getDependencies() {
+    default Set<IDependencyClass<CLASS>> getSubDependenciesForBase() {
         return new HashSet<>();
     }
 
-    default Object ensureAndGetInstance(IDependencyMetaData metaData){
-        return null;
-    }
+//    default IDependencyInstance<T> ensureAndGetInstance(IDependencyMetaData<T> classToEnsure){
+//        return null;
+//    }
+
+
 
     /**
      * Sets the direct dependencies of this component.
      * This allows configuration of which types must be resolved prior to this component's initialization.
      *
-     * @param deps the set of classes this component depends on
      */
-    default void setDependencies(Set<Class<?>> deps) {
+    default void setSubDependenciesForBase(Set<IDependencyClass<CLASS>> dependencyClassSet) {
         // No-op: implementation may be overridden by concrete class
     }
 
@@ -95,7 +105,7 @@ public interface IDependencyMetaData  {
      *
      * @return the role of this component
      */
-    default DependencyRole getRole() {
+    default DependencyRole getDependencyRole() {
         return DependencyRole.ISOLATED;
     }
 
@@ -103,9 +113,9 @@ public interface IDependencyMetaData  {
      * Sets the role of this component in the dependency graph.
      * This determines how the component behaves in the resolution and lifecycle management.
      *
-     * @param role the role assigned to this component
+     * @param dependencyRole the role assigned to this component
      */
-    default void setRole(DependencyRole role) {
+    default void setDependencyRole(DependencyRole dependencyRole) {
         // No-op: implementation may be overridden by concrete class
     }
 
@@ -175,25 +185,25 @@ public interface IDependencyMetaData  {
         // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Returns the bound instance of this component, if any.
-     * This is the actual object created and managed by the dependency graph.
-     *
-     * @return the bound instance, or null if not yet bound
-     */
-    default Object getDependencyInstance(Class<?> aClass) {
-        return null;
-    }
+//    /**
+//     * Returns the bound instance of this component, if any.
+//     * This is the actual object created and managed by the dependency graph.
+//     *
+//     * @return the bound instance, or null if not yet bound
+//     */
+//    default Object getDependencyInstance(Class<?> aClass) {
+//        return null;
+//    }
 
-    /**
-     * Sets the bound instance of this component.
-     * This is used to store the actual object instance after successful construction.
-     *
-     * @param instance the instance to bind
-     */
-    default void setInstance(Object instance) {
-        // No-op: implementation may be overridden by concrete class
-    }
+//    /**
+//     * Sets the bound instance of this component.
+//     * This is used to store the actual object instance after successful construction.
+//     *
+//     * @param instance the instance to bind
+//     */
+//    default void setInstance(Object instance) {
+//        // No-op: implementation may be overridden by concrete class
+//    }
 
     /**
      * Returns the source context that owns this dependency metadata.
@@ -201,7 +211,7 @@ public interface IDependencyMetaData  {
      *
      * @return the source context, or null if not assigned
      */
-    default IContext<?> getSourceContext() {
+    default IContext<CLASS> getSourceContext() {
         return null;
     }
 
@@ -211,7 +221,7 @@ public interface IDependencyMetaData  {
      *
      * @param ctx the context that owns this metadata
      */
-    default void setSourceContext(IContext<?> ctx) {
+    default void setSourceContext(IContext<CLASS> ctx) {
         // No-op: implementation may be overridden by concrete class
     }
 
@@ -235,37 +245,47 @@ public interface IDependencyMetaData  {
 
     }
 
-    default void setDependencyClass(Class<?> clazz){
-        // Implementation overridden in concrete class
-    }
+
 
     default void setRetryCount(int i){
         // Implementation overridden in concrete class
 
     }
 
-    /**
-     * Returns the factory supplier for creating instances of this dependency.
-     * The factory is used to create new instances on demand rather than using a singleton.
-     *
-     * @return the factory supplier, or null if not set
-     */
-    default Supplier<?> getFactory() {
+//    /**
+//     * Returns the factory supplier for creating instances of this dependency.
+//     * The factory is used to create new instances on demand rather than using a singleton.
+//     *
+//     * @return the factory supplier, or null if not set
+//     */
+//    default Supplier<?> getFactory() {
+//
+//        return null;
+//    }
 
-        return null;
-    }
+//    /**
+//     * Sets the factory supplier for creating instances of this dependency.
+//     * This allows dynamic instance creation rather than singleton behavior.
+//     *
+//     * @param factory the supplier that creates new instances
+//     */
+//    default void setFactory(Supplier<?> factory) {
+//        // No-op: implementation may be overridden by concrete class
+//    }
 
-    /**
-     * Sets the factory supplier for creating instances of this dependency.
-     * This allows dynamic instance creation rather than singleton behavior.
-     *
-     * @param factory the supplier that creates new instances
-     */
-    default void setFactory(Supplier<?> factory) {
-        // No-op: implementation may be overridden by concrete class
-    }
-    default boolean hasInstance(Class<?> clazz){
+
+    default boolean hasInstanceFromDependencyClass(IDependencyClass<CLASS> dependencyClass){
         return false;
+    }
+
+    default DependencyRole determineRole(Set<IDependencyClass<CLASS>> dependencyClassSet){
+        return DependencyRole.ISOLATED;
+    }
+
+
+
+    default int calculateDepth(IDependencyClass<CLASS> dependencyClass, Set<IDependencyClass<CLASS>> dependencyClassSet){
+        return 0;
     }
 
     default String getDependencyMetaDataSummary(){
