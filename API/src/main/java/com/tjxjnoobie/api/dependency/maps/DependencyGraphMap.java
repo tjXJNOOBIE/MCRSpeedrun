@@ -25,7 +25,8 @@ import java.util.Set;
  * @author TJ
  * @since 11/2/2025
  */
-public class DependencyGraphMap<T> {
+public class DependencyGraphMap<T> extends ConcurrentHashMap<IDependencyClass<T>, IDependencyInstance<Supplier<T>>> implements IDependencyGraphMap<T> {
+
 
     IDependencyMetaData<T> dependencyMetaData;
 
