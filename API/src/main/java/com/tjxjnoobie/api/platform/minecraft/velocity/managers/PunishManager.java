@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.UUID;
 
-public class PunishManager implements IUtils, IPunishManager {
+public class PunishManager implements IUtils, IPunishManager, IPlayerProfile {
 
     @Inject private IGlobalContext globalContext;
     private final Jedis jedis = Redis.jedis;
@@ -350,10 +350,9 @@ public class PunishManager implements IUtils, IPunishManager {
     }
     @Override
     public void logPunishmentByUsername(String username , Timestamp startDate, Timestamp endDate , String punishment, String sender, String reason) throws SQLException {
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
         String punishKey = "punishLog:"+username+":"+punishment;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String UUIDStr = playerProfile.getUUIDFromUsername("punish",username,"punishLog");
+        String UUIDStr = getUUIDFromUsername("punish",username,"punishLog");
         jedis.hset(punishKey, "PUNISHED_UUID",UUIDStr);
         jedis.hset(punishKey,"START_DATE",Objects.requireNonNullElse(startDate.toLocalDateTime().format(formatter),"NONE"));
         jedis.hset(punishKey,"END_DATE",Objects.requireNonNullElse(endDate.toLocalDateTime().format(formatter), "Permanent"));
