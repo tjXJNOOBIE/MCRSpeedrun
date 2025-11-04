@@ -2,7 +2,6 @@ package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.interfaces.IDebugger;
 import com.tjxjnoobie.api.interfaces.IMCUtils;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -101,13 +100,12 @@ public class Debugger implements IDebugger, IMCUtils {
     /**
      * Sends a debug message to a player if they are a debugger
      * @param playerId The player to send the message to
-     * @param speedRunContext The GlobalContext for accessing utilities
      * @param message The debug message
      */
     @Override
-    public void sendDebugMessage(UUID playerId, ISpeedRunContext speedRunContext, String message) {
-        if (playerId != null && speedRunContext != null) {
-            boolean isDebugger = speedRunContext.getDebugger().isDebugger(playerId);
+    public void sendDebugMessage(UUID playerId, String message) {
+        if (playerId != null) {
+            boolean isDebugger = isDebugger(playerId);
             if (isDebugger) {
 
                 // Now you need a way to get a Player from the UUID (platform dependent)
@@ -128,14 +126,13 @@ public class Debugger implements IDebugger, IMCUtils {
     /**
      * Sends a debug message with a custom prefix
      * @param player The player to send the message to
-     * @param speedRunContext The GlobalContext for accessing utilities
      * @param prefix The custom prefix (e.g., "[BUILDER]", "[MANAGER]")
      * @param message The debug message
      */
     @Override
-    public void sendDebugMessage(Player player, ISpeedRunContext speedRunContext, String prefix, String message) {
-        if (player != null && speedRunContext != null) {
-            boolean isDebugger = speedRunContext.getDebugger().isDebugger(player.getUniqueId());
+    public void sendDebugMessage(Player player, String prefix, String message) {
+        if (player != null) {
+            boolean isDebugger = isDebugger(player.getUniqueId());
             if (isDebugger) {
                 player.sendMessage(getMinecraftStaffInGamePrefix() + "§c" + prefix + " " + message);
             }
