@@ -91,10 +91,10 @@ public interface IDebugger {
      * only to players who have been designated as debuggers.
      *
      * @param playerId The UUID of the player to whom the debug message should be sent
-     * @param globalContext The global context containing dependencies such as game state, plugin, and utility services
      * @param message The debug message content to send to the player
      */
-    default void sendDebugMessage(UUID playerId, ISpeedRunContext globalContext, String message) { }
+    default void sendDebugMessage(UUID playerId, String message) { }
+
 
     /**
      * Sends a debug message to the specified player with an optional prefix.
@@ -102,9 +102,8 @@ public interface IDebugger {
      * This method is intended for internal debugging purposes and does not affect gameplay or player experience.
      *
      * @param player The Player object to send the debug message to
-     * @param globalContext The global context containing dependency injections such as game mode, player manager, etc.
-     * @param prefix An optional prefix string to prepend to the message (e.g., "DEBUG: ")
+     * @param prefix An optional prefix string to prepend to the message (e.g., 'DEBUG: ')
      * @param message The actual debug message content to be sent
      */
-    default void sendDebugMessage(Player player, ISpeedRunContext globalContext, String prefix, String message) { }
+    default void sendDebugMessage(Player player, String prefix, String message) { }
 }
