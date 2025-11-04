@@ -10,29 +10,53 @@ import java.util.UUID;
  */
 public interface IRankCache {
 
-    void addRankCache(UUID uuid) throws SQLException;
+    default void addRankCache(UUID uuid) throws SQLException {
+    }
 
-    void removeRankCache(UUID uuid);
+    default void removeRankCache(UUID uuid) {
+    }
 
-    String getRank(UUID uuid);
+    default String getRank(UUID uuid) {
+        return null;
+    }
 
-    int getPowerLevel(UUID uuid);
+    default int getPowerLevel(UUID uuid) {
+        return 0;
+    }
 
-    Set<String> getPermissions(UUID uuid);
+    default Set<String> getPermissions(UUID uuid) {
+        return null;
+    }
 
-    boolean hasPermission(UUID uuid, String permission);
+    default boolean hasPermission(UUID uuid, String permission) {
+        return false;
+    }
 
-    HashMap<UUID,String> getRankCache();
+    default HashMap<UUID, String> getRankCache() {
+        return null;
+    }
 
-    HashMap<UUID,Integer> getPowerLevelCache();
+    default HashMap<UUID, Integer> getPowerLevelCache() {
+        return null;
+    }
 
-    HashMap<UUID, Set<String>> getPermissionsCache();
+    default HashMap<UUID, Set<String>> getPermissionsCache() {
+        return null;
+    }
 
-    boolean rankExists(String rankName) throws SQLException;
+    default boolean rankExists(String rankName) throws SQLException {
+        return false;
+    }
 
-    boolean isStaff(UUID uuid);
+    default boolean isStaff(UUID uuid) {
+        return false;
+    }
 
-    boolean isAdmin(UUID uuid);
+    default boolean isAdmin(UUID uuid) {
+        return false;
+    }
 
-    boolean isDonor(UUID uuid);
+    default boolean isDonor(UUID uuid) {
+        return false;
+    }
 }
