@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @DelegatesToInterface(getClassForDelegation = IMCUtils.class)
-public class MCUtils implements IMCUtils {
+public class MCUtils implements IMCUtils, IDebugger, IRankCache {
     //TODO: First test candidate for our new injection system
     private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();
@@ -93,13 +93,10 @@ public class MCUtils implements IMCUtils {
     @Override
     public void sendDebugMessage(Player player, String message) {
         //TODO: Move depends to field injection
-        IRankCache rankCache = speedRunContext.getRankCache();
-        IUtils utils = speedRunContext.getUtils();
         UUID uuid = player.getUniqueId();
-        IDebugger debugger = speedRunContext.getDebugger();
-        if (rankCache.getPowerLevel(uuid) <= 10000 ||
-                rankCache.hasPermission(uuid, "network.debug")
-                        && debugger.isDebugger(uuid)) {
+        if (getPowerLevel(uuid) <= 10000 ||
+                hasPermission(uuid, "network.debug")
+                        && isDebugger(uuid)) {
             player.sendMessage(getMinecraftStaffInGamePrefix() + message);
         }
     }
