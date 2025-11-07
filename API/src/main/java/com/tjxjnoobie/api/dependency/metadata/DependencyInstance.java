@@ -26,7 +26,13 @@ public class DependencyInstance<INSTANCE extends IDependencyInstance<?>>
 
     Supplier<INSTANCE> dependencyFactory;
     INSTANCE instance;
+    Class<?> dependencyConcrete;
 
+    public DependencyInstance() {
+    }
+    public DependencyInstance(Class<?> dependencyConcrete) {
+        this.dependencyConcrete = dependencyConcrete;
+    }
     @Override
     public INSTANCE getDependencyInstance() {
         if (dependencyFactory == null) {
