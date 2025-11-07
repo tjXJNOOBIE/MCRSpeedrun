@@ -2,8 +2,6 @@ package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.IGameManager;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
