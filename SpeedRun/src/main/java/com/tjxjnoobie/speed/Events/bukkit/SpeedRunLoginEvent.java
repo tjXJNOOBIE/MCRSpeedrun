@@ -9,7 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerLoginEvent;
 
-public class SpeedRunLoginEvent implements Listener {
+public class SpeedRunLoginEvent implements Listener, IGameManager {
 
 
     @Inject private ISpeedRunContext speedRunContext;
@@ -18,14 +18,13 @@ public class SpeedRunLoginEvent implements Listener {
 
     @EventHandler
     public void onSpeedLogin(PlayerLoginEvent e) {
-        GameStateEnum currentState = speedRunContext.getGameState().getCurrentState();
+        GameStateEnum currentState = getCurrentState();
         if (currentState == GameStateEnum.STARTUP) {
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Server is starting up");
         } else if (currentState == GameStateEnum.ENDING) {
-            IGameManager gameManager = speedRunContext.getGameManager();
-            Player winner = gameManager.getSpeedRunWinner();
+            Player winner = getSpeedRunWinner();
             String winnerName = winner.getName();
-            String winnerTime = gameManager.getFinalTimeString(winner.getUniqueId());
+            String winnerTime = getFinalTimeString(winner.getUniqueId());
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, 
                 "The game has ended! The winner is: " + winnerName + " with Final Time: " + winnerTime);
         }
