@@ -12,7 +12,7 @@ import org.bukkit.scheduler.BukkitTask;
 /**
  * Interface for Minecraft utility functions
  */
-public interface IMCUtils extends ILocalServerMetaData {
+public interface IMCUtils extends ILocalServerMetaData, IDebugger {
 
 
     //TODO: Replace class methods parameters for custom DI system
