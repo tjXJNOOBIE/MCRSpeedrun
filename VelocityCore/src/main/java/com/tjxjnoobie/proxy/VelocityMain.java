@@ -2,12 +2,11 @@ package com.tjxjnoobie.proxy;
 
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
-import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
+import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.platform.minecraft.Config;
@@ -32,12 +31,12 @@ import java.sql.SQLException;
     version = "1.0"
 )
 @DelegatesToInterface(getClassForDelegation = IVelocityMain.class)
-public class VelocityMain implements IDependencyMetaData, IVelocityMain {
+public class VelocityMain implements IDependencyClass<VelocityMain>, IVelocityMain {
 
     @com.google.inject.Inject private Logger logger;
     @com.google.inject.Inject private ProxyServer proxyServer;
     private IContext<IGlobalContext> globalContext;
-
+    IDependencyInjectorHelper<?,?> injectionHelper = new DependencyInjectorHelper<>();
 
     //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
 
@@ -49,13 +48,11 @@ public class VelocityMain implements IDependencyMetaData, IVelocityMain {
         //TODO: Add main method logging
         //TODO: Remove from main method
         ReflectUtil.loadLibs();
-        IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
         //TODO: Remove concrete call in favor of DI
         globalContext = new GlobalContext();
         Config.createConfig();
         Config.loadConfig();
-
-        injectionHelper.injectAllContextsGlobally(globalContext);
+        injectionHelper.setupDISystem(this);
         //TODO: Delegate null check away from main init loop
         onVelocityEnable();
 
