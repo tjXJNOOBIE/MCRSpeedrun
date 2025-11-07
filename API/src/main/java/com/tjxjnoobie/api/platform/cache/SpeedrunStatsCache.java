@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.UUID;
 
-public class SpeedrunStatsCache implements ISpeedrunStatsCache {
+public class SpeedrunStatsCache implements ISpeedrunStatsCache, IStatsManager {
 
     public HashMap<UUID, Integer> wins = new HashMap<>();
     public HashMap<UUID, Integer> losses = new HashMap<>();
@@ -26,15 +26,14 @@ public class SpeedrunStatsCache implements ISpeedrunStatsCache {
 
 
     public void createStorage(UUID uuid) throws SQLException {
-        IStatsManager statsManager = globalContext.getStatsManager();
-        int playerWins = statsManager.getStat("speedrun_stats",uuid,"WINS");
-        int playerLosses = statsManager.getStat("speedrun_stats",uuid,"LOSSES");
-        int gamesPlayed = statsManager.getStat("speedrun_stats",uuid,"PLAYED");
-        int enderTrips = statsManager.getStat("speedrun_stats",uuid,"ENDER_TRIPS");
-        int netherTrips = statsManager.getStat("speedrun_stats",uuid,"NETHER_TRIPS");
-        int elims = statsManager.getStat("speedrun_stats",uuid,"ELIMS");
-        long bestTimeLong = statsManager.getStat("speedrun_stats",uuid,"BEST_TIMELONG");
-        String bestTime = statsManager.getBestSRTime(uuid);
+        int playerWins =  getStat("speedrun_stats",uuid,"WINS");
+        int playerLosses =  getStat("speedrun_stats",uuid,"LOSSES");
+        int gamesPlayed =  getStat("speedrun_stats",uuid,"PLAYED");
+        int enderTrips =  getStat("speedrun_stats",uuid,"ENDER_TRIPS");
+        int netherTrips =  getStat("speedrun_stats",uuid,"NETHER_TRIPS");
+        int elims =  getStat("speedrun_stats",uuid,"ELIMS");
+        long bestTimeLong =  getStat("speedrun_stats",uuid,"BEST_TIMELONG");
+        String bestTime =  getBestSRTime(uuid);
         wins.put(uuid,playerWins);
         losses.put(uuid,playerLosses);
         played.put(uuid,gamesPlayed);
@@ -47,11 +46,10 @@ public class SpeedrunStatsCache implements ISpeedrunStatsCache {
 
     }
     public void updateSRStats(UUID uuid) throws SQLException {
-        IStatsManager statsManager = globalContext.getStatsManager();
-        statsManager.setBestSRTime(getBestTime(uuid),uuid);
-        statsManager.setStat("speedrun_stats","WINS",uuid,getWins(uuid));
-        statsManager.setStat("speedrun_stats","LOSSES",uuid,getLosses(uuid));
-        statsManager.setStat("speedrun_stats","BESTTIME_LONG",uuid,getBestTimeLong(uuid));
+         setBestSRTime(getBestTime(uuid),uuid);
+         setStat("speedrun_stats","WINS",uuid,getWins(uuid));
+         setStat("speedrun_stats","LOSSES",uuid,getLosses(uuid));
+         setStat("speedrun_stats","BESTTIME_LONG",uuid,getBestTimeLong(uuid));
 
 
     }
