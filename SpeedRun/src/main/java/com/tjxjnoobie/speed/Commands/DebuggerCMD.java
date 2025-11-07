@@ -15,10 +15,6 @@ public class DebuggerCMD implements CommandExecutor, IMCUtils, IDebugger, IRankC
 
 
 
-   @Inject
-   private IGlobalContext globalContext;
-
-
 
 
     @Override
