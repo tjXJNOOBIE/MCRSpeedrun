@@ -24,8 +24,6 @@ import java.util.UUID;
 
 public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, ILocationCache, IGameState, IGameManager, IRatingCache {
 
-    @Inject private ISpeedRunContext speedRunContext;
-
     public BukkitTask bossBar;
     
     
