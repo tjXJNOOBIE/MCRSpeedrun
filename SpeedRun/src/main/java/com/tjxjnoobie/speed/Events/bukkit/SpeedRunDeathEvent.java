@@ -10,12 +10,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.UUID;
 
-public class SpeedRunDeathEvent implements Listener {
-    private  final ISpeedRunContext speedRunContext;
-    private IGlobalContext globalContext;
-    public SpeedRunDeathEvent(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
+public class SpeedRunDeathEvent implements Listener, IGameMode, IGameState, IMCUtils, IPlayerManager {
+
 
 
     @EventHandler
@@ -23,19 +19,16 @@ public class SpeedRunDeathEvent implements Listener {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         String name = player.getName();
-        IGameMode gameMode = speedRunContext.getGameMode();
-        IGameManager gameManager = speedRunContext.getGameManager();
-        IGameState gameState = speedRunContext.getGameState();
-        IPlayerManager playerManager = speedRunContext.getPlayerManager();
-        GameModeEnum currentGamemode = gameMode.getCurrentGameMode();
-        GameStateEnum currentState = gameState.getCurrentState();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
+
+        GameModeEnum currentGamemode = getCurrentGameMode();
+        GameStateEnum currentState = getCurrentState();
+
         if(currentGamemode == GameModeEnum.ELIMINATION
         && currentState == GameStateEnum.INGAME){
-            playerManager.eliminatePlayer(uuid,name,player);
+            eliminatePlayer(uuid,name,player);
         }else{
             e.setCancelled(true);
-            mcUtils.sendDebugMessage(player,name+"Tried to die outside of INGAME state.");
+            sendDebugMessage(player,name+"Tried to die outside of INGAME state.");
         }
     }
 }
