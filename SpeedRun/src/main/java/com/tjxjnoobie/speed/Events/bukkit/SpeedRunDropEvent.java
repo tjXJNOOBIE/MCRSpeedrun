@@ -2,23 +2,17 @@ package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.IGameState;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerDropItemEvent;
 
-public class SpeedRunDropEvent implements Listener {
+public class SpeedRunDropEvent implements Listener, IGameState {
 
-    private final ISpeedRunContext speedRunContext;
 
-    public SpeedRunDropEvent(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
 
     @EventHandler
     public void onDrop(PlayerDropItemEvent e){
-        IGameState gameState = speedRunContext.getGameState();
-        GameStateEnum currentState = gameState.getCurrentState();
+        GameStateEnum currentState = getCurrentState();
         if(currentState == GameStateEnum.LOBBY){
             e.setCancelled(true);
         }
