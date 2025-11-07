@@ -10,33 +10,56 @@ import java.util.UUID;
  * Interface for voting system operations
  */
 public interface IVoting {
-    
 
-    void calculateAndAnnounceWinner();
+    default void calculateAndAnnounceWinner() {
+        // no-op
+    }
 
+    default boolean isComplete() {
+        return false;
+    }
 
-    boolean isComplete();
+    default boolean hasVoted(UUID uuid) {
+        return false;
+    }
 
-    boolean hasVoted(UUID uuid);
+    default void setComplete(boolean complete) {
+        // no-op
+    }
 
-    void setComplete(boolean complete);
+    default String getVotingOptions() {
+        return "";
+    }
 
-    String getVotingOptions();
+    default void sendVotingOptions(Player player) {
+        // no-op
+    }
 
-    void sendVotingOptions(Player player);
+    default HashMap<String, Integer> getGameModes() {
+        return new HashMap<>();
+    }
 
-    HashMap<String, Integer> getGameModes();
+    default void loadGameModes() {
+        // no-op
+    }
 
+    default void addVote(String gamemode, int votes) {
+        // no-op
+    }
 
-    void loadGameModes();
+    default Integer getVotes(String gamemode) {
+        return 0;
+    }
 
-    void addVote(String gamemode, int votes);
+    default String getWinner() {
+        return "";
+    }
 
-    Integer getVotes(String gamemode);
+    default void vote(Player player, String gamemode) {
+        // no-op
+    }
 
-    String getWinner();
-
-    void vote(Player player, String gamemode);
-
-    List<UUID> getHasVotedHash();
+    default List<UUID> getHasVotedHash() {
+        return List.of();
+    }
 }
