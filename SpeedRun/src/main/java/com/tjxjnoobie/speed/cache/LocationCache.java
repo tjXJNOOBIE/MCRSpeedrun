@@ -1,10 +1,11 @@
 package com.tjxjnoobie.speed.cache;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.enums.GameStateEnum;
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.speed.managers.SpeedRunContext;
+import com.tjxjnoobie.api.interfaces.IGameState;
+import com.tjxjnoobie.api.interfaces.ILocationCache;
+import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.interfaces.IWorldManager;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;
@@ -14,14 +15,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 
-public class LocationCache implements IUtils, ILocationCache {
+public class LocationCache implements IUtils, ILocationCache, IWorldManager, IGameState {
 
 
     private final HashMap<String, Location> spawn = new HashMap<>();
-    @Inject private SpeedRunContext speedRunContext;
-    @Inject private IGlobalContext globalContext;
-    @Inject private IGameState gameState;
-    @Inject private IWorldManager worldManager;
     private Plugin plugin;
 
 
@@ -38,11 +35,11 @@ public class LocationCache implements IUtils, ILocationCache {
             new BukkitRunnable(){
                 @Override
                 public void run() {
-                    Bukkit.getLogger().info("Adding world " + worldManager.getSpawnWorld());
-                    spawn.put(worldManager.getSpawnWorld(), worldManager.getSpawn(worldManager.getSpawnWorld()));
-                    Bukkit.getLogger().info(spawn.get(worldManager.getSpawnWorld())+ " Updated");
+                    Bukkit.getLogger().info("Adding world " + getSpawnWorld());
+                    spawn.put(getSpawnWorld(), getSpawn(getSpawnWorld()));
+                    Bukkit.getLogger().info(spawn.get(getSpawnWorld())+ " Updated");
                     try {
-                        gameState.setGameState(GameStateEnum.LOBBY,getServerID());
+                        setGameState(GameStateEnum.LOBBY,getServerID());
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
                     }
@@ -57,8 +54,7 @@ public class LocationCache implements IUtils, ILocationCache {
     }
 
     public Location getSpawn() {
-        IWorldManager worldManager = speedRunContext.getWorldManager();
-            return spawn.get(worldManager.getSpawnWorld());
+            return spawn.get(getSpawnWorld());
 
     }
 }
