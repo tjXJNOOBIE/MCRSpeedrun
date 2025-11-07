@@ -10,30 +10,49 @@ import java.util.UUID;
  * Interface for punishment management operations
  */
 public interface IPunishManager {
-    
 
-    void setTimedPunishment(UUID targetUUID, String targetName, String punishmentTypeBans, Timestamp from, Timestamp timestamp, String s, String senderName, String number) throws SQLException;
 
-    void logPunishment(UUID uuid, String punished, Timestamp startDate, Timestamp endDate, String punishment, String sender, String reason) throws SQLException;
+    default void setTimedPunishment(UUID targetUUID, String targetName, String punishmentTypeBans,
+                                    Timestamp from, Timestamp timestamp, String s, String senderName,
+                                    String number) throws SQLException {
+    }
 
-    void setPunishNumber(String punishmentTypeBans, int i, UUID targetUUID) throws SQLException;
+    default void logPunishment(UUID uuid, String punished, Timestamp startDate, Timestamp endDate,
+                               String punishment, String sender, String reason) throws SQLException {
+    }
 
-    int getPunishmentNumber(String punishmentTypeBans, UUID targetUUID, String targetName);
+    default void setPunishNumber(String punishmentTypeBans, int i, UUID targetUUID) throws SQLException {
+    }
 
-    void cacheAllPunishments();
+    default int getPunishmentNumber(String punishmentTypeBans, UUID targetUUID, String targetName) {
+        return 0;
+    }
 
-    boolean isPunished(UUID targetUUID, String targetName, String banned);
+    default void cacheAllPunishments() {
+    }
 
-    void logPunishmentByUsername(String targetName, Timestamp unbanTimeTS, Timestamp unbanTimeTS1, String unbans, String senderName, String s) throws SQLException;
+    default boolean isPunished(UUID targetUUID, String targetName, String banned) {
+        return false;
+    }
 
-    void setPunishedByUsername(String targetName, String bans, int i) throws SQLException;
+    default void logPunishmentByUsername(String targetName, Timestamp unbanTimeTS, Timestamp unbanTimeTS1,
+                                         String unbans, String senderName, String s) throws SQLException {
+    }
 
-    void incrementPunishLogCount(String punishLog, UUID targetUUID, String punishmentTypeWarns);
+    default void setPunishedByUsername(String targetName, String bans, int i) throws SQLException {
+    }
 
-    int getPunishLogCount(UUID uuid, String punishment);
+    default void incrementPunishLogCount(String punishLog, UUID targetUUID, String punishmentTypeWarns) {
+    }
 
-    PunishLog getActivePunishment(UUID uuid, String name, String bans) throws SQLException;
+    default int getPunishLogCount(UUID uuid, String punishment) {
+        return 0;
+    }
 
-    void setPunished(UUID uuid, String bans, int i) throws SQLException;
+    default PunishLog getActivePunishment(UUID uuid, String name, String bans) throws SQLException {
+        return null;
+    }
 
+    default void setPunished(UUID uuid, String bans, int i) throws SQLException {
+    }
 }
