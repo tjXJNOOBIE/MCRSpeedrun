@@ -11,24 +11,32 @@ public interface IGameMode {
      * Gets the current game mode
      * @return The current game mode enum
      */
-    GameModeEnum getCurrentGameMode();
+    default GameModeEnum getCurrentGameMode(){
+        return null;
+    }
     
     /**
      * Sets the game mode
      * @param gameMode The game mode to set
      */
-    void setGameMode(GameModeEnum gameMode);
+    default void setGameMode(GameModeEnum gameMode){
+
+    }
     
     /**
      * Checks if the current game mode matches the given mode
      * @param gameMode The game mode to check
      * @return true if current mode matches
      */
-    boolean isGameMode(GameModeEnum gameMode);
+    default boolean isGameMode(GameModeEnum gameMode){
+        return false;
+    }
     
     /**
      * Gets the game mode as a string
      * @return The game mode string representation
      */
-    String getGameModeString();
+    default String getGameModeString(){
+        return null;
+    }
 }
