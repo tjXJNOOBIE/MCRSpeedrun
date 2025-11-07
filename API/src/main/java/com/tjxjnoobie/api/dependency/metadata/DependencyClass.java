@@ -10,7 +10,6 @@
 package com.tjxjnoobie.api.dependency.metadata;
 
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
 import java.util.Date;
 import java.util.UUID;
@@ -29,7 +28,6 @@ public class DependencyClass<CLASS extends IDependencyClass<?>>
     //TODO: Add logging to all methods so we can see what methods are being called and their parameters
     // This can also be used to make it so we can make a registry of all classes and their methods, fields, extends, implmentations, etc.
     private CLASS dependencyClass;
-    private IDependencyMetaData<CLASS, ?> metadata;
     private final Class<?> interfaceClass;
     public UUID dependencyId;
     public Date creationTime;
