@@ -11,21 +11,39 @@ public interface IRatingCache {
 
 
 
-    void loadSpeedRunRatings(UUID uuid) throws SQLException;
+    default void loadSpeedRunRatings(UUID uuid) throws SQLException {
 
-    UUID getUuid();
+    }
 
-    void setUuid(UUID playerUUID);
+    default UUID getUuid() {
+        return null;
+    }
 
-    double getRating() throws SQLException;
+    default void setUuid(UUID playerUUID){
 
-    void setRating(double playerRating) throws SQLException;
+    }
 
-    double getVolatility();
+   default double getRating() throws SQLException {
+        return 0.0;
+    }
 
-    void setVolatility(double playerVolatility);
+    default void setRating(double playerRating) throws SQLException {
 
-    double getDeviation();
+    }
 
-    void setDeviation(double playerDeviation);
+    default double getVolatility() {
+        return 0.0;
+    }
+
+    default void setVolatility(double playerVolatility) {
+
+    }
+
+    default double getDeviation(){
+        return 0.0;
+    }
+
+   default void setDeviation(double playerDeviation){
+
+   }
 }
