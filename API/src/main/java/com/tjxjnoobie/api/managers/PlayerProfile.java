@@ -35,7 +35,7 @@ public class PlayerProfile implements IPlayerProfile {
         this.globalRank = globalRating;
     }
 
-    public UUID getUuid() {
+    public UUID getUUID() {
         return uuid;
     }
 
@@ -43,16 +43,10 @@ public class PlayerProfile implements IPlayerProfile {
         return name;
     }
 
-    public String getRank() {
-        return rank;
-    }
+
 
     public String getGrade() {
         return grade;
-    }
-
-    public int getPowerLevel() {
-        return powerLevel;
     }
 
     public double getCurrency() {
@@ -71,7 +65,7 @@ public class PlayerProfile implements IPlayerProfile {
 
 
 
-
+    @Override
     public boolean playerExistsByUUID(UUID uuid, String table, String redisKey) throws SQLException {
         String existKey = redisKey +":"+ uuid.toString();
         // Check Redis first
@@ -89,17 +83,17 @@ public class PlayerProfile implements IPlayerProfile {
         return existsInDatabase;
     }
 
-
+    @Override
     public boolean playerExistsFromUsername(String username, String table, String redisKey) throws SQLException {
         return playerExistsByUsername(username, table, redisKey,null);
     }
 
-
+    @Override
     public boolean playerExistsFromUsername(String username, String table, String redisKey, String punishment) throws SQLException {
         return playerExistsByUsername(username, table, redisKey, punishment);
     }
-
-    private boolean playerExistsByUsername(String username, String table, String redisKey, String punishment) throws SQLException {
+    @Override
+    public boolean playerExistsByUsername(String username, String table, String redisKey, String punishment) throws SQLException {
         String existKey = punishment == null ? (redisKey + ":" + username) : (redisKey + ":" + username + ":" + punishment);
         if (!jedis.hexists(existKey, username)) {
             System.out.println(username + " does not exist in Redis checking database");
@@ -113,13 +107,15 @@ public class PlayerProfile implements IPlayerProfile {
         }
 
     }
-
+    @Override
     public String getUUIDFromUsername(String table, String username, String redisKey) throws SQLException {
         return getUUIDFromName(table, username, redisKey);
     }
+    @Override
     public String getUUIDFromUsername(String table, String username, String redisKey, String punishment) throws SQLException {
         return getUUIDFromName(table, username, redisKey, punishment);
     }
+    @Override
     public String getUUIDFromName(String table, String username, String redisKey, String punishment) throws SQLException {
         String existKey = punishment == null ? (redisKey + ":" + username) : (redisKey + ":" + username + ":" + punishment);
         if(!jedis.exists(existKey)) {
@@ -135,7 +131,7 @@ public class PlayerProfile implements IPlayerProfile {
         }
         return "Can't get UUID for "+username;
     }
-
+    @Override
     public String getUUIDFromName(String table, String name, String redisKey) throws SQLException {
         System.out.println("Checking Redis for UUID via key: " + redisKey);
         String uuidFromRedis = jedis.hget(redisKey, "UUID");
@@ -154,6 +150,7 @@ public class PlayerProfile implements IPlayerProfile {
 
         return "Can't get UUID for " + name;
     }
+    @Override
     public void createProfile(UUID uuid, String name) throws SQLException {
 
         MySQL.executePreparedStatement("INSERT IGNORE INTO player_profile (UUID, NAME, RANK, POWERLEVEL, IP) VALUES (?, ?, ?, ?, ?)", uuid.toString(), name, "Member", "100", "Test");
