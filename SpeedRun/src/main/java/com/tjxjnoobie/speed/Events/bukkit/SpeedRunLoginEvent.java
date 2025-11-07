@@ -23,7 +23,7 @@ public class SpeedRunLoginEvent implements Listener {
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, "Server is starting up");
         } else if (currentState == GameStateEnum.ENDING) {
             IGameManager gameManager = speedRunContext.getGameManager();
-            Player winner = gameManager.getWinner();
+            Player winner = gameManager.getSpeedRunWinner();
             String winnerName = winner.getName();
             String winnerTime = gameManager.getFinalTimeString(winner.getUniqueId());
             e.disallow(PlayerLoginEvent.Result.KICK_OTHER, 
