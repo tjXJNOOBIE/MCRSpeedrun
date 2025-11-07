@@ -7,10 +7,16 @@ import org.bukkit.Location;
  */
 public interface ILocationCache {
 
-    Location getSpawn();
+    default Location getSpawn(){
+        return null;
+    }
 
-    void loadLocationCache();
+    default void loadLocationCache(){
 
-    void removeLocationCache(String worldName);
+    }
+
+    default void removeLocationCache(String worldName) {
+
+    }
 
 }
