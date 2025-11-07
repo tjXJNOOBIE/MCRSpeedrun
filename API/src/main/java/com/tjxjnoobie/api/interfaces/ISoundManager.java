@@ -8,11 +8,19 @@ import org.bukkit.entity.Player;
 public interface ISoundManager {
 
 
-    void playVictoryJingle(Player player);
+    default void playVictoryJingle(Player player){
 
-    void playEpicEnderDragonDeath(Player player);
+    }
 
-    void playCustomDragonDeath(Player player);
+    default void playEpicEnderDragonDeath(Player player){
 
-    void playVictoryWithDragonDeath(Player killer);
+    }
+
+    default void playCustomDragonDeath(Player player){
+
+    }
+
+    default void playVictoryWithDragonDeath(Player killer){
+
+    }
 }
