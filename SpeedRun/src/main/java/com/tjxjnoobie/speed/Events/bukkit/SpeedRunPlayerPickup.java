@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityPickupItemEvent;
 
 import java.util.UUID;
 
- public class SpeedRunPlayerPickup implements Listener, IMCUtils {
+ public class SpeedRunPlayerPickup implements Listener, IMCUtils, IGameManager {
 
     private final ISpeedRunContext speedRunContext;
 
@@ -24,45 +24,43 @@ import java.util.UUID;
 
     @EventHandler
     public void onPickup(EntityPickupItemEvent e) {
-        IGameManager gameManager = speedRunContext.getGameManager();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        IGameState gameState = speedRunContext.getGameState();
+
         Material item = e.getItem().getItemStack().getType();
         Entity entity = e.getEntity();
         Player player = (Player) entity;
         UUID uuid = entity.getUniqueId();
         String displayName = player.getDisplayName();
         String name = player.getName();
-        Player allPlayers = mcUtils.getAllMinecraftPlayers();
+        Player allPlayers = getAllMinecraftPlayers();
         Location allLocation = allPlayers.getLocation();
-        boolean HasBlazeRod = gameManager.hasBlazeRod(uuid);
-        boolean HasEye = gameManager.hasEnderEye(uuid);
-        boolean HasPearl = gameManager.hasEnderPearl(uuid);
-        int BlazeRodSize = gameManager.getBlazeRod().size();
-        int PearlSize = gameManager.getEnderPearl().size();
-        int EyeSize = gameManager.getEyeOfEnder().size();
-        GameStateEnum currentState = gameState.getCurrentState();
+        boolean HasBlazeRod = hasBlazeRod(uuid);
+        boolean HasEye = hasEnderEye(uuid);
+        boolean HasPearl = hasEnderPearl(uuid);
+        int BlazeRodSize = getBlazeRod().size();
+        int PearlSize = getEnderPearl().size();
+        int EyeSize = getEyeOfEnder().size();
+        GameStateEnum currentState = getCurrentState();
         if(currentState != GameStateEnum.LOBBY) {
             if (item == Material.BLAZE_ROD && !HasBlazeRod && BlazeRodSize == 0 && entity instanceof Player) {
                 Bukkit.broadcastMessage(getMinecraftPrefix() + displayName + " has been the first to acquire a §cBlaze Rod!§f");
-                gameManager.addBlazeRod(uuid, name);
-                mcUtils.playSoundForAll(allLocation, Sound.ENTITY_BLAZE_DEATH, 1.0f, 1.0f);
+                addBlazeRod(uuid, name);
+                playSoundForAll(allLocation, Sound.ENTITY_BLAZE_DEATH, 1.0f, 1.0f);
             } else if (HasBlazeRod) {
                 return;
             }
 
             if (item == Material.ENDER_EYE && !HasEye && EyeSize == 0 && entity instanceof Player) {
                 Bukkit.broadcastMessage(getMinecraftPrefix() + name + " has been the first to acquire a §cEye of Ender!§f");
-                gameManager.addEnderEye(uuid, name);
-                mcUtils.playSoundForAll(allLocation, Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
+                addEnderEye(uuid, name);
+                playSoundForAll(allLocation, Sound.ENTITY_ENDER_DRAGON_GROWL, 1.0f, 1.0f);
             } else if (HasEye) {
-                mcUtils.sendMessageToAll(getMinecraftPrefix()+displayName+" has acquired a Eye of Ender!");
+                sendMessageToAll(getMinecraftPrefix()+displayName+" has acquired a Eye of Ender!");
                 return;
             }
             if (item == Material.ENDER_PEARL && !HasPearl && PearlSize == 0 && entity instanceof Player) {
                 Bukkit.broadcastMessage(getMinecraftPrefix() + name + " has been the first to acquire a §cEnder Pearl!§f");
-                gameManager.addEnderEye(uuid, name);
-                mcUtils.playSoundForAll(allLocation, Sound.ENTITY_ENDERMAN_DEATH, 1.0f, 1.0f);
+                addEnderEye(uuid, name);
+                playSoundForAll(allLocation, Sound.ENTITY_ENDERMAN_DEATH, 1.0f, 1.0f);
             } else if (HasPearl) {
                 return;
             }
