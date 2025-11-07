@@ -31,8 +31,8 @@ public class SpawnEnderDragon implements CommandExecutor, IMCUtils, IRankCache {
             UUID uuid = player.getUniqueId();
             World world = player.getWorld();
             Location location = player.getLocation();
-            if(getPowerLevel(uuid) <= 10000 ||
-                hasPermission(uuid,"speedrun.spawndragon")) {
+            if(getCachedPowerLevel(uuid) <= 10000 ||
+                hasCachedPermission(uuid,"speedrun.spawndragon")) {
                 spawnStationaryEnderDragon(world, location);
                 player.sendMessage(getMinecraftStaffInGamePrefix() + " Ender dragon spawned");
                 player.getInventory().addItem(new ItemStack(Material.DIAMOND_SWORD,1));
