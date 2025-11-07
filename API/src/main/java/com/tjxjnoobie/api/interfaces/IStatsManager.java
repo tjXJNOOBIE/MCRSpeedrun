@@ -15,17 +15,27 @@ public interface IStatsManager {
      * @param statFor The statistic to retrieve (e.g., "WINS", "LOSSES", "PLAYED")
      * @return Player statistics object
      */
-    int getStat(String gameMode, UUID playerId, String statFor);
+    default int getStat(String gameMode, UUID playerId, String statFor){
+        return 0;
+    }
 
 
 
 
-    void setStat(String game,String stat, UUID uuid, Object wins) throws SQLException;
+    default void setStat(String game,String stat, UUID uuid, Object wins) throws SQLException{
 
-    void setBestSRTime(String bestTime, UUID uuid ) throws SQLException;
+    }
+
+    default void setBestSRTime(String bestTime, UUID uuid ) throws SQLException{
+
+    }
 
 
-    String getBestSRTime(UUID uuid) throws SQLException;
+    default String getBestSRTime(UUID uuid) throws SQLException{
+        return null;
+    }
 
-    String getGrade(String gameMode, UUID uuid);
+    default String getGrade(String gameMode, UUID uuid){
+        return null;
+    }
 }
