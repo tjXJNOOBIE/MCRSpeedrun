@@ -34,6 +34,10 @@ public interface IPlayerProfile {
         return false;
     }
 
+    default boolean playerExistsByUsername(String username, String table, String redisKey, String punishment) throws SQLException{
+        return false;
+    }
+
     default String getUUIDFromUsername(String punishTable, String targetName, String punishTable1) throws SQLException {
         return "";
     }
