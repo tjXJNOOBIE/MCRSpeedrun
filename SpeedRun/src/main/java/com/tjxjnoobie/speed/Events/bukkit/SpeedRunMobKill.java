@@ -63,7 +63,7 @@ public class SpeedRunMobKill implements Listener, IMCUtils {
         String finalTime = gameManager.getFinalTimeString(uuid);
         String currentTime = gameManager.getCurrentTime();
         long currentTimeLong = gameManager.getCurrentTimeLong();
-        Player allPlayers = getAllPlayers();
+        Player allPlayers = getAllMinecraftPlayers();
         Location allLocation = allPlayers.getLocation();
         GameModeEnum currentMode = gameMode.getCurrentGameMode();
 
@@ -97,7 +97,7 @@ public class SpeedRunMobKill implements Listener, IMCUtils {
             gameManager.addFinished();
             gameManager.addFinishedPlayer(uuid);
             gameManager.setWinner(killer);
-            gameManager.getWinner().sendMessage(getMinecraftPrefix() + "§a§lCongratulations! §cYou have won!");
+            gameManager.getSpeedRunWinner().sendMessage(getMinecraftPrefix() + "§a§lCongratulations! §cYou have won!");
             sendEnderDragonBossBarMessage(allPlayers, 20 * 7);
 
         } else if (killedEnderDragon) {
