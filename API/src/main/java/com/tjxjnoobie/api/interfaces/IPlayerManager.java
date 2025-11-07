@@ -15,7 +15,9 @@ public interface IPlayerManager {
      * @param name The player's name
      * @param player The player object
      */
-    void makeSpectator(UUID uuid, String name, Player player);
+    default void makeSpectator(UUID uuid, String name, Player player) {
+
+    }
     
     /**
      * Eliminates a player from the game
@@ -23,7 +25,9 @@ public interface IPlayerManager {
      * @param name The player's name
      * @param player The player object
      */
-    void eliminatePlayer(UUID uuid, String name, Player player);
+    default void eliminatePlayer(UUID uuid, String name, Player player){
+
+    }
     
 
 }
