@@ -1,10 +1,9 @@
 package com.tjxjnoobie.speed;
 
 import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
-import com.tjxjnoobie.api.dependency.injection.helpers.ContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IContextInjectionHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -43,7 +42,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 @Injectable("Main class for Minecraft Speedrun Module")
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, MainInterFace {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, MainInterFace, IDependencyMap {
 
     private IContext<IGlobalContext> iGlobalContext;
     private IContext<ISpeedRunContext> iSpeedContext;
@@ -89,31 +88,25 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
      @Inject private IPunishLog punishLog;
      @Inject private FireEvent fireEvent;
      @Inject private ILocalServerMetaData localServerMetaData;
-     private Plugin plugin;
+     public static Plugin plugin;
      private static Main instance;
      private static final String CHANNEL = "factions:sync";
 
     @Override
     public void onEnable() {
         plugin = this;
-        IContextInjectionHelper injectionHelper = new ContextInjectionHelper();
+        IDependencyInjectorHelper<?,?> injectionHelper = new DependencyInjectorHelper<>();
 
         //TODO: Delegate this temp fix to a helper method
         //TODO: Use injection helper classes thru implementations instead of instancing
-        IDependencyInjectorHelper dependencyInjectorHelper = new DependencyInjectorHelper();
         // ===== PHASE 0: AutoBind Main class FIRST (before anything else) =====
-        Log.info("[Main] ===== Phase 0: Pre-AutoBind Main Class =====");
         // This ensures Main's fields are scanned and registered before contexts are created
         // We create a temporary helper just to run autoBind on Main
         try {
-            // AutoBind Main class to scan its fields and prepare for injection
-            // dependencyInjectorHelper.autoBind(this);
-            Log.info("[Main] Main class autoBind complete");
-        } catch (Exception e) {
-            Log.error("[Main] Failed to autoBind Main class: " + e.getMessage());
-            throw new RuntimeException(e);
+            injectionHelper.setupDISystem(this);
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+            Log.exception(e);
         }
-        
         // ===== PHASE 1: Pre-DI Setup (No dependencies needed) =====
         Log.info("[Main] ===== Phase 1: Pre-DI Setup =====");
         Config.createConfig();
@@ -127,16 +120,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         iSpeedContext = new SpeedRunContext();
         
         // Register Plugin in both contexts so it's available everywhere
-        iSpeedContext.getContext().setPlugin(this);
 
-        try {
-            //TODO: Use injection helper classes thru implementations instead of instancing
-
-            // Use the concrete ContextInjectionHelper implementation
-            injectionHelper.injectAllContextsGlobally(this);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
-            throw new RuntimeException(e);
-        }
 
         //TODO: Update logging to use entire context register size instead of one context
         Log.info("[Main] Registered contexts: " + iGlobalContext.getAllContexts().size());
@@ -146,19 +130,19 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Log.info("[Main] ===== Phase 3: Post-DI Setup =====");
         
         // Interface Manager setup
-        InterfaceManager.setMainInterFace(this);
-        mainInterFace = InterfaceManager.getMainInterFace();
-
-        try {
-            InterfaceManager.setBlockPlaceHandler();
-            InterfaceManager.setGlobalHandler("com.tjxjnoobie.kingdomFactions.Events.BlockPlace", "BlockPlaceHandler");
-            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.ChatEvent","ChatHandler");
-            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreJoin","CoreJoinHandler");
-            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreQuit","CoreQuitHandler");
-        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
-            Log.exception(e);
-        }
+//        InterfaceManager.setMainInterFace(this);
+//        mainInterFace = InterfaceManager.getMainInterFace();
+//
+//        try {
+//            InterfaceManager.setBlockPlaceHandler();
+//            InterfaceManager.setGlobalHandler("com.tjxjnoobie.kingdomFactions.Events.BlockPlace", "BlockPlaceHandler");
+//            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.ChatEvent","ChatHandler");
+//            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreJoin","CoreJoinHandler");
+//            InterfaceManager.setGlobalHandler("com.tjxjnoobie.core.Events.CoreQuit","CoreQuitHandler");
+//        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | InstantiationException |
+//                 IllegalAccessException e) {
+//            Log.exception(e);
+//        }
         
         // Game setup (uses injected dependencies)
         Log.info("[Main] Setting up game systems...");
@@ -205,7 +189,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         registerCommand("changeworld", new ChangeWorldCMD());
         registerCommand("world", new LoadWorld());
         registerCommand("loadseed", new Seed());
-        registerCommand("setspawn", new SetSpawns(speedRunContext));
+        registerCommand("setspawn", new SetSpawns());
         registerCommand("spawndragon", new SpawnEnderDragon());
         registerCommand("debugger", new DebuggerCMD());
         registerCommand("vote", new Vote());
@@ -261,23 +245,23 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunWeatherChange(), this);
         Bukkit.getPluginManager().registerEvents(new ChatListener(), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryDrag(speedRunContext),this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryDrag(),this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryInteract(), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunDropEvent(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryMove(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunDropEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryMove(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunInventoryClick(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunLoginEvent(), this);
         Bukkit.getPluginManager().registerEvents(new CoreJoinListener(), this);
         Bukkit.getPluginManager().registerEvents(new CoreQuitListener(), this);
         Bukkit.getPluginManager().registerEvents(new BlockPlaceListener(blockPlaceHandler), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunJoinEvent(), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunDeathEvent(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunQuitEvent(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunDeathEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunQuitEvent(), this);
         Bukkit.getPluginManager().registerEvents(new SpeedRunMobKill(), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunHungerLevelChange(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunPlayerPickup(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunDamageEvent(speedRunContext), this);
-        Bukkit.getPluginManager().registerEvents(new SpeedRunChangeWorld(speedRunContext), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunHungerLevelChange(), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunPlayerPickup(), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunDamageEvent(), this);
+        Bukkit.getPluginManager().registerEvents(new SpeedRunChangeWorld(), this);
         Bukkit.getPluginManager().registerEvents(new FairFight(), this);
 
     }
