@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public class DebuggerCMD implements CommandExecutor, IMCUtils, IDebugger {
+public class DebuggerCMD implements CommandExecutor, IMCUtils, IDebugger, IRankCache {
 
 
 
@@ -26,10 +26,9 @@ public class DebuggerCMD implements CommandExecutor, IMCUtils, IDebugger {
         Player player = (Player) sender;
         UUID uuid = player.getUniqueId();
         String name = player.getName();
-        IRankCache rankCache = globalContext.getRankCache();
         boolean isDebugger = isDebugger(uuid);
         int length = args.length;
-        if(rankCache.getPowerLevel(uuid) <= 10000 || rankCache.hasPermission(uuid,"server.debugger")) {
+        if(getPowerLevel(uuid) <= 10000 || hasPermission(uuid,"server.debugger")) {
             if (length == 0 && !isDebugger) {
                 setDebugger(uuid, true);
                 player.sendMessage(getMinecraftStaffInGamePrefix() + "You are now a server debugger");
