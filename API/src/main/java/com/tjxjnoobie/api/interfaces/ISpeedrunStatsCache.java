@@ -14,15 +14,25 @@ public interface ISpeedrunStatsCache {
      * @param playerId The player UUID
      * @return Best time in milliseconds
      */
-    String getBestTime(UUID playerId);
+    default String getBestTime(UUID playerId){
+        return null;
+    }
     
 
 
-    void addBestTime(UUID uuid, String finalTime);
+    default void addBestTime(UUID uuid, String finalTime){
 
-    void createStorage(UUID uuid) throws SQLException;
+    }
 
-    void setBestTimeLong(UUID uuid, long playerFinalTime);
+    default void createStorage(UUID uuid) throws SQLException{
 
-    long getBestTimeLong(UUID uuid);
+    }
+
+    default void setBestTimeLong(UUID uuid, long playerFinalTime){
+
+    }
+
+    default long getBestTimeLong(UUID uuid){
+        return 0;
+    }
 }
