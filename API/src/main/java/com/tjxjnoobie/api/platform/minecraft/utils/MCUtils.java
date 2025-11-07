@@ -46,7 +46,7 @@ public class MCUtils implements IMCUtils, IDebugger, IRankCache {
     }
 
     @Override
-    public Player getAllPlayers() {
+    public Player getAllMinecraftPlayers() {
         for (Player ap : Bukkit.getOnlinePlayers()) {
             if (ap != null) {
                 return ap;
