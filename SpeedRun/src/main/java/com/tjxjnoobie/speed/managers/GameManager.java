@@ -22,8 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager, IMCUtils {
-
+public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager, 
+        IMCUtils, IGameState, IGameType, IGameMode, IBossBarManager, IVoting {
+    //TODO: Better abstract and compose implmentations
+    //TODO: Condense maps to use AbstractRegistry
     public HashMap<Long, Location> spawn = new HashMap<>();
     public HashMap<UUID, String> ingame = new HashMap<>();
     public HashMap<UUID, String> allPlayers = new HashMap<>();
@@ -190,7 +192,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
 
 
-    public Player getWinner() {
+    public Player getSpeedRunWinner() {
         return winner.getFirst();
     }
 
@@ -384,16 +386,14 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
 
     public void runCheckers() {
-        IGameState gameState = speedRunContext.getGameState();
-        IGameMode gameMode = speedRunContext.getGameMode();
 
         checkers = new BukkitRunnable() {
 
             public void run() {
-                GameStateEnum currentState = gameState.getCurrentState();
+                GameStateEnum currentState =   getCurrentState();
                 int ingameSize = ingame.size();
                 int soloMessage = 29;
-                GameModeEnum currentGM = gameMode.getCurrentGameMode();
+                GameModeEnum currentGM = getCurrentGameMode();
                 Player player = getAllPlayers();
                 if (player == null) {
                     return;
@@ -427,7 +427,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
                 } else if (currentState == GameStateEnum.PREGAME) {
                     if (ingame.isEmpty() && currentGM != GameModeEnum.SOLO) {
-                        Bukkit.getLogger().info("All players left the server in pre lobby Gamestate: " + gameState + " ingame: " + ingameSize + " gamemode: " + gameMode);
+//                        Bukkit.getLogger().info("All players left the server in pre lobby Gamestate: " + get + " ingame: " + ingameSize + " gamemode: " + gameMode);
                         //restart game or whatever
                     }
                 } else if (currentState == GameStateEnum.INGAME) {
@@ -440,8 +440,6 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
     public void startLobby() {
         {
-            IGameState gameState = speedRunContext.getGameState();
-
 
             new BukkitRunnable() {
 
@@ -450,7 +448,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
                     int ingame = getPlaying().size();
                     int startPlayers = minPlayers - getPlaying().size();
-                    GameStateEnum currentState = gameState.getCurrentState();
+                    GameStateEnum currentState =   getCurrentState();
                     if (!(currentState == GameStateEnum.LOBBY)) {
                         cancel();
                     }
@@ -483,11 +481,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
 
     public void startPreGame() throws SQLException {
-        IGameState gameState = speedRunContext.getGameState();
 
-
-        ISpeedRunJoinEvent joinEvent = speedRunContext.getJoinEvent();
-        IBossBarManager bossBarManager = speedRunContext.getBossBarManager();
         new BukkitRunnable() {
 
             public void run() {
@@ -497,7 +491,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
         Player aplayers = getAllPlayers();
         String serverID = getLocalServerID();
-        gameState.setGameState(GameStateEnum.PREGAME, serverID);
+          setGameState(GameStateEnum.PREGAME, serverID);
         createWorlds(World.Environment.NORMAL);
         new BukkitRunnable() {
 
@@ -514,13 +508,13 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     allPlayers.sendTitle("§aMATCH STARTED!!!", "", 10, 40, 10);
 
                     try {
-                        for (String bossBar : bossBarManager.getActiveBossBars()) {
+                        for (String bossBar : getActiveBossBars()) {
                             if (bossBar.contains(" ")) {
-                                bossBarManager.cleanup();
+                                cleanup();
                             }
                         }
-                        bossBarManager.removePlayer(allPlayers);
-                        gameState.setGameState(GameStateEnum.INGAME, serverID);
+                        removePlayer(allPlayers);
+                          setGameState(GameStateEnum.INGAME, serverID);
                         startGame();
                     } catch (SQLException e) {
                         throw new RuntimeException(e);
@@ -548,7 +542,6 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
 
     public void startLobbyCountdown() {
-        IVoting voting = speedRunContext.getVoting();
 
 
         lobbyTimer = new BukkitRunnable() {
@@ -572,7 +565,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 }
 
                 if (lobbyCountdown == 0) {
-                    voting.calculateAndAnnounceWinner();
+                    calculateAndAnnounceWinner();
                     cancel();
                     Bukkit.broadcastMessage(getMinecraftPrefix() + "§cMatch is starting!");
                     canMove = false;
@@ -595,16 +588,14 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
 
     public void startGame() throws SQLException {
-        IGameState gameState = speedRunContext.getGameState();
-        IGameMode gameMode = speedRunContext.getGameMode();
-
+ 
 
         startTime = System.currentTimeMillis();
         runHotBarTimer();
         runGame();
         int players = ingame.size();
         String serverID = getLocalServerID();
-        GameModeEnum CurrentGM = gameMode.getCurrentGameMode();
+        GameModeEnum CurrentGM = getCurrentGameMode();
         Player allPlayers = getAllPlayers();
         playDramaticBoom(allPlayers);
         if (players == 0 && CurrentGM == GameModeEnum.SOLO) {
@@ -620,16 +611,12 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
 
     public void stopGame() throws SQLException {
-        IGameState gameState = speedRunContext.getGameState();
-
-
-        IWorldManager worldManager = speedRunContext.getWorldManager();
 
         String serverID = getLocalServerID();
         Player aplayers = getAllPlayers();
         World world = Bukkit.getWorld("lobby");
         Location spawn = world.getSpawnLocation();
-        gameState.setGameState(GameStateEnum.ENDING, serverID);
+          setGameState(GameStateEnum.ENDING, serverID);
         System.out.println("Starting cleanup...");
         hotBarTimer.cancel();
         // Teleport to spawn/peds
@@ -646,9 +633,9 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 for (UUID ingame_uuid : ingame.keySet()) {
 
                     System.out.print("Deleting worlds from play " + ingame_uuid.toString());
-                    worldManager.deleteWorld(ingame_uuid.toString() + "_NORMAL");
-                    worldManager.deleteWorld(ingame_uuid.toString() + "_NETHER");
-                    worldManager.deleteWorld(ingame_uuid.toString() + "_ENDER");
+                    deleteWorld(ingame_uuid.toString() + "_NORMAL");
+                    deleteWorld(ingame_uuid.toString() + "_NETHER");
+                    deleteWorld(ingame_uuid.toString() + "_ENDER");
 
                 }
             }
@@ -682,14 +669,13 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     }
 
     public void createWorlds(World.Environment environment) {
-        IWorldManager worldManager = speedRunContext.getWorldManager();
 
         Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + " §cLoading Worlds...");
         for (UUID ingame_uuid : ingame.keySet()) {
             Player player = Bukkit.getPlayer(ingame_uuid);
             System.out.print("Creating world " + ingame_uuid.toString());
-            worldManager.createWorld(ingame_uuid.toString() + "_" + environment.name(), environment);
-            worldManager.createWorld(ingame_uuid.toString() + "_" + environment.name(), World.Environment.NETHER);
+            createWorld(ingame_uuid.toString() + "_" + environment.name(), environment);
+            createWorld(ingame_uuid.toString() + "_" + environment.name(), World.Environment.NETHER);
         }
     }
 
@@ -698,9 +684,9 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         Bukkit.broadcastMessage(getMinecraftPrefix() + " §cLoading Worlds...");
 
         for (UUID ingame_uuid : ingame.keySet()) {
-            IWorldManager worldManager = speedRunContext.getWorldManager();
+
             System.out.print("Creating world " + ingame_uuid.toString());
-            worldManager.createWorldFromSeed(ingame_uuid.toString() + "_" + environment.name(), environment, seed);
+            createWorldFromSeed(ingame_uuid.toString() + "_" + environment.name(), environment, seed);
         }
     }
 
