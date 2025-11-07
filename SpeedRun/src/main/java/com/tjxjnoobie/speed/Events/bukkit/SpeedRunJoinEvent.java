@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitTask;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunJoinEvent implements Listener, IBossBarManager {
+public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, ILocationCache, IGameState, IGameManager, IRatingCache {
 
     @Inject private ISpeedRunContext speedRunContext;
 
@@ -40,55 +40,45 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) throws SQLException {
-        IUtils utils = speedRunContext.getUtils();
-        GameTypeEnum currentType = speedRunContext.getGameType().getGameType();
+        GameTypeEnum currentType = getGameType();
 
         if (currentType != GameTypeEnum.SPEED_RUN) {
             Bukkit.getLogger().info("Speedrun join event: GameType is not SPEEDRUN!");
             return;
         }
 
-        IRatingCache ratingCache = speedRunContext.getRatingCache();
-        IGameState gameState = speedRunContext.getGameState();
-        IGameManager gameManager = speedRunContext.getGameManager();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        ILocationCache locationCache = speedRunContext.getLocationCache();
-        IRatingAPI ratingAPI = speedRunContext.getRatingAPI();
-        ISpeedrunStatsCache statsCache = speedRunContext.getStatsCache();
-        IPlayerManager playerManager = speedRunContext.getPlayerManager();
-        Plugin plugin = speedRunContext.getPlugin();
-        IInventoryManager inventoryManager = speedRunContext.getInventoryManager();
-        GameStateEnum currentGameState = gameState.getCurrentState();
+;
+        GameStateEnum currentGameState = getCurrentState();
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         String name = player.getName();
         String displayName = player.getDisplayName();
         int inGamePlayers = Bukkit.getOnlinePlayers().size();
-        int minPlayers = gameManager.getMinPlayers();
-        int maxPlayers = gameManager.getMaxPlayers();
-        int startPlayers = minPlayers - gameManager.getPlaying().size();
-        int playerCount = gameManager.getPlayersRemaining();
+        int minPlayers = getMinPlayers();
+        int maxPlayers = getMaxPlayers();
+        int startPlayers = minPlayers - getPlaying().size();
+        int playerCount = getPlayersRemaining();
         double progress = Math.min((double) inGamePlayers / minPlayers, 1.0);
-        Location quitLocation = gameManager.getQuitLocation(uuid);
+        Location quitLocation = getQuitLocation(uuid);
         Location spawn = locationCache.getSpawn();
-        boolean isQuitPlayer = gameManager.getQuitPlayers().containsKey(uuid);
+        boolean isQuitPlayer = getQuitPlayers().containsKey(uuid);
 
         ratingCache = new RatingCache(ratingAPI, uuid, 0.0, 0.0, 0.0);
-        ratingCache.loadSpeedRunRatings(uuid);
-        Bukkit.getLogger().info(name + " Logged in with Rating: " + ratingCache.getRating() + " Deviation: " + ratingCache.getDeviation() + " Vol: " + ratingCache.getVolatility());
+        loadSpeedRunRatings(uuid);
+        Bukkit.getLogger().info(name + " Logged in with Rating: " + getRating() + " Deviation: " + getDeviation() + " Vol: " + getVolatility());
 
         mcUtils.cancelBukkitTask(bossBar);
         addPlayer(player); // Add player to the boss bar
 
         if (isQuitPlayer && currentGameState != GameStateEnum.LOBBY && currentGameState != GameStateEnum.ENDING) {
             e.setJoinMessage(displayName + ChatColor.DARK_GRAY + " rejoined");
-            gameManager.getQuitPlayers().remove(uuid);
-            gameManager.getPlaying().put(uuid, name);
+            getQuitPlayers().remove(uuid);
+            getPlaying().put(uuid, name);
             player.teleport(quitLocation);
         } else if (currentGameState == GameStateEnum.LOBBY) {
             player.teleport(spawn);
-            gameManager.addPlayer(uuid, name);
-            gameManager.addInGame(uuid, name);
+            addPlayer(uuid, name);
+            addInGame(uuid, name);
             statsCache.createStorage(uuid);
             player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1.0f, 1.0f);
             player.getInventory().clear();
@@ -101,8 +91,8 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager {
             setLobbyInventory(player);
             e.setJoinMessage(displayName + ChatColor.DARK_GRAY + " joined  §7(§c" + playerCount + "§7/§c" + maxPlayers + "§7)");
         } else if (currentGameState == GameStateEnum.INGAME) {
-            gameManager.addPlayer(uuid, name);
-            gameManager.addWatching(uuid, name);
+            addPlayer(uuid, name);
+            addWatching(uuid, name);
             playerManager.makeSpectator(uuid, name, player);
         }
 
@@ -125,7 +115,6 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager {
      * @param plugin The plugin instance used to schedule the task.
      */
     private void startBossBarTask(Player player, GameStateEnum currentGameState, Plugin plugin) {
-        IGameManager gameManager = speedRunContext.getGameManager();
         bossBar = new BukkitRunnable() {
             private enum DisplayState {
                 WAITING,
@@ -180,8 +169,8 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager {
             }
 
             private void updatePlayersNeededState() {
-                int minPlayers = gameManager.getMinPlayers();
-                int currentPlayers = gameManager.getCurrentPlayers();
+                int minPlayers = getMinPlayers();
+                int currentPlayers = getCurrentPlayers();
                 int playersNeeded = minPlayers - currentPlayers;
                 double progress = Math.min((double) currentPlayers / minPlayers, 1.0);
 
