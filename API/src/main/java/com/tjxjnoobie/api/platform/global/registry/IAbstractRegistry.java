@@ -32,6 +32,10 @@ public interface IAbstractRegistry<REG_TYPE extends RegistryType<REG_TYPE,REG_DA
         return null;
     }
 
+    default RegistryType<REG_TYPE, REG_DATA> getRegistryTypeByData(REG_DATA registryData){
+        return null;
+    }
+
     default REG_DATA getRegistryData(REG_TYPE registryType){
         return null;
     }

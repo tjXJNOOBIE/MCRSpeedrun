@@ -10,10 +10,12 @@
 package com.tjxjnoobie.api.platform.global.registry;
 
 import com.tjxjnoobie.api.platform.global.console.Log;
+import com.tjxjnoobie.api.platform.global.console.style.LogColor;
 import com.tjxjnoobie.api.platform.global.registry.enums.RegistryType;
-import org.jetbrains.annotations.NotNull;
+import com.tjxjnoobie.api.platform.global.registry.metadata.interfaces.IRegistryData;
 
-import java.util.Map;
+import java.lang.reflect.Array;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,118 +29,105 @@ public abstract class AbstractRegistry<REG_TYPE extends RegistryType<REG_TYPE,RE
         extends ConcurrentHashMap<REG_TYPE, REG_DATA> implements IAbstractRegistry<REG_TYPE, REG_DATA> {
 
 
+    //========= Main Registry Registration Methods =========\\
+
+    @Override
+    public IAbstractRegistry<REG_TYPE, REG_DATA> createRegistry(REG_TYPE registryType, REG_DATA registryData) {
+        computeIfAbsent(registryType, (k) -> {
+            Log.success("[Registry] Registering Registry Type:"
+                    +registryType.getClass().getSimpleName() +
+                    " Bound RegistryData to -> " + registryType);
+            return registryData;
+        });
+
+        return this;
+    }
+
+    //========= Registry Getter Methods | Multi-View =========\\
 
 
     @Override
-    public IAbstractRegistry<T> createRegistry(RegistryType type) {
-        registries.putIfAbsent(type, new ConcurrentHashMap<>());
+    public IAbstractRegistry<REG_TYPE,REG_DATA> getAbstractRegistry() {
         return this;
     }
-
+    //TODO: Check method function, we should be retruning the type, which is a key not a value
     @Override
-    public IAbstractRegistry<T> createRegistry(RegistryType... types) {
-        for (RegistryType type : types) {
-            createRegistry(type);
-        }
-        return this;
-    }
-
-    @Override
-    public IAbstractRegistry<T> createRegistry(Map<RegistryType, Map<IRegistryInstance<T>, IRegistrySettings<T>>> prefill) {
-        for (@NotNull Map.Entry<RegistryType, Map<IRegistryInstance<T>, IRegistrySettings<T>>> entry : prefill.entrySet()) {
-            registries.putIfAbsent(entry.getKey(), new ConcurrentHashMap<>());
-            registries.get(entry.getKey()).putAll(entry.getValue());
-        }
-        return this;
-    }
-    @Override
-    public IAbstractRegistry<T> registerInstance(RegistryType type, IRegistryInstance<T> instance) {
-        registries.computeIfAbsent(type, t -> new ConcurrentHashMap<>())
-                .putIfAbsent(instance, null);
-        return this;
-    }
-    @Override
-    public IAbstractRegistry<T> registerInstance(RegistryType type, IRegistryInstance<T> instance, IRegistrySettings<T> settings) {
-        registries.computeIfAbsent(type, t -> new ConcurrentHashMap<>())
-                .put(instance, settings);
-        return this;
-    }
-
-    public IAbstractRegistry<T> registerInstances(RegistryType type, Map<IRegistryInstance<T>, IRegistrySettings<T>> instances) {
-        registries.computeIfAbsent(type, t -> new ConcurrentHashMap<>())
-                .putAll(instances);
-        return this;
-    }
-
-    // Create registries from a Map<RegistryType, Map<Instance, Settings>> prefill
-    public  void createRegistryWithSettings(Map<RegistryType, Map<IRegistryInstance<T>, IRegistrySettings<T>>> registry) {
-        for (Map.Entry<RegistryType, Map<IRegistryInstance<T>, IRegistrySettings<T>>> entry : registry.entrySet()) {
-            registries.putIfAbsent(entry.getKey(), new ConcurrentHashMap<>());
-            registries.get(entry.getKey()).putAll(entry.getValue());
-        }
-    }
-    public Map<IRegistryInstance<T>, IRegistrySettings<T>> getRegistries(RegistryType type) {
-        return registries.getOrDefault(type, new ConcurrentHashMap<>());
-    }
-    public IRegistryInstance<T> getRegistry(RegistryType type) {
-        Map<IRegistryInstance<T>, IRegistrySettings<T>> map = registries.get(type);
-        if (map == null || map.isEmpty()) return null;
-        return map.keySet().iterator().next();
-    }
-    // Get settings from instance
-    @SuppressWarnings("unchecked")
-    public IRegistrySettings<T> getSettings(RegistryType type, IRegistryInstance<T> instance) {
-        Map<IRegistryInstance<T>, IRegistrySettings<T>> registry = registries.get(type);
-        if (registry == null) {
-            Log.critical("Registry not found for type: " + type);
+    public RegistryType<REG_TYPE,REG_DATA> getRegistryTypeByData(REG_DATA registryData) {
+        if (registryData == null ) {
+            Log.error("[AbstractRegistry] Registry type not found: " + registryData);
             return null;
         }
-        return (IRegistrySettings<T>) registry.get(instance);
+        Log.success("[AbstractRegistry] Found -> " + LogColor.BLUE + registryData.getClass().getSimpleName());
+        return keySet().stream().filter(k -> k.equals(registryData)).findFirst().orElse(null);
     }
 
-    // Get instance from settings
+    @Override
+    public REG_DATA getRegistryData(REG_TYPE registryType){
+        return get(registryType);
+    }
+    @Override
+    public Set<REG_TYPE> getRegistryTypesAsSet() {
+        return new HashSet<>(keySet());
+    }
+    @Override
+    public List<REG_TYPE> getRegistryTypesAsList() {
+        return new ArrayList<>(keySet());
+    }
+    @Override
+    public Collection<REG_TYPE> getRegistryTypesAsCollection() {
+        return keySet();
+    }
     @SuppressWarnings("unchecked")
-    public IRegistryInstance<T> getInstance(RegistryType type, IRegistrySettings<T> settings) {
-        Map<IRegistryInstance<T>, IRegistrySettings<T>> registry = registries.get(type);
-        if (registry == null){
-            Log.critical("Registry not found for type: " + type);
-            return null;
-    }
-        return (IRegistryInstance<T>) registry.entrySet().stream()
-                .filter(e -> e.getValue().equals(settings))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse(null);
-
-    }
     @Override
-    public IRegistryInstance<T> getInstanceBySettings(IRegistrySettings<T> settings, RegistryType type) {
-        Map<IRegistryInstance<T>, IRegistrySettings<T>> map = registries.get(type);
-        if (map == null) return null;
-
-        return map.entrySet().stream()
-                .filter(e -> e.getValue().equals(settings))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse(null);
-    }
-    @Override
-    public Map<IRegistryInstance<T>, IRegistrySettings<T>> getRegistryByType(RegistryType type) {
-        return registries.getOrDefault(type, new ConcurrentHashMap<>());
+    public REG_TYPE[] getRegistryTypesAsArray() {
+        REG_TYPE[] registryTypeArray  = (REG_TYPE[]) Array.newInstance(
+                getRegistryType().getClass(), keySet().size()
+        );
+        return keySet().toArray(registryTypeArray);
     }
 
     @Override
-    public Map<RegistryType, ConcurrentHashMap<IRegistryInstance<T>, IRegistrySettings<T>>> getRegistries() {
-        return registries;
+    public Set<REG_DATA> getRegistryDataBySet() {
+        return new HashSet<>(values());
     }
     @Override
-    public boolean hasRegistry(RegistryType type) {
-        return registries.containsKey(type);
+    public List<REG_DATA> getRegistryDatasByList() {
+        return new ArrayList<>(values());
     }
     @Override
-    public boolean hasInstance(RegistryType type, IRegistryInstance<T> instance) {
-        return registries.containsKey(type) && registries.get(type).containsKey(instance);
+    public Collection<REG_DATA> getRegistryDataByCollection() {
+        return values();
     }
+    @SuppressWarnings("unchecked")
+    @Override
+    public REG_DATA[] getRegistryDataByArray() {
+        return values().toArray((REG_DATA[]) new IRegistryData<?>[keySet().size()]);
+    }
+
+
+    //========= Registry Checker/Boolean Methods =========\\
+
+
+    @Override
+    public boolean hasRegistryType(REG_TYPE registryType) {
+        if(registryType == null){
+            Log.error("[AbstractRegistry] Registry type is null: " + registryType);
+            return false;
+        }
+        Log.success("[AbstractRegistry] Found Registry Type -> " + LogColor.BLUE + registryType.getClass().getSimpleName());
+        return containsKey(registryType);
+    }
+    @Override
+    public boolean hasRegistryData(REG_DATA registryData) {
+        if(registryData == null){
+            Log.error("[AbstractRegistry] Registry data is null: " + registryData);
+            return false;
+        }
+        Log.success("[AbstractRegistry] Found Registry Data -> " + LogColor.BLUE + registryData.getClass().getSimpleName());
+        return containsValue(registryData);
+    }
+
+
 
 
 }
