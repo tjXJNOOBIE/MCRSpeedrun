@@ -12,91 +12,91 @@ import java.util.UUID;
  * Interface for game management operations
  */
 public interface IGameManager {
-    
+
     // Player management
-    void addPlayer(UUID uuid, String name);
-    void addInGame(UUID uuid, String name);
-    void addWatching(UUID uuid, String name);
-    void addInNether(UUID uuid, String name);
-    void addInEnder(UUID uuid, String name);
-    void addBlazeRod(UUID uuid, String name);
-    void addEnderEye(UUID uuid, String name);
-    void addEnderPearl(UUID uuid, String name);
-    void addFinishedPlayer(UUID uuid);
-    void addFinished();
-    void setWinner(Player player);
-    void setFinalTime(UUID uuid);
-    
+    default void addPlayer(UUID uuid, String name) { }
+    default void addInGame(UUID uuid, String name) { }
+    default void addWatching(UUID uuid, String name) { }
+    default void addInNether(UUID uuid, String name) { }
+    default void addInEnder(UUID uuid, String name) { }
+    default void addBlazeRod(UUID uuid, String name) { }
+    default void addEnderEye(UUID uuid, String name) { }
+    default void addEnderPearl(UUID uuid, String name) { }
+    default void addFinishedPlayer(UUID uuid) { }
+    default void addFinished() { }
+    default void setWinner(Player player) { }
+    default void setFinalTime(UUID uuid) { }
+
     // Game state queries
-    int getCurrentPlayers();
-    int getMinPlayers();
-    int getMaxPlayers();
-    int getPlayersRemaining();
-    int getSpectatorsInt();
-    int getPlayersInNetherInt();
-    int getPlayersInEndInt();
-    int getAllPlayersInt();
-    int getPregameTime();
-    int getLobbyCountDown();
-    int getPlayerNeeded();
-    int getFinished();
-    
+    default int getCurrentPlayers() { return 0; }
+    default int getMinPlayers() { return 0; }
+    default int getMaxPlayers() { return 0; }
+    default int getPlayersRemaining() { return 0; }
+    default int getSpectatorsInt() { return 0; }
+    default int getPlayersInNetherInt() { return 0; }
+    default int getPlayersInEndInt() { return 0; }
+    default int getAllPlayersInt() { return 0; }
+    default int getPregameTime() { return 0; }
+    default int getLobbyCountDown() { return 0; }
+    default int getPlayerNeeded() { return 0; }
+    default int getFinished() { return 0; }
+
     // Player state checks
-    boolean isSpectator(UUID uuid);
-    boolean hasBlazeRod(UUID uuid);
-    boolean hasEnderEye(UUID uuid);
-    boolean hasEnderPearl(UUID uuid);
-    boolean hasKilledBlaze(UUID uuid);
-    boolean canSolo();
-    boolean canMove();
-    
+    default boolean isSpectator(UUID uuid) { return false; }
+    default boolean hasBlazeRod(UUID uuid) { return false; }
+    default boolean hasEnderEye(UUID uuid) { return false; }
+    default boolean hasEnderPearl(UUID uuid) { return false; }
+    default boolean hasKilledBlaze(UUID uuid) { return false; }
+    default boolean canSolo() { return false; }
+    default boolean canMove() { return false; }
+
     // Game data access
-    HashMap<UUID, String> getPlaying();
-    HashMap<UUID, String> getWatching();
-    HashMap<UUID, String> getAllPlayersHash();
-    HashMap<UUID, String> getBlazeRod();
-    HashMap<UUID, String> getEnderPearl();
-    HashMap<UUID, String> getEyeOfEnder();
-    HashMap<UUID, String> getKilledBlaze();
-    HashMap<UUID, String> getEnderDragon();
-    HashMap<UUID, String> getInNetherHash();
-    HashMap<UUID, String> getFinishedPlayers();
-    HashMap<UUID, String> getInEnd();
-    HashMap<UUID, String> getQuitPlayers();
-    HashMap<UUID, Location> QuitLocation();
-    
+    default HashMap<UUID, String> getPlaying() { return new HashMap<>(); }
+    default HashMap<UUID, String> getWatching() { return new HashMap<>(); }
+    default HashMap<UUID, String> getAllPlayersHash() { return new HashMap<>(); }
+    default HashMap<UUID, String> getBlazeRod() { return new HashMap<>(); }
+    default HashMap<UUID, String> getEnderPearl() { return new HashMap<>(); }
+    default HashMap<UUID, String> getEyeOfEnder() { return new HashMap<>(); }
+    default HashMap<UUID, String> getKilledBlaze() { return new HashMap<>(); }
+    default HashMap<UUID, String> getEnderDragon() { return new HashMap<>(); }
+    default HashMap<UUID, String> getInNetherHash() { return new HashMap<>(); }
+    default HashMap<UUID, String> getFinishedPlayers() { return new HashMap<>(); }
+    default HashMap<UUID, String> getInEnd() { return new HashMap<>(); }
+    default HashMap<UUID, String> getQuitPlayers() { return new HashMap<>(); }
+    default HashMap<UUID, Location> QuitLocation() { return new HashMap<>(); }
+
     // Time management
-    long getSeed();
-    long getTimeElapsedLong();
-    long getFinalTime(UUID uuid);
-    String getFinalTimeString(UUID uuid);
-    String getCurrentTime();
-    long getCurrentTimeLong();
-    String getTimeElapsed();
-    
+    default long getSeed() { return 0L; }
+    default long getTimeElapsedLong() { return 0L; }
+    default long getFinalTime(UUID uuid) { return 0L; }
+    default String getFinalTimeString(UUID uuid) { return ""; }
+    default String getCurrentTime() { return ""; }
+    default long getCurrentTimeLong() { return 0L; }
+    default String getTimeElapsed() { return ""; }
+
     // Location management
-    Location getSpawnFromSeed(long seed);
-    Location getQuitLocation(UUID uuid);
-    
+    default Location getSpawnFromSeed(long seed) { return null; }
+    default Location getQuitLocation(UUID uuid) { return null; }
+
     // Player retrieval
-    UUID getPlayerUUID(String name);
-    Player getWinner();
-    Player getInGamePlayers();
-    Player getPlayersWatching();
-    Player getAllPlayers();
-    
+    default UUID getPlayerUUID(String name) { return null; }
+    default Player getSpeedRunWinner() { return null; }
+    default Player getInGamePlayers() { return null; }
+    default Player getPlayersWatching() { return null; }
+    default Player getAllPlayers() { return null; }
+
     // Game flow control
-    void runCheckers();
-    void startLobby();
-    void startPreGame() throws SQLException;
-    void startLobbyCountdown();
-    void startGame() throws SQLException;
-    void runGame() throws SQLException;
-    void stopGame() throws SQLException;
-    void runHotBarTimer();
-    
+    default void runCheckers() { }
+    default void startLobby() { }
+    default void startPreGame() throws SQLException { }
+    default void startLobbyCountdown() { }
+    default void startGame() throws SQLException { }
+    default void runGame() throws SQLException { }
+    default void stopGame() throws SQLException { }
+    default void runHotBarTimer() { }
+
     // World management
-    void createWorlds(World.Environment environment);
-    void createWorldsWithSeed(World.Environment environment, Long seed);
-    void teleportPlayersToWorlds();
+    default void createWorlds(World.Environment environment) { }
+    default void createWorldsWithSeed(World.Environment environment, Long seed) { }
+    default void teleportPlayersToWorlds() { }
 }
