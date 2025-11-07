@@ -23,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author TJ
  * @since 10/11/2025
  */
-public abstract class AbstractRegistry<T> implements IAbstractRegistry<T> {
-    public final ConcurrentHashMap<RegistryType, ConcurrentHashMap<IRegistryInstance<T>, IRegistrySettings<T>>> registries = new ConcurrentHashMap<>();
+public abstract class AbstractRegistry<REG_TYPE extends RegistryType<REG_TYPE,REG_DATA>, REG_DATA extends IRegistryData<REG_TYPE,REG_DATA>>
+        extends ConcurrentHashMap<REG_TYPE, REG_DATA> implements IAbstractRegistry<REG_TYPE, REG_DATA> {
 
 
 
