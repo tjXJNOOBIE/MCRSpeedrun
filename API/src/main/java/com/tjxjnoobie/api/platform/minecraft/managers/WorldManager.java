@@ -37,7 +37,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
         World checkWorld = Bukkit.getWorld(worldName);
         if (worldExists(worldName)) {
             Bukkit.getLogger().info(worldName + " already exist on disk");
-            sendDebugMessage (getAllPlayers(), getMinecraftStaffInGamePrefix() + "World exist on disk, loading...");
+            sendDebugMessage (getAllMinecraftPlayers(), getMinecraftStaffInGamePrefix() + "World exist on disk, loading...");
             loadWorld(worldName);
             return;
         }
@@ -46,7 +46,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
         } else {
             WorldCreator worldCreator = new WorldCreator(worldName).environment(environment);
             World world = Bukkit.createWorld(worldCreator);
-                sendDebugMessage(getAllPlayers(), getMinecraftStaffInGamePrefix() + "New World " + worldName + " created in " + environment.toString());
+                sendDebugMessage(getAllMinecraftPlayers(), getMinecraftStaffInGamePrefix() + "New World " + worldName + " created in " + environment.toString());
 
             Bukkit.getLogger().info(environment.toString() + " created with the name " + worldName);
 
@@ -56,8 +56,8 @@ public class WorldManager implements IMCUtils, IWorldManager {
     public void createWorldFromSeed(String worldName, World.Environment environment, long seed){
 
         World checkWorld = Bukkit.getWorld(worldName);
-        Player aplayers = getAllPlayers();
-        UUID auuid = getAllPlayers().getUniqueId();
+        Player aplayers = getAllMinecraftPlayers();
+        UUID auuid = getAllMinecraftPlayers().getUniqueId();
 
             if (worldExists(worldName)) {
                     Bukkit.getLogger().info(worldName + " World exist on disk");
@@ -83,8 +83,8 @@ public class WorldManager implements IMCUtils, IWorldManager {
     public void loadWorld(String worldName) {
         WorldCreator worldCreator = new WorldCreator(worldName);
         World world = Bukkit.getWorld(worldName);
-        Player aplayers = getAllPlayers();
-        UUID auuid = getAllPlayers().getUniqueId();
+        Player aplayers = getAllMinecraftPlayers();
+        UUID auuid = getAllMinecraftPlayers().getUniqueId();
         if (isWorldLoaded(worldName)) {
             sendDebugMessage( aplayers, "World is already loaded");
 
@@ -119,8 +119,8 @@ public class WorldManager implements IMCUtils, IWorldManager {
     @Override
     public void unloadWorld(String worldName, boolean save) {
         World world = Bukkit.getWorld(worldName);
-        Player aplayers = getAllPlayers();
-        UUID auuid = getAllPlayers().getUniqueId();
+        Player aplayers = getAllMinecraftPlayers();
+        UUID auuid = getAllMinecraftPlayers().getUniqueId();
 
         if (!worldExists(worldName)) {
             sendDebugMessage(aplayers, "World does not exist");
@@ -151,7 +151,7 @@ public class WorldManager implements IMCUtils, IWorldManager {
     @Override
     public void deleteWorld(String worldName) {
         // Unload the world
-        Player aplayers = getAllPlayers();
+        Player aplayers = getAllMinecraftPlayers();
         World world = Bukkit.getWorld(worldName);
 
             if (world != null) {
