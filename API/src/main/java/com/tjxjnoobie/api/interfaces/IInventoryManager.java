@@ -13,50 +13,97 @@ import java.util.Set;
 /**
  * Interface for InventoryManager to provide inventory management capabilities
  */
-public interface IInventoryManager  {
-    
+public interface IInventoryManager {
+
     // Core inventory operations
 
-    void setPlayerInventoryType(Player player, InventoryType type, String title, int size, int page);
-    void setPlayerInventoryType(Player player, InventoryType type);
+    default void setPlayerInventoryType(Player player, InventoryType type, String title, int size, int page) {
+    }
 
-    void addToHistory(Player player, InventoryType type, String title, int size, int page);
+    default void setPlayerInventoryType(Player player, InventoryType type) {
+    }
 
-    InventoryType getPlayerInventoryType(Player player);
-    void removePlayerInventoryType(Player player);
-    void clearPlayerData(Player player);
-    boolean hasInventoryType(Player player, InventoryType type);
-    
+    default void addToHistory(Player player, InventoryType type, String title, int size, int page) {
+    }
+
+    default InventoryType getPlayerInventoryType(Player player) {
+        return null;
+    }
+
+    default void removePlayerInventoryType(Player player) {
+    }
+
+    default void clearPlayerData(Player player) {
+    }
+
+    default boolean hasInventoryType(Player player, InventoryType type) {
+        return false;
+    }
+
     // History management
-    InventoryHistory getLastInventory(Player player);
-    List<InventoryHistory> getInventoryHistory(Player player);
-    boolean openLastInventory(Player player);
-    
+    default InventoryHistory getLastInventory(Player player) {
+        return null;
+    }
+
+    default List<InventoryHistory> getInventoryHistory(Player player) {
+        return java.util.Collections.emptyList();
+    }
+
+    default boolean openLastInventory(Player player) {
+        return false;
+    }
+
     // Pagination
-    int getCurrentPage(Player player, InventoryType type);
-    void setCurrentPage(Player player, InventoryType type, int page);
+    default int getCurrentPage(Player player, InventoryType type) {
+        return 0;
+    }
 
-    void initializePageableTypes();
+    default void setCurrentPage(Player player, InventoryType type, int page) {
+    }
 
-    void validatePlayer(Player player);
+    default void initializePageableTypes() {
+    }
 
-    void validateInventoryType(InventoryType type);
+    default void validatePlayer(Player player) {
+    }
 
-    void validatePageable(InventoryType type);
+    default void validateInventoryType(InventoryType type) {
+    }
 
-    boolean isInventoryPageable(InventoryType type);
-    void setInventoryPageable(InventoryType type, boolean pageable);
-    Set<InventoryType> getPageableInventoryTypes();
-    
+    default void validatePageable(InventoryType type) {
+    }
+
+    default boolean isInventoryPageable(InventoryType type) {
+        return false;
+    }
+
+    default void setInventoryPageable(InventoryType type, boolean pageable) {
+    }
+
+    default Set<InventoryType> getPageableInventoryTypes() {
+        return java.util.Collections.emptySet();
+    }
+
     // Inventory creation
-    Inventory openCustomInventory(Player player, String title, int size, InventoryType type);
-    Inventory openCustomInventory(Player player, String title, int size, InventoryType type, int page);
-    InventoryBuilder createInventory(Player player);
-    
+    default Inventory openCustomInventory(Player player, String title, int size, InventoryType type) {
+        return null;
+    }
+
+    default Inventory openCustomInventory(Player player, String title, int size, InventoryType type, int page) {
+        return null;
+    }
+
+    default InventoryBuilder createInventory(Player player) {
+        return null;
+    }
+
     // Specialized menus
-    void openConfirmMenu(Player player, String title);
+    default void openConfirmMenu(Player player, String title) {
+    }
 
-    void openVotingInventory(Player player);
+    default void openVotingInventory(Player player) {
+    }
 
-    void openConfirmMenu(Player player);
+    default void openConfirmMenu(Player player) {
+    }
 }
