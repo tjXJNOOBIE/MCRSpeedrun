@@ -11,45 +11,34 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
-public class SpeedRunQuitEvent implements Listener, IMCUtils {
+public class SpeedRunQuitEvent implements Listener, IMCUtils, IGameManager {
 
-
-    private final ISpeedRunContext speedRunContext;
-    public SpeedRunQuitEvent(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         //TODO: Remove these delegations
-        IGameManager gameManager = speedRunContext.getGameManager();
-        IGameState gameState = speedRunContext.getGameState();
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
-        ISpeedRunJoinEvent joinEvent = speedRunContext.getJoinEvent();
-        IBossBarManager bossBarManager = speedRunContext.getBossBarManager();
-        IStatsManager statsManager = speedRunContext.getStatsManager();
-        ISpeedrunStatsCache srStatsCache = speedRunContext.getSRStatsCache();
+
         UUID uuid = e.getPlayer().getUniqueId();
         Player player = e.getPlayer();
         String name = e.getPlayer().getName();
         String displayName = String.valueOf(e.getPlayer().displayName());
         Location quitLocation = e.getPlayer().getLocation();
-        int maxPlayers = gameManager.getMaxPlayers();
-        int playerCount = gameManager.getPlayersRemaining();
-        boolean QuitPlayer = gameManager.getQuitPlayers().containsKey(uuid);
-        GameStateEnum currentState = gameState.getCurrentState();
-        boolean InGamePlayer = gameManager.getPlaying().containsKey(uuid);
+        int maxPlayers = getMaxPlayers();
+        int playerCount = getPlayersRemaining();
+        boolean QuitPlayer = getQuitPlayers().containsKey(uuid);
+        GameStateEnum currentState = getCurrentState();
+        boolean InGamePlayer = getPlaying().containsKey(uuid);
 
 
         if(currentState == GameStateEnum.LOBBY){
-            gameManager.getPlaying().remove(uuid);
-            gameManager.getAllPlayersHash().remove(uuid);
-            gameManager.getInNetherHash().remove(uuid);
-            gameManager.getInEnd().remove(uuid);
-            gameManager.getWatching().remove(uuid);
+            getPlaying().remove(uuid);
+            getAllPlayersHash().remove(uuid);
+            getInNetherHash().remove(uuid);
+            getInEnd().remove(uuid);
+            getWatching().remove(uuid);
             //TODO Re-add bossbar cancel timer for speedrun lobby
-            bossBarManager.removePlayer(player);
-            bossBarManager.removePlayer(player);
+            removePlayer(player);
+            removePlayer(player);
             Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left (§c"+playerCount+"§7/§c"+maxPlayers+"§7)");
 
 
@@ -58,14 +47,14 @@ public class SpeedRunQuitEvent implements Listener, IMCUtils {
             if(InGamePlayer) {
                 // Assign player to Quit Player
                 Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left. They have 5 minutes to rejoin");
-                gameManager.getQuitPlayers().put(uuid, name);
-                gameManager.QuitLocation().put(uuid, quitLocation);
-                gameManager.getPlaying().remove(uuid);
-                gameManager.getAllPlayersHash().remove(uuid);
+                getQuitPlayers().put(uuid, name);
+                QuitLocation().put(uuid, quitLocation);
+                getPlaying().remove(uuid);
+                getAllPlayersHash().remove(uuid);
             }else{
                 // Player is spectating
-                gameManager.getWatching().remove(uuid);
-                gameManager.getAllPlayersHash().remove(uuid);
+                getWatching().remove(uuid);
+                getAllPlayersHash().remove(uuid);
                 Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left");
 
 
@@ -75,9 +64,9 @@ public class SpeedRunQuitEvent implements Listener, IMCUtils {
             }else{
             //Handle End game condition
             Bukkit.broadcastMessage(getMinecraftPrefix()+displayName+ " has left");
-            gameManager.getWatching().remove(uuid);
-            gameManager.getAllPlayersHash().remove(uuid);
-            gameManager.getPlaying().remove(uuid);
+            getWatching().remove(uuid);
+            getAllPlayersHash().remove(uuid);
+            getPlaying().remove(uuid);
         }
         }
     }
