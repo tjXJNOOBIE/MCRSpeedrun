@@ -10,7 +10,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
-public class Voting implements IVoting, IMCUtils {
+public class Voting implements IVoting, IMCUtils, IRankCache, IGameState {
 
     private boolean isComplete = false;
 
@@ -61,27 +61,27 @@ public class Voting implements IVoting, IMCUtils {
             player.sendMessage(getMinecraftPrefix()+"§cYou have already voted!");
             return;
         }
-        IRankCache rankCache = speedRunContext.getRankCache();
-        if (rankCache.getRank(uuid).equals("Developer") || rankCache.getRank(uuid).equals("Owner")
-                || rankCache.getRank(uuid).equals("HeadAdmin")) {
+        
+        if (getRank(uuid).equals("Developer") || getRank(uuid).equals("Owner")
+                || getRank(uuid).equals("HeadAdmin")) {
             addVote(gamemode, getVotes(gamemode) + 100);
-        } else if (rankCache.getRank(uuid).equals("Mod") || rankCache.getRank(uuid).equals("SrMod")
-                || rankCache.getRank(uuid).equals("Admin")) {
+        } else if (getRank(uuid).equals("Mod") || getRank(uuid).equals("SrMod")
+                || getRank(uuid).equals("Admin")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (rankCache.getRank(uuid).equals("Partner")) {
+        } else if (getRank(uuid).equals("Partner")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (rankCache.getRank(uuid).equals("Premier")) {
+        } else if (getRank(uuid).equals("Premier")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (rankCache.getRank(uuid).equals("Prime")) {
+        } else if (getRank(uuid).equals("Prime")) {
             addVote(gamemode, getVotes(gamemode) + 5);
-        } else if (rankCache.getRank(uuid).equals("Premium")) {
+        } else if (getRank(uuid).equals("Premium")) {
             addVote(gamemode, getVotes(gamemode) + 3);
-        } else if (rankCache.getRank(uuid).equals("Supporter")) {
+        } else if (getRank(uuid).equals("Supporter")) {
             addVote(gamemode, getVotes(gamemode) + 2);
         } else {
             addVote(gamemode, getVotes(gamemode) + 1);
         }
-        System.out.println(uuid.toString()+" is a " +rankCache.getRank(uuid)+" voting");
+        System.out.println(uuid.toString()+" is a " +getRank(uuid)+" voting");
 
     }
 
@@ -113,13 +113,11 @@ public class Voting implements IVoting, IMCUtils {
         player.sendMessage(getVotingOptions());
     }
         public void runVoting(){
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
         new BukkitRunnable(){
             @Override
             public void run() {
-                IGameState gameState = speedRunContext.getGameState();
-                GameStateEnum currentState = gameState.getCurrentState();
-                Player aplayer = mcUtils.getAllPlayers();
+                GameStateEnum currentState = getCurrentState();
+                Player aplayer = getAllMinecraftPlayers();
                 if (aplayer == null) {
                     return;
                 }
@@ -144,7 +142,6 @@ public class Voting implements IVoting, IMCUtils {
     }
     @Override
     public void calculateAndAnnounceWinner() {
-        IMCUtils mcUtils = speedRunContext.getMcUtils();
 
 
         int highestVotes = -1;
@@ -164,7 +161,7 @@ public class Voting implements IVoting, IMCUtils {
                 + winningGamemode;
 
         // Announce to all online players
-        Player aplayer = mcUtils.getAllPlayers();
+        Player aplayer = getAllMinecraftPlayers();
         aplayer.sendMessage(announcement);
 
         // Optionally, print to the console as well
