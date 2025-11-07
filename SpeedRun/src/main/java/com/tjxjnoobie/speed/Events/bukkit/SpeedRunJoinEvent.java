@@ -1,11 +1,10 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.cache.RatingCache;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.speed.Main;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -22,8 +21,9 @@ import org.bukkit.scheduler.BukkitTask;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, ILocationCache, IGameState, IGameManager, IRatingCache {
-
+public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, ILocationCache, IGameState, IGameManager, IRatingCache
+                        , IInventoryManager, IPlayerManager, IMCUtils, ISpeedrunStatsCache{
+    //TODO: Better compose/abstract interfaces
     public BukkitTask bossBar;
     
     
@@ -58,14 +58,14 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, 
         int playerCount = getPlayersRemaining();
         double progress = Math.min((double) inGamePlayers / minPlayers, 1.0);
         Location quitLocation = getQuitLocation(uuid);
-        Location spawn = locationCache.getSpawn();
+        Location spawn = getSpawn();
         boolean isQuitPlayer = getQuitPlayers().containsKey(uuid);
 
-        ratingCache = new RatingCache(ratingAPI, uuid, 0.0, 0.0, 0.0);
+//        ratingCache = new RatingCache(ratingAPI, uuid, 0.0, 0.0, 0.0);
         loadSpeedRunRatings(uuid);
         Bukkit.getLogger().info(name + " Logged in with Rating: " + getRating() + " Deviation: " + getDeviation() + " Vol: " + getVolatility());
 
-        mcUtils.cancelBukkitTask(bossBar);
+        cancelBukkitTask(bossBar);
         addPlayer(player); // Add player to the boss bar
 
         if (isQuitPlayer && currentGameState != GameStateEnum.LOBBY && currentGameState != GameStateEnum.ENDING) {
@@ -77,7 +77,7 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, 
             player.teleport(spawn);
             addPlayer(uuid, name);
             addInGame(uuid, name);
-            statsCache.createStorage(uuid);
+            createStorage(uuid);
             player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1.0f, 1.0f);
             player.getInventory().clear();
             player.setHealth(20);
@@ -85,20 +85,20 @@ public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, 
             player.setExp(0);
             player.setLevel(0);
             player.setGameMode(GameMode.SURVIVAL);
-            inventoryManager.openVotingInventory(player);
+            openVotingInventory(player);
             setLobbyInventory(player);
             e.setJoinMessage(displayName + ChatColor.DARK_GRAY + " joined  §7(§c" + playerCount + "§7/§c" + maxPlayers + "§7)");
         } else if (currentGameState == GameStateEnum.INGAME) {
             addPlayer(uuid, name);
             addWatching(uuid, name);
-            playerManager.makeSpectator(uuid, name, player);
+            makeSpectator(uuid, name, player);
         }
 
         String message = "§b§l▶▶ §c" + startPlayers + "§e Players needed to start.. §b§l◀◀";
         updateTitle(message);
         updateProgress(progress);
 
-        startBossBarTask(player, currentGameState, plugin);
+        startBossBarTask(player, currentGameState, Main.getPlugin());
     }
 
 
