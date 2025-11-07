@@ -9,8 +9,10 @@
 
 package com.tjxjnoobie.api.dependency.metadata;
 
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyFactory;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
+import com.tjxjnoobie.api.platform.global.console.Log;
+
+import java.util.function.Supplier;
 
 /**
  * DependencyInstance – TODO: implement class functionality
@@ -20,24 +22,60 @@ import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
  * @since 11/2/2025
  */
 public class DependencyInstance<INSTANCE extends IDependencyInstance<?>>
-        implements IDependencyInstance<INSTANCE>  {
+        implements IDependencyInstance<INSTANCE> {
 
-    //TODO: Make a full factory with hot reload and rebinding functionality
-    IDependencyFactory<INSTANCE> dependencyFactory;
-    IDependencyInstance<INSTANCE> dependencyInstance;
+    Supplier<INSTANCE> dependencyFactory;
+    INSTANCE instance;
+
+    @Override
+    public INSTANCE getDependencyInstance() {
+        if (dependencyFactory == null) {
+            Log.error("[DependencyInstance] dependencyFactory is null!" +
+                    " Don't forget to setDependencyFactory()! ");
+            return null;
+        }
+        return dependencyFactory.get();
+    }
 
 
     @Override
-    public IDependencyInstance<INSTANCE> getDependencyInstance() {
-        return dependencyInstance;
+    public Supplier<INSTANCE> getDependencySupplier() {
+        return dependencyFactory;
     }
 
     @Override
-    public void setDependencyInstance(IDependencyInstance<INSTANCE> dependencyInstance) {
-        this.dependencyInstance = dependencyInstance;
-
+    public void setDependencyInstance(INSTANCE instance) {
+        this.instance = instance;
     }
 
+    @Override
+    public void setDependencyFactoryAndInstance(INSTANCE dependencyInstance) {
+        this.dependencyFactory = () -> dependencyInstance;
+        setDependencyInstance(dependencyInstance);
+    }
+
+    @Override
+    public void setDependencySupplier(INSTANCE dependencyFactory) {
+        this.dependencyFactory = () -> dependencyFactory;
+    }
+
+    @Override
+    public INSTANCE getOrCreateDependencyInstance() {
+        if (instance == null) instance = dependencyFactory.get();
+        return instance;
+    }
+
+    @Override
+    public INSTANCE refreshDependencyInstance() {
+        instance = dependencyFactory.get();
+        return instance;
+    }
+
+    @Override
+    public void rebindFactory(Supplier<INSTANCE> newFactory) {
+        this.dependencyFactory = newFactory;
+        refreshDependencyInstance();
+    }
 
 
 }
