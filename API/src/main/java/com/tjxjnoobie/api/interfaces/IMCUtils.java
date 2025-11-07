@@ -55,7 +55,7 @@ public interface IMCUtils extends ILocalServerMetaData {
      *
      * @return A Player instance containing all current players in the game
      */
-    default Player getAllPlayers() {
+    default Player getAllMinecraftPlayers() {
         return null;
     }
 
@@ -108,7 +108,7 @@ public interface IMCUtils extends ILocalServerMetaData {
      * Broadcast a plain text message to all players using Adventure API
      */
     default void broadcast(Component message) {
-        getAllPlayers().sendMessage(message);
+        getAllMinecraftPlayers().sendMessage(message);
     }
 
     /**
