@@ -12,8 +12,6 @@ import org.bukkit.event.player.PlayerLoginEvent;
 public class SpeedRunLoginEvent implements Listener, IGameManager {
 
 
-    @Inject private ISpeedRunContext speedRunContext;
-
 
 
     @EventHandler
