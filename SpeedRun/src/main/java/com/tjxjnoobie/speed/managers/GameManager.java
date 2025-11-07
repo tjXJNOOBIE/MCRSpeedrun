@@ -217,7 +217,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         return null;
     }
 
-    public Player getAllPlayers() {
+    public Player getAllMinecraftPlayers() {
         for (UUID playerUUID : allPlayers.keySet()) {
             Player player = Bukkit.getPlayer(playerUUID);
             if (player != null && player.isOnline()) {
@@ -394,7 +394,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                 int ingameSize = ingame.size();
                 int soloMessage = 29;
                 GameModeEnum currentGM = getCurrentGameMode();
-                Player player = getAllPlayers();
+                Player player = getAllMinecraftPlayers();
                 if (player == null) {
                     return;
                 }
@@ -415,7 +415,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     }
 
                     if (ingameSize == minPlayers) {
-                        Player allPlayers = getAllPlayers();
+                        Player allPlayers = getAllMinecraftPlayers();
                         Location pLocation = allPlayers.getLocation();
                         Bukkit.broadcastMessage(getMinecraftStaffInGamePrefix() + "Minimum number of players reached! Starting match...");
 
@@ -462,7 +462,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
                     }
 
                     if (ingame < minPlayers && currentState == GameStateEnum.LOBBY) {
-                        Player players = getAllPlayers();
+                        Player players = getAllMinecraftPlayers();
                         if (players == null) {
                             return;
                         }
@@ -489,15 +489,15 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
             }
         }.runTaskLater(plugin, 20 * 5);
 
-        Player aplayers = getAllPlayers();
+        Player aplayers = getAllMinecraftPlayers();
         String serverID = getLocalServerID();
           setGameState(GameStateEnum.PREGAME, serverID);
         createWorlds(World.Environment.NORMAL);
         new BukkitRunnable() {
 
             public void run() {
-                Player allPlayers = getAllPlayers();
-                Location allPlayersLocation = getAllPlayers().getLocation();
+                Player allPlayers = getAllMinecraftPlayers();
+                Location allPlayersLocation = getAllMinecraftPlayers().getLocation();
 
                 if (preGameCount == 0) {
                     cancel();
@@ -547,7 +547,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         lobbyTimer = new BukkitRunnable() {
 
             public void run() {
-                Player aplayers = getAllPlayers();
+                Player aplayers = getAllMinecraftPlayers();
                 Location aplocation = aplayers.getLocation();
                 Bukkit.broadcastMessage("Running Lobby countdown");
 
@@ -596,7 +596,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
         int players = ingame.size();
         String serverID = getLocalServerID();
         GameModeEnum CurrentGM = getCurrentGameMode();
-        Player allPlayers = getAllPlayers();
+        Player allPlayers = getAllMinecraftPlayers();
         playDramaticBoom(allPlayers);
         if (players == 0 && CurrentGM == GameModeEnum.SOLO) {
 
@@ -613,7 +613,7 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public void stopGame() throws SQLException {
 
         String serverID = getLocalServerID();
-        Player aplayers = getAllPlayers();
+        Player aplayers = getAllMinecraftPlayers();
         World world = Bukkit.getWorld("lobby");
         Location spawn = world.getSpawnLocation();
           setGameState(GameStateEnum.ENDING, serverID);
