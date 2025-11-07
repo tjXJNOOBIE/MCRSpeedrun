@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
 
-public class VelocityLoginEvent {
+public class VelocityLoginEvent implements IPunishManager, IPlayerProfile, IProxyUtils, IRankCache {
 
    @Inject private IGlobalContext globalContext;
 
@@ -26,13 +26,9 @@ public class VelocityLoginEvent {
         Player player = e.getPlayer();
         UUID uuid = e.getPlayer().getUniqueId();
         String name = e.getPlayer().getUsername();
-        IPunishManager punishManager = globalContext.getPunishManager();
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        IRankCache rankCache = globalContext.getRankCache();
-        boolean isBanned = punishManager.isPunished(uuid,name,"BANNED");
+        boolean isBanned = isPunished(uuid,name,"BANNED");
         if(isBanned){
-            PunishLog punishLog = punishManager.getActivePunishment(uuid,name,"BANS");
+            PunishLog punishLog = getActivePunishment(uuid,name,"BANS");
             Timestamp banStart = punishLog.getStartDate();
             Timestamp banEnd = punishLog.getEndDate();
             String formattedDuration;
@@ -45,23 +41,23 @@ public class VelocityLoginEvent {
                 if (remainingDuration.isNegative() || remainingDuration.isZero()) {
                     e.setResult(ResultedEvent.ComponentResult.allowed());
 
-                    punishManager.setPunished(uuid,"BANS",0);
+                    setPunished(uuid,"BANS",0);
                     System.out.println(name+" ban has expired, allowing join");
                     return;
                 } else {
-                    formattedDuration = proxyUtils.formatDuration(remainingDuration);
+                    formattedDuration = formatDuration(remainingDuration);
                 }
             }
             String sender = punishLog.getSender();;
             String reason = punishLog.getReason();
-            player.disconnect(proxyUtils.colorzie("&4You were banned by &b&l"+ sender +"\n " +
+            player.disconnect(colorzie("&4You were banned by &b&l"+ sender +"\n " +
                     "&eDuration&7: &c"+ formattedDuration +"\n" +
                     "&eReason&7: &b " + reason+"\n" +
-                    "&cYou may appeal on Discord @ " +proxyUtils.getDiscordString()+ " or on the website @ " + proxyUtils.getWebsiteString()));
+                    "&cYou may appeal on Discord @ " +getDiscordString()+ " or on the website @ " + getWebsiteString()));
             return;
         }
-        rankCache.addRankCache(uuid);
-        playerProfile.createProfile(uuid,name);
+        addRankCache(uuid);
+        createProfile(uuid,name);
 
     }
 }

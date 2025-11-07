@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Warn implements SimpleCommand {
+public class Warn implements SimpleCommand, IRankCache, IProxyUtils, IPlayerProfile, IPunishManager {
 
     @Inject private IGlobalContext globalContext;
     @com.google.inject.Inject private ProxyServer proxyServer;
@@ -28,15 +28,13 @@ public class Warn implements SimpleCommand {
 
     @Override
     public void execute(Invocation invocation) {
-        IRankCache rankCache = globalContext.getRankCache();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
         int length = args.length;
         final String DEFAULT_REASON = "Not provided";
 
         if (length < 1 || length > 2) {
-            source.sendMessage(proxyUtils.withStaffPrefix("&cUsage: /warn <player> [reason]"));
+            source.sendMessage(withStaffPrefix("&cUsage: /warn <player> [reason]"));
             return;
         }
         String targetName = args[0];
@@ -47,14 +45,14 @@ public class Warn implements SimpleCommand {
 
         if (source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
-            if (rankCache.isStaff(senderUUID) || rankCache.hasPermission(senderUUID, "network.warn")) {
+            if (isStaff(senderUUID) || hasPermission(senderUUID, "network.warn")) {
                 try {
                     handleWarn(sender, targetPlayer, targetName, reason);
                 } catch (SQLException e) {
                     throw new RuntimeException(e);
                 }
             }else{
-                sender.sendMessage(proxyUtils.withPrefix("No permission."));
+                sender.sendMessage(withPrefix("No permission."));
             }
         } else if (source instanceof ConsoleCommandSource) {
             try {
@@ -75,21 +73,19 @@ public class Warn implements SimpleCommand {
 
     private UUID retrieveUUID(Optional<Player> targetPlayer, String targetName, CommandSource source) {
         final String PUNISH_TABLE = "punish";
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         UUID targetUUID = null;
         if (targetPlayer.isPresent()) {
             targetUUID = targetPlayer.get().getUniqueId();
         } else {
             try {
-                String uuidString = playerProfile.getUUIDFromUsername(PUNISH_TABLE, targetName, PUNISH_TABLE);
+                String uuidString = getUUIDFromUsername(PUNISH_TABLE, targetName, PUNISH_TABLE);
                 if (uuidString != null && !uuidString.isEmpty()) {
                     targetUUID = UUID.fromString(uuidString);
                 } else {
-                    source.sendMessage(proxyUtils.withStaffPrefix("Could not retrieve UUID for " + targetName));
+                    source.sendMessage(withStaffPrefix("Could not retrieve UUID for " + targetName));
                 }
             } catch (IllegalArgumentException e) {
-                source.sendMessage(proxyUtils.withStaffPrefix("Invalid UUID format for player: " + targetName));
+                source.sendMessage(withStaffPrefix("Invalid UUID format for player: " + targetName));
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -98,15 +94,13 @@ public class Warn implements SimpleCommand {
     }
 
     private void warnPlayer(CommandSource source, UUID targetUUID, String targetName, String reason) throws SQLException {
-        IPunishManager punishManager = globalContext.getPunishManager();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         Instant warnStart = Instant.now();
         String senderName = (source instanceof Player) ? ((Player) source).getUsername() : "Console";
 
-        int warns = punishManager.getPunishmentNumber(PUNISHMENT_TYPE_WARNS,targetUUID,targetName);
-        punishManager.incrementPunishLogCount("punishLog",targetUUID,PUNISHMENT_TYPE_WARNS);
-        punishManager.setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_WARNS, Timestamp.from(warnStart), null, reason, senderName, "1");
-        source.sendMessage(proxyUtils.withStaffPrefix("You have warned &b" + targetName + (reason.isEmpty() ? "" : " &cfor &b" + reason) + ". Total warns: " + warns));
+        int warns = getPunishmentNumber(PUNISHMENT_TYPE_WARNS,targetUUID,targetName);
+        incrementPunishLogCount("punishLog",targetUUID,PUNISHMENT_TYPE_WARNS);
+        setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_WARNS, Timestamp.from(warnStart), null, reason, senderName, "1");
+        source.sendMessage(withStaffPrefix("You have warned &b" + targetName + (reason.isEmpty() ? "" : " &cfor &b" + reason) + ". Total warns: " + warns));
     }
 
     @Override

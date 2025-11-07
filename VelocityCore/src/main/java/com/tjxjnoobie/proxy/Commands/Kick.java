@@ -19,8 +19,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Kick implements SimpleCommand {
-    @Inject IPunishManager punishManager;
+public class Kick implements SimpleCommand, IPunishManager, IRankCache, IProxyUtils {
     @Inject private  IGlobalContext globalContext;
     @com.google.inject.Inject private ProxyServer proxyServer;
 
@@ -39,16 +38,14 @@ public class Kick implements SimpleCommand {
     public void execute(Invocation invocation) {
         String[] args = invocation.arguments();
         int length = args.length;
-        IRankCache rankCache = globalContext.getRankCache();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         CommandSource source = invocation.source();
 
         if (source instanceof Player sender) {
             String senderName = sender.getUsername();
             UUID uuid = sender.getUniqueId();
-            if (rankCache.isStaff(uuid) || rankCache.hasPermission(uuid, "network.kick")) {
+            if (isStaff(uuid) || hasPermission(uuid, "network.kick")) {
                 if (length < 1 || length > 3) {
-                    sender.sendMessage(proxyUtils.withStaffPrefix("&cUsage: /kick <player> [reason]"));
+                    sender.sendMessage(withStaffPrefix("&cUsage: /kick <player> [reason]"));
                     return;
                 }
                 String targetName = args[0];
@@ -57,12 +54,12 @@ public class Kick implements SimpleCommand {
 
                 handleKick(sender, targetPlayer, targetName, senderName, reason);
             } else {
-                sender.sendMessage(proxyUtils.withPrefix("&cNo permission."));
+                sender.sendMessage(withPrefix("&cNo permission."));
             }
         } else if (source instanceof ConsoleCommandSource) {
             // Sender is Console
             if (length < 1 || length > 3) {
-                source.sendMessage(proxyUtils.withStaffPrefix("&cUsage: /kick <player> [reason]"));
+                source.sendMessage(withStaffPrefix("&cUsage: /kick <player> [reason]"));
                 return;
             }
             String targetName = args[0];
@@ -87,26 +84,25 @@ public class Kick implements SimpleCommand {
      * notifies the source. Handles any SQL exceptions that occur during the process.
      */
     private void handleKick(CommandSource source, Optional<Player> targetPlayer, String targetName, String senderName, String reason) {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         if (targetPlayer.isPresent()) {
             UUID targetUUID = targetPlayer.get().getUniqueId();
             try {
                 kickPlayer(source, targetPlayer, targetUUID, targetName, senderName, reason);
                 if (source instanceof Player player) {
-                    player.sendMessage(constructKickMessage(proxyUtils, targetName, reason));
+                    player.sendMessage(constructKickMessage(targetName, reason));
                 }
             } catch (SQLException e) {
-                source.sendMessage(proxyUtils.withStaffPrefix("An error occurred while trying to process this command"));
+                source.sendMessage(withStaffPrefix("An error occurred while trying to process this command"));
                 System.out.println("Failed to kick player due to SQL error " + e.getMessage());
             }
         } else {
-            source.sendMessage(proxyUtils.withStaffPrefix(targetName + " is offline"));
+            source.sendMessage(withStaffPrefix(targetName + " is offline"));
         }
     }
 
-    private Component constructKickMessage(IProxyUtils proxyUtils, String targetName, String reason) {
+    private Component constructKickMessage(String targetName, String reason) {
         String message = "Kicked &b" + targetName + (reason != null && !reason.isEmpty() ? " &cfor&b " + reason : "");
-        return proxyUtils.withStaffPrefix(message);
+        return withStaffPrefix(message);
     }
 
     /**
@@ -124,35 +120,32 @@ public class Kick implements SimpleCommand {
      * increments the kick count, and logs the punishment details.
      */
     public void kickPlayer(CommandSource source, Optional<Player> player, UUID targetUUID, String targetName, String senderName, String reason) throws SQLException {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         Instant kickTimeNow = Instant.now();
         Timestamp kickTime = Timestamp.from(kickTimeNow);
-        int kicks = punishManager.getPunishmentNumber("KICKS", targetUUID, targetName);
+        int kicks = getPunishmentNumber("KICKS", targetUUID, targetName);
         
         if (player.isPresent()) {
             try {
-                player.get().disconnect(constructKickMessage(senderName, reason));
+                player.get().disconnect(constructKickDisconnectMessage(senderName, reason));
                 source.sendMessage(constructKickMessageWithReason(targetName, reason));
-                punishManager.setPunishNumber("KICKS", kicks + 1, targetUUID);
-                punishManager.logPunishment(targetUUID, targetName, kickTime, null, "KICKS", senderName, (reason.isEmpty() ? null : reason));
+                setPunishNumber("KICKS", kicks + 1, targetUUID);
+                logPunishment(targetUUID, targetName, kickTime, null, "KICKS", senderName, (reason.isEmpty() ? null : reason));
                 System.out.println("Successfully kicked player: " + targetName);
             } catch (Exception e) {
                 System.out.println("Failed to kick player: " + targetName + ". Error: " + e.getMessage());
 
             }
         } else {
-            source.sendMessage(proxyUtils.withStaffPrefix(targetName + " is offline"));
+            source.sendMessage(withStaffPrefix(targetName + " is offline"));
         }
     }
 
-    private Component constructKickMessage(String senderName, String reason) {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        return proxyUtils.colorzie("&4You were kicked by &b" + senderName + "\n " +
+    private Component constructKickDisconnectMessage(String senderName, String reason) {
+        return colorzie("&4You were kicked by &b" + senderName + "\n " +
                 (reason.isEmpty() ? null :"&eReason&7: &b " + reason));
     }
 
     private Component constructKickMessageWithReason(String targetName, String reason) {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        return proxyUtils.withStaffPrefix("You have kicked &b" + targetName + " &cfor &b" + (reason.isEmpty() ? null : reason));
+        return withStaffPrefix("You have kicked &b" + targetName + " &cfor &b" + (reason.isEmpty() ? null : reason));
     }
 }

@@ -20,7 +20,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 
-public class Ban implements SimpleCommand, IUtils {
+public class Ban implements SimpleCommand, IUtils, IRankCache, IPlayerProfile, IProxyUtils, IPunishManager {
 
     @Inject private IGlobalContext globalContext;
     @com.google.inject.Inject private ProxyServer proxyServer;
@@ -39,8 +39,7 @@ public class Ban implements SimpleCommand, IUtils {
      */
     @Override
     public void execute(Invocation invocation)  {
-        IRankCache rankCache = globalContext.getRankCache();
-        Component staffPrefix = globalContext.getProxyUtils().withStaffPrefix("&cUsage: /ban <player> [duration] [reason]");
+        Component staffPrefix = withStaffPrefix("&cUsage: /ban <player> [duration] [reason]");
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
         int length = args.length;
@@ -60,8 +59,8 @@ public class Ban implements SimpleCommand, IUtils {
 
         if(source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
-            if (rankCache.isStaff(senderUUID) ||
-                       rankCache.hasPermission(senderUUID, "network.ban")) {
+            if (isStaff(senderUUID) ||
+                       hasPermission(senderUUID, "network.ban")) {
                 try {
                     handleBan(sender, targetPlayer, targetName, reason, durationStr);
                 } catch (SQLException e) {
@@ -107,21 +106,19 @@ public class Ban implements SimpleCommand, IUtils {
      */
     private UUID retrieveUUID(Optional<Player> targetPlayer, String targetName, CommandSource source) throws SQLException {
         final String PUNISH_TABLE = "punish";
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
         UUID targetUUID = null;
         if (targetPlayer.isPresent()) {
             targetUUID = targetPlayer.get().getUniqueId();
         } else {
             try {
-                String uuidString = playerProfile.getUUIDFromUsername(PUNISH_TABLE, targetName, PUNISH_TABLE);
+                String uuidString = getUUIDFromUsername(PUNISH_TABLE, targetName, PUNISH_TABLE);
                 if (uuidString != null && !uuidString.isEmpty()) {
                     targetUUID = UUID.fromString(uuidString);
                 } else {
-                    source.sendMessage(proxyUtils.withStaffPrefix("Could not retrieve UUID for " + targetName));
+                    source.sendMessage(withStaffPrefix("Could not retrieve UUID for " + targetName));
                 }
             } catch (IllegalArgumentException e) {
-                source.sendMessage(proxyUtils.withStaffPrefix("Invalid UUID format for player: " + targetName));
+                source.sendMessage(withStaffPrefix("Invalid UUID format for player: " + targetName));
             }
         }
         return targetUUID;
@@ -141,40 +138,37 @@ public class Ban implements SimpleCommand, IUtils {
      */
     private void banPlayer(CommandSource source, UUID targetUUID, String targetName, String reason, String durationStr) throws SQLException {
         final String PUNISHMENT_TYPE_BANS = "BANS";
-        IPunishManager punishManager = globalContext.getPunishManager();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        Duration banDuration = determineBanDuration(durationStr, source, proxyUtils);
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
+        Duration banDuration = determineBanDuration(durationStr, source);
         String senderName = (source instanceof Player) ? ((Player) source).getUsername() : "Console";
 
-        String formattedDuration = banDuration.isZero() ? "Permanent" : proxyUtils.formatDuration(banDuration);
+        String formattedDuration = banDuration.isZero() ? "Permanent" : formatDuration(banDuration);
         Optional<Player> optionalPlayer = proxyServer.getPlayer(targetName);
         Instant banStart = Instant.now();
         Instant banEnd = banDuration.isZero() ? null : banStart.plus(banDuration);
 
-        if (!punishManager.isPunished(targetUUID, targetName, "BANNED")) {
+        if (!isPunished(targetUUID, targetName, "BANNED")) {
             if (optionalPlayer.isPresent()) {
-                int bans = punishManager.getPunishmentNumber(PUNISHMENT_TYPE_BANS, targetUUID, targetName);
-                optionalPlayer.get().disconnect(proxyUtils.colorzie("&4You were banned by &b" + senderName + "\n " +
+                int bans = getPunishmentNumber(PUNISHMENT_TYPE_BANS, targetUUID, targetName);
+                optionalPlayer.get().disconnect(colorzie("&4You were banned by &b" + senderName + "\n " +
                         "&eDuration&7: &c" + formattedDuration + "\n" +
                         "&eReason&7: &b " + reason + "\n" +
-                        "&cYou may appeal on Discord @ " + proxyUtils.getDiscordString() + " or on the website @ " + proxyUtils.getWebsiteString()));
-                punishManager.setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_BANS, Timestamp.from(banStart), banEnd != null ? Timestamp.from(banEnd) : null, reason, senderName, "1");
-                punishManager.setPunishNumber(PUNISHMENT_TYPE_BANS, bans + 1, targetUUID);
-                source.sendMessage(proxyUtils.withStaffPrefix("You have banned &b" + targetName + "&c for &b" + formattedDuration + (reason.isEmpty() ? "" : " &cfor &b" + reason)));
+                        "&cYou may appeal on Discord @ " + getDiscordString() + " or on the website @ " + getWebsiteString()));
+                setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_BANS, Timestamp.from(banStart), banEnd != null ? Timestamp.from(banEnd) : null, reason, senderName, "1");
+                setPunishNumber(PUNISHMENT_TYPE_BANS, bans + 1, targetUUID);
+                source.sendMessage(withStaffPrefix("You have banned &b" + targetName + "&c for &b" + formattedDuration + (reason.isEmpty() ? "" : " &cfor &b" + reason)));
             } else {
-                if (playerProfile.playerExistsFromUsername(targetName, "punish", "punish")) {
-                    source.sendMessage(proxyUtils.withStaffPrefix(targetName + " does not exist in database"));
+                if (playerExistsFromUsername(targetName, "punish", "punish")) {
+                    source.sendMessage(withStaffPrefix(targetName + " does not exist in database"));
                 } else {
-                    int bans = punishManager.getPunishmentNumber(PUNISHMENT_TYPE_BANS, targetUUID, targetName);
-                    source.sendMessage(proxyUtils.withStaffPrefix(targetName + " is offline, attempting ban..."));
-                    punishManager.setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_BANS, Timestamp.from(banStart), banEnd != null ? Timestamp.from(banEnd) : null, (reason.isEmpty() ? "No reason provided" : reason), senderName, "1");
-                    punishManager.setPunishNumber(PUNISHMENT_TYPE_BANS, bans + 1, targetUUID);
-                    source.sendMessage(proxyUtils.withStaffPrefix("You have banned &b" + targetName + "&c for &b" + formattedDuration + (reason.isEmpty() ? "" : " &cfor &b" + reason)));
+                    int bans = getPunishmentNumber(PUNISHMENT_TYPE_BANS, targetUUID, targetName);
+                    source.sendMessage(withStaffPrefix(targetName + " is offline, attempting ban..."));
+                    setTimedPunishment(targetUUID, targetName, PUNISHMENT_TYPE_BANS, Timestamp.from(banStart), banEnd != null ? Timestamp.from(banEnd) : null, (reason.isEmpty() ? "No reason provided" : reason), senderName, "1");
+                    setPunishNumber(PUNISHMENT_TYPE_BANS, bans + 1, targetUUID);
+                    source.sendMessage(withStaffPrefix("You have banned &b" + targetName + "&c for &b" + formattedDuration + (reason.isEmpty() ? "" : " &cfor &b" + reason)));
                 }
             }
         } else {
-            source.sendMessage(proxyUtils.withStaffPrefix(targetName + " is already banned."));
+            source.sendMessage(withStaffPrefix(targetName + " is already banned."));
         }
     }
     /**
@@ -188,14 +182,14 @@ public class Ban implements SimpleCommand, IUtils {
      * @param proxyUtils the ProxyUtils instance used for parsing the duration.
      * @return the parsed Duration or zero for permanent bans, or null if parsing fails.
      */
-    private Duration determineBanDuration(String durationStr, CommandSource source, IProxyUtils proxyUtils) {
+    private Duration determineBanDuration(String durationStr, CommandSource source) {
         if (durationStr == null || durationStr.trim().isEmpty() || durationStr.equalsIgnoreCase("permanent")) {
             return Duration.ZERO;
         } else {
             try {
-                return proxyUtils.parseDuration(durationStr);
+                return parseDuration(durationStr);
             } catch (IllegalArgumentException e) {
-                source.sendMessage(proxyUtils.withStaffPrefix("Invalid ban duration format. Use formats like 1m, 1h, 1d, 1m, 1yr, p, permanent."));
+                source.sendMessage(withStaffPrefix("Invalid ban duration format. Use formats like 1m, 1h, 1d, 1m, 1yr, p, permanent."));
                 return null;
             }
         }

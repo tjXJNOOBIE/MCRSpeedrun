@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class Unban implements SimpleCommand {
+public class Unban implements SimpleCommand, IProxyUtils, IRankCache, IPlayerProfile, IPunishManager {
 
    @Inject private IGlobalContext globalContext;
    @com.google.inject.Inject private ProxyServer proxyServer;
@@ -35,13 +35,11 @@ public class Unban implements SimpleCommand {
      */
     @Override
     public void execute(Invocation invocation) {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        IRankCache rankCache = globalContext.getRankCache();
         CommandSource source = invocation.source();
         String[] args = invocation.arguments();
         int length = args.length;
         if (length != 1) {
-            source.sendMessage(proxyUtils.withStaffPrefix("Usage: /unban <player>"));
+            source.sendMessage(withStaffPrefix("Usage: /unban <player>"));
             return;
         }
         String targetName = args[0];
@@ -49,8 +47,8 @@ public class Unban implements SimpleCommand {
         if (source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
             String senderName = sender.getUsername();
-            if (!rankCache.isStaff(senderUUID) && !rankCache.hasPermission(senderUUID, "network.unban")) {
-                source.sendMessage(proxyUtils.withPrefix("No permission."));
+            if (!isStaff(senderUUID) && !hasPermission(senderUUID, "network.unban")) {
+                source.sendMessage(withPrefix("No permission."));
                 return;
             }
             processUnban(source, targetName, senderName);
@@ -67,21 +65,18 @@ public class Unban implements SimpleCommand {
      * @throws RuntimeException If a database access error occurs.
      */
     private void processUnban(CommandSource source, String targetName, String senderName) {
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        IPunishManager punishManager = globalContext.getPunishManager();
         try {
-            if (!playerProfile.playerExistsFromUsername(targetName, "punish", "punish")) {
-                source.sendMessage(proxyUtils.withStaffPrefix(targetName + " does not exist in database"));
+            if (!playerExistsFromUsername(targetName, "punish", "punish")) {
+                source.sendMessage(withStaffPrefix(targetName + " does not exist in database"));
                 return;
             }
             Instant unbanTime = Instant.now();
             Timestamp unbanTimeTS = Timestamp.from(unbanTime);
             unBanPlayer(source, targetName);
-            punishManager.logPunishmentByUsername(targetName, unbanTimeTS, unbanTimeTS, "UNBANS", senderName, senderName + " unbanned " + targetName);
+            logPunishmentByUsername(targetName, unbanTimeTS, unbanTimeTS, "UNBANS", senderName, senderName + " unbanned " + targetName);
 
         } catch (SQLException e) {
-            source.sendMessage(proxyUtils.withStaffPrefix("An error occurred processing this command."));
+            source.sendMessage(withStaffPrefix("An error occurred processing this command."));
             throw new RuntimeException(e);
         }
     }
@@ -97,15 +92,12 @@ public class Unban implements SimpleCommand {
      * @throws SQLException If a database access error occurs.
      */
     private void unBanPlayer(CommandSource source, String targetName) throws SQLException {
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        IPunishManager punishManager = globalContext.getPunishManager();
-        if (!playerProfile.playerExistsFromUsername(targetName, "punish", "punish")) {
-            source.sendMessage(proxyUtils.withStaffPrefix("Player does not exist in database"));
+        if (!playerExistsFromUsername(targetName, "punish", "punish")) {
+            source.sendMessage(withStaffPrefix("Player does not exist in database"));
 
         } else {
-            punishManager.setPunishedByUsername(targetName,"BANS",0);
-            source.sendMessage(proxyUtils.withStaffPrefix("You have unbanned &b" + targetName));
+            setPunishedByUsername(targetName,"BANS",0);
+            source.sendMessage(withStaffPrefix("You have unbanned &b" + targetName));
         }
 
     }
