@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Interface for game management operations
  */
-public interface IGameManager {
+public interface IGameManager extends IGameState {
 
     // Player management
     default void addPlayer(UUID uuid, String name) { }
