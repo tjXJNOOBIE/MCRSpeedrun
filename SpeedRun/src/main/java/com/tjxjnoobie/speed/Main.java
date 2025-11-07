@@ -245,7 +245,9 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         }
         return true;
     }
-
+    public static Plugin getPlugin() {
+        return plugin;
+    }
 
     public IGameState getGameState() {
         return gameState;
