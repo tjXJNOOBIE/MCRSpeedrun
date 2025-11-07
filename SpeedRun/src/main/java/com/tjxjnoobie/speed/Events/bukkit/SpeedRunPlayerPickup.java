@@ -33,7 +33,7 @@ import java.util.UUID;
         UUID uuid = entity.getUniqueId();
         String displayName = player.getDisplayName();
         String name = player.getName();
-        Player allPlayers = mcUtils.getAllPlayers();
+        Player allPlayers = mcUtils.getAllMinecraftPlayers();
         Location allLocation = allPlayers.getLocation();
         boolean HasBlazeRod = gameManager.hasBlazeRod(uuid);
         boolean HasEye = gameManager.hasEnderEye(uuid);
