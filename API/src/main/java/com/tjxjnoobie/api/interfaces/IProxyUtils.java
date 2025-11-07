@@ -11,23 +11,43 @@ import java.time.Duration;
 public interface IProxyUtils {
 
 
-    String getDiscordString();
+    default String getDiscordString() {
+        return null;
+    }
 
-    String getWebsiteString();
+    default String getWebsiteString(){
+        return null;
+    }
 
-    String getPrefixString();
+    default String getPrefixString(){
+        return null;
+    }
 
-    String getStaffPrefixString();
+    default String getStaffPrefixString(){
+        return null;
+    }
 
-    Component colorzie(String message);
+    default Component colorzie(String message){
+        return null;
+    }
 
-    void sendMessageToPlayer(String username, String legacyMessage);
+    default void sendMessageToPlayer(String username, String legacyMessage){
 
-    @NotNull Component withStaffPrefix(String s);
+    }
 
-    Component withPrefix(String message);
+    default @NotNull Component withStaffPrefix(String s){
+        return null;
+    }
 
-    Duration parseDuration(String durationStr);
+    default Component withPrefix(String message){
+        return null;
+    }
 
-    String formatDuration(Duration banDuration);
+    default Duration parseDuration(String durationStr){
+        return null;
+    }
+
+    default String formatDuration(Duration banDuration){
+        return null;
+    }
 }
