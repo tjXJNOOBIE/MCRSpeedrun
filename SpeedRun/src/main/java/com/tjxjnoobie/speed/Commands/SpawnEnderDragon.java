@@ -17,7 +17,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
 
-public class SpawnEnderDragon implements CommandExecutor, IMCUtils {
+public class SpawnEnderDragon implements CommandExecutor, IMCUtils, IRankCache {
 
 
    @Inject
@@ -31,9 +31,8 @@ public class SpawnEnderDragon implements CommandExecutor, IMCUtils {
             UUID uuid = player.getUniqueId();
             World world = player.getWorld();
             Location location = player.getLocation();
-            IRankCache rankCache = globalContext.getRankCache();
-            if(rankCache.getPowerLevel(uuid) <= 10000 ||
-                rankCache.hasPermission(uuid,"speedrun.spawndragon")) {
+            if(getPowerLevel(uuid) <= 10000 ||
+                hasPermission(uuid,"speedrun.spawndragon")) {
                 spawnStationaryEnderDragon(world, location);
                 player.sendMessage(getMinecraftStaffInGamePrefix() + " Ender dragon spawned");
                 player.getInventory().addItem(new ItemStack(Material.DIAMOND_SWORD,1));
