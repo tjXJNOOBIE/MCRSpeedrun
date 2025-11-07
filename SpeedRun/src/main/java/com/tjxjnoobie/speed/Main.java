@@ -35,7 +35,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -215,20 +214,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         gameState.removeServerID(serverID);
     }
     
-     @Inject public boolean hasNoInjectFields(Object obj) {
-        if (obj == null) return true;
-        
-        Class<?> clazz = obj.getClass();
-        while (clazz != null && clazz != Object.class) {
-            for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(Inject.class)) {
-                    return false;
-                }
-            }
-            clazz = clazz.getSuperclass();
-        }
-        return true;
-    }
+
     public static Plugin getPlugin() {
         return plugin;
     }
@@ -305,9 +291,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         }
     }
 
-    public Object getPluginInstance() {
-        return this; // Return the plugin instance
-    }
 
 
 }
