@@ -9,5 +9,13 @@
 
 package com.tjxjnoobie.api.platform.global.registry.enums;
 
-public enum RegistryType {
+/**
+ * RegistryType – TODO: implement class functionality
+ * Auto-generated skeleton by MondayGPT-style template
+ *
+ * @author TJ
+ * @since 11/5/2025
+ */
+public class RegistryType<REG_TYPE, REG_DATA> {
+
 }
