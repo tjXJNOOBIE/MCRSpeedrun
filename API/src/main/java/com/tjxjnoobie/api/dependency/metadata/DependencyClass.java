@@ -21,7 +21,7 @@ import java.util.UUID;
  * @author TJ
  * @since 11/1/2025
  */
-public class DependencyClass<CLASS extends IDependencyClass<?>>
+public class DependencyClass<CLASS>
         implements IDependencyClass<CLASS> {
 
     //To add to class Doc sstring: We have to wrap Class methods here since Class object is final at runtime and not easily changeable
@@ -53,7 +53,7 @@ public class DependencyClass<CLASS extends IDependencyClass<?>>
     }
 
     @Override
-    public void setDependencyClass(CLASS dependencyClass) {
+    public void setDependencyClass(Class<?> dependencyClass) {
         this.dependencyClass = (CLASS) dependencyClass;
     }
 
