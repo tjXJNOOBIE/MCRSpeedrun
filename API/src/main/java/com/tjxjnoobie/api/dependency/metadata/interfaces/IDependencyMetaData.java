@@ -9,10 +9,13 @@
 
 package com.tjxjnoobie.api.dependency.metadata.interfaces;
 
+import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
+import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
 import java.lang.reflect.Method;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,15 +25,17 @@ import java.util.Set;
  * dependency resolution, lifecycle, and context ownership.
  *
  */
-public interface IDependencyMetaData
-        <CLASS extends IDependencyClass<?>,
-                INSTANCE extends IDependencyInstance<?>>
-        extends IDependencyClass<CLASS>, IDependencyInstance<INSTANCE>  {
+public interface IDependencyMetaData<CLASS, INSTANCE >
+          extends IDependencyClass<CLASS>,
+        IDependencyInstance<INSTANCE>, IDependencyMap<CLASS,INSTANCE> {
 
 
 
-    default void populateMetaData(){
+    default void populateMetaData(CLASS dependencyClass, INSTANCE dependencyInstance){
 
+    }
+    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(){
+        return null;
     }
 
 
@@ -49,8 +54,17 @@ public interface IDependencyMetaData
 //    }
 
 
-    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(IDependencyClass<CLASS> dependencyClass){
+    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(CLASS dependencyClass){
         return null;
+    }
+
+    //TODO: Move to injection helper if working
+    default boolean isClassLoadable(Class<?> dependencyClass){
+        return false;
+    }
+
+    default EnumMap<LifecycleType, Method> detectLifecycleForClass(CLASS dependencyClass){
+        return  null;
     }
 
     /**
@@ -59,14 +73,9 @@ public interface IDependencyMetaData
      *
      * @return a read-only set of dependency classes
      */
-    default Set<IDependencyClass<CLASS>> getSubDependenciesForBase() {
+    default Set<CLASS> getSubDependencies() {
         return new HashSet<>();
     }
-
-//    default IDependencyInstance<T> ensureAndGetInstance(IDependencyMetaData<T> classToEnsure){
-//        return null;
-//    }
-
 
 
     /**
@@ -74,7 +83,7 @@ public interface IDependencyMetaData
      * This allows configuration of which types must be resolved prior to this component's initialization.
      *
      */
-    default void setSubDependenciesForBase(Set<IDependencyClass<CLASS>> dependencyClassSet) {
+    default void setSubDependencies(Set<CLASS> dependencyClassSet) {
         // No-op: implementation may be overridden by concrete class
     }
 
@@ -185,26 +194,6 @@ public interface IDependencyMetaData
         // No-op: implementation may be overridden by concrete class
     }
 
-//    /**
-//     * Returns the bound instance of this component, if any.
-//     * This is the actual object created and managed by the dependency graph.
-//     *
-//     * @return the bound instance, or null if not yet bound
-//     */
-//    default Object getDependencyInstance(Class<?> aClass) {
-//        return null;
-//    }
-
-//    /**
-//     * Sets the bound instance of this component.
-//     * This is used to store the actual object instance after successful construction.
-//     *
-//     * @param instance the instance to bind
-//     */
-//    default void setInstance(Object instance) {
-//        // No-op: implementation may be overridden by concrete class
-//    }
-
     /**
      * Returns the source context that owns this dependency metadata.
      * This identifies the context in which this component is being managed.
@@ -274,19 +263,19 @@ public interface IDependencyMetaData
 //    }
 
 
-    default boolean hasInstanceFromDependencyClass(IDependencyClass<CLASS> dependencyClass){
-        return false;
+
+
+    default int calculateDepth(CLASS dependencyClass, Set<CLASS> dependencyClassSet){
+        return 0;
     }
 
-    default DependencyRole determineRole(Set<IDependencyClass<CLASS>> dependencyClassSet){
+    default DependencyRole determineRole(Set<CLASS> dependencyClassSet){
         return DependencyRole.ISOLATED;
     }
 
 
 
-    default int calculateDepth(IDependencyClass<CLASS> dependencyClass, Set<IDependencyClass<CLASS>> dependencyClassSet){
-        return 0;
-    }
+
 
     default String getDependencyMetaDataSummary(){
         return "";
