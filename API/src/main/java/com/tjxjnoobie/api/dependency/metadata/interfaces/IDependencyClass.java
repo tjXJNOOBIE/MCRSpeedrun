@@ -17,15 +17,26 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.UUID;
 
-public interface IDependencyClass<CLASS extends IDependencyClass<?>> {
+public interface IDependencyClass<CLASS> {
     //TODO: Extend Class "class" object wrapping to another class so DependencyInstance
     // or any other class can use the wrappings so we don't have to delegate .getClass()
     // to get to our typed class
-    default IDependencyClass<CLASS> getDependencyClass() {
+
+
+
+
+
+
+
+    default UUID getDependencyId(){
         return null;
     }
 
-    default UUID getDependencyId(){
+    default CLASS getDependencyClass(){
+        return null;
+    }
+
+    default Class<?> getDependencyRawInterface(){
         return null;
     }
 
@@ -33,8 +44,11 @@ public interface IDependencyClass<CLASS extends IDependencyClass<?>> {
         return null;
     }
 
-    default void setDependencyClass(IDependencyClass<CLASS> dependencyClass){
-        // Implementation overridden in concrete class
+
+
+
+    default void setDependencyClass(Class<?> dependencyClass){
+
     }
 
     default void setDependencyId(UUID dependencyId) {
