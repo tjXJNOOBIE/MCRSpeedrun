@@ -26,88 +26,105 @@ public class DependencyInstance<INSTANCE>
         implements IDependencyInstance<INSTANCE> {
 
     INSTANCE instance;
-    Supplier<INSTANCE> dependencyFactory;
+    Supplier<?> dependencySupplier;
     Class<?> dependencyConcrete;
+    IDependencyInstance<INSTANCE> dependencyInstance;
 
     public DependencyInstance() {
         Log.info(LogColor.BOLD + "[DependencyInstance] " + LogColor.CYAN + "constructed with no concrete class");
     }
+
+    /** Constructor for immediate binding (pre-instantiated or factory-provided) */
+    public DependencyInstance(Supplier<INSTANCE> supplier, Class<?> dependencyConcrete) {
+        this.dependencySupplier = supplier;
+        this.instance = (INSTANCE) dependencyConcrete;
+        this.dependencyConcrete = instance != null ? (Class<? extends INSTANCE>) instance.getClass() : null;
+
+        Log.info(LogColor.BOLD + "[DependencyInstance] Bound to concrete: " +
+                LogColor.GREEN + (instance != null ? instance.getClass().getSimpleName() : "null"));
+    }
     public DependencyInstance(Class<?> dependencyConcrete) {
+        if(dependencyConcrete != null) {
+        Log.info("[DependencyInstance] Trying to constucut DependencyInstance Constructor for -> " + dependencyConcrete.getClass().getSimpleName());
+        createDefaultSupplier(dependencyConcrete);
         this.dependencyConcrete = dependencyConcrete;
-        Log.info(LogColor.BOLD + "[DependencyInstance] " +
+        this.instance = (INSTANCE) this.dependencySupplier.get();
+        Log.success(LogColor.BOLD + "[DependencyInstance] " +
                  "bound to concrete: " + LogColor.GREEN +
-                 (dependencyConcrete != null ? dependencyConcrete.getName() : "null"));
+                 (dependencyConcrete != null ? dependencySupplier.get().getClass().getName() : "null"));
+    }
+        Log.error(LogColor.RED + "[DependencyInstance] dependencyConcrete is null during constructor creation");
+
     }
     @Override
-    public INSTANCE getDependencyInstance() {
-        if (dependencyFactory == null) {
+    public Supplier<?> getDependencyInstance() {
+        if (dependencySupplier == null) {
             Log.error(LogColor.BOLD + "[DependencyInstance] " + LogColor.RED + "dependencyFactory is null" +
                       " — call " + LogColor.YELLOW + "setDependencySupplier(...)" + " first.");
             return null;
         }
         Log.info(LogColor.BOLD + "[DependencyInstance] " + "fetching " + LogColor.BLUE + "instance");
-        return dependencyFactory.get();
+        return dependencySupplier;
     }
 
 
     @Override
-    public Supplier<INSTANCE> getDependencySupplier() {
-        return dependencyFactory;
+    public Supplier<?> getDependencySupplier() {
+        return dependencySupplier;
     }
 
     @Override
-    public void setDependencyInstance(INSTANCE instance) {
-        this.instance = instance;
+    public void setDependencyInstance(Class<?> instance) {
+        if(instance != null){
+        Log.warn("[DependencyInstance] Trying to set " + LogColor.YELLOW + "instance" + LogColor.GREEN + "instance: " + LogColor.CYAN + instance.getClass().getSimpleName());
+        this.instance = (INSTANCE) instance;
+        this.instance = (INSTANCE) dependencyInstance;
+        Log.success(LogColor.BOLD + "[DependencyInstance] " + "instance set to " + LogColor.GREEN + instance.getClass().getSimpleName());
     }
-
-    @Override
-    public void setDependencySupplier(Class<?> dependencyInstance) {
-        this.dependencyFactory = () -> (INSTANCE) dependencyConcrete;
-
-    }
-
-    @Override
-    public void setDependencySupplier(INSTANCE dependencyFactory) {
-        this.dependencyFactory = () -> dependencyFactory;
-        Log.info(LogColor.BOLD + "[DependencyInstance] " + "supplier set from " + LogColor.GREEN + "INSTANCE" +
-                 ": " + LogColor.CYAN + (dependencyFactory != null ? dependencyFactory.getClass().getName() : "null"));
-    }
-
-    @Override
-    public INSTANCE getOrCreateDependencyInstance() {
-        if (dependencyFactory == null) {
-            Log.error(LogColor.BOLD + "[DependencyInstance] " + LogColor.RED + "cannot create instance" +
-                      " — " + LogColor.YELLOW + "dependencyFactory" + " is null");
-            return null;
         }
-        if (instance == null) {
-            Log.info(LogColor.BOLD + "[DependencyInstance] " + "creating " + LogColor.BLUE + "new instance");
-            instance = dependencyFactory.get();
-        } else {
-            Log.info(LogColor.BOLD + "[DependencyInstance] " + "returning " + LogColor.GREEN + "cached instance");
+
+    @Override
+    public void setDependencySupplier(Class<?> dependencyClass) {
+        if (dependencyClass == null) {
+            Log.error("[DependencyInstance] Null dependencyClass in setDependencySupplier()");
+            return;
         }
-        return instance;
+        this.dependencySupplier = () -> (INSTANCE) dependencyConcrete;
+        Log.warn(LogColor.BOLD + "[DependencyInstance] " + "supplier set from " + LogColor.YELLOW + "Class<?>" +
+                ": " + LogColor.CYAN + (dependencyClass != null ? dependencyClass.getSimpleName() : "null"));
     }
+
+//    @Override
+//    public void setDependencySupplier(INSTANCE dependencyFactory) {
+//        this.dependencyFactory = () -> dependencyFactory;
+//        Log.info(LogColor.BOLD + "[DependencyInstance] " + "supplier set from " + LogColor.GREEN + "INSTANCE" +
+//                 ": " + LogColor.CYAN + (dependencyFactory != null ? dependencyFactory.getClass().getName() : "null"));
+//    }
+
 
     @Override
     public INSTANCE refreshDependencyInstance() {
-        if (dependencyFactory == null) {
+        if (dependencySupplier == null) {
             Log.error(LogColor.BOLD + "[DependencyInstance] " + LogColor.RED + "cannot refresh instance" +
                       " — " + LogColor.YELLOW + "dependencyFactory" + " is null");
             return null;
         }
         Log.warn(LogColor.BOLD + "[DependencyInstance] " + "refreshing " + LogColor.BLUE + "instance");
-        instance = dependencyFactory.get();
+        instance = (INSTANCE) dependencySupplier;
         return instance;
     }
 
     @Override
     public void rebindFactory(Supplier<INSTANCE> newFactory) {
-        this.dependencyFactory = newFactory;
+        this.dependencySupplier = newFactory;
         Log.info(LogColor.BOLD + "[DependencyInstance] " + "rebound " + LogColor.YELLOW + "factory" +
                  " and " + LogColor.BLUE + "refreshing instance");
         refreshDependencyInstance();
     }
-
-
+    private void createDefaultSupplier(Class<?> type) {
+        dependencySupplier = () -> type ;
+        }
 }
+
+
+
