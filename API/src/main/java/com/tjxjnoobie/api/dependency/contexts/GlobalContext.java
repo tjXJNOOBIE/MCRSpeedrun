@@ -265,9 +265,7 @@ public class GlobalContext extends AbstractContext<IGlobalContext> implements IG
     }
 
     
-    public InterfaceManager getInterfaceManager() {
-        return interfaceManager;
-    }
+   
 
 
     // Setters that return the context for method chaining
