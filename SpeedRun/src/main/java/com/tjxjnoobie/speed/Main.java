@@ -115,9 +115,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         
         // ===== PHASE 2: DI Initialization =====
         Log.info("[Main] ===== Phase 2: DI Initialization =====");
-        iGlobalContext = new GlobalContext();
-        iSpeedContext = new SpeedRunContext();
-        
+
         // Register Plugin in both contexts so it's available everywhere
 
 
