@@ -1,0 +1,114 @@
+package com.tjxjnoobie.api.dependency.injection.helpers;
+
+import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingRedisService;
+import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingUtilsService;
+import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingVelocityMainService;
+import com.tjxjnoobie.api.dependency.injection.helpers.multiplefixtures.DelegatingMultiInterfaceService;
+import com.tjxjnoobie.api.dependency.maps.DependencyMap;
+import com.tjxjnoobie.api.interfaces.IRedis;
+import com.tjxjnoobie.api.interfaces.IUtils;
+import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
+import com.tjxjnoobie.api.platform.velocity.startup.interfaces.IVelocityMain;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class DependencyInjectorHelperIntegrationTest {
+    private static final String FIXTURE_PACKAGE = "com.tjxjnoobie.api.dependency.injection.helpers.fixtures";
+    private static final String MULTI_FIXTURE_PACKAGE = "com.tjxjnoobie.api.dependency.injection.helpers.multiplefixtures";
+
+    @BeforeEach
+    void resetState() {
+        DependencyMap.getDependencyMap().clear();
+        DelegatingRedisService.reset();
+        DelegatingVelocityMainService.reset();
+        DelegatingMultiInterfaceService.reset();
+    }
+
+    @AfterEach
+    void clearMap() {
+        DependencyMap.getDependencyMap().clear();
+    }
+
+    @Test
+    void scansAnnotatedFixturesAndRegistersRealProjectInterfaces() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+
+        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
+        helper.scanPackage(FIXTURE_PACKAGE, getClass().getClassLoader());
+        helper.registerDependenciesViaAnnotation();
+
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(IRedis.class));
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(IUtils.class));
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(IVelocityMain.class));
+
+        IRedis redis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
+        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
+        IVelocityMain velocityMain = DependencyMap.getDependencyMap().getInstance(IVelocityMain.class);
+
+        assertNotNull(redis);
+        assertNotNull(utils);
+        assertNotNull(velocityMain);
+
+        redis.connectToRedis();
+        redis.disconnectFromRedis();
+        utils.createServerID();
+        utils.createGameID();
+        utils.setConfigValue("mode", "integration");
+        velocityMain.onProxyInitialization(null);
+        velocityMain.registerCommand("ping", null, null, "p");
+
+        assertEquals(1, DelegatingRedisService.getConnectCalls());
+        assertEquals(1, DelegatingRedisService.getDisconnectCalls());
+        assertEquals("server-generated", utils.getServerID());
+        assertEquals("game-generated", utils.getGameID());
+        assertEquals("integration", utils.getConfigValues().get("mode"));
+        assertEquals(1, DelegatingVelocityMainService.getInitializationCalls());
+        assertEquals("ping", DelegatingVelocityMainService.getLastCommand());
+        assertEquals(1, DelegatingVelocityMainService.getLastAliasCount());
+    }
+
+    @Test
+    void scansMultiInterfaceFixtureAndRegistersEveryDeclaredInterfaceAgainstTheSameSingleton() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+
+        helper.BASE_PACKAGE = MULTI_FIXTURE_PACKAGE;
+        helper.scanPackage(MULTI_FIXTURE_PACKAGE, getClass().getClassLoader());
+        helper.registerDependenciesViaAnnotation();
+
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(IRedis.class));
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(IUtils.class));
+        assertTrue(DependencyMap.getDependencyMap().isRegistered(ILocalServerMetaData.class));
+
+        IRedis redis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
+        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = DependencyMap.getDependencyMap().getInstance(ILocalServerMetaData.class);
+
+        assertNotNull(redis);
+        assertNotNull(utils);
+        assertNotNull(localServerMetaData);
+        assertSame(redis, utils);
+        assertSame(redis, localServerMetaData);
+
+        redis.connectToRedis();
+        utils.createServerID();
+        utils.createGameID();
+        utils.setConfigValue("surface", "annotation-multi");
+        localServerMetaData.setServerID("delegated-local-server");
+
+        assertEquals(1, DelegatingMultiInterfaceService.getConnectCalls());
+        assertEquals("delegated-local-server", utils.getServerID());
+        assertEquals("delegated-local-server", localServerMetaData.getLocalServerID());
+        assertEquals("annotated-multi-game", localServerMetaData.getGameID());
+        assertEquals("annotation-multi", utils.getConfigValues().get("surface"));
+        assertEquals("annotated-multi-4", utils.generateRandomID(4));
+    }
+
+    private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<Object, Object> {
+    }
+}
