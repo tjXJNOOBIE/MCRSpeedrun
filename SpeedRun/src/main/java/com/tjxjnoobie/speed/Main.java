@@ -1,9 +1,8 @@
 package com.tjxjnoobie.speed;
 
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -13,16 +12,12 @@ import com.tjxjnoobie.api.listeners.BlockPlaceListener;
 import com.tjxjnoobie.api.listeners.ChatListener;
 import com.tjxjnoobie.api.listeners.CoreJoinListener;
 import com.tjxjnoobie.api.listeners.CoreQuitListener;
-import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.managers.FairFight;
 import com.tjxjnoobie.speed.Commands.*;
 import com.tjxjnoobie.speed.Events.bukkit.*;
-import com.tjxjnoobie.speed.managers.SpeedRunContext;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.entity.Player;
@@ -35,58 +30,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 
-@Injectable("Main class for Minecraft Speedrun Module")
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, MainInterFace, IDependencyMap {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, IDependencyInterface<IRedis> {
 
-    private IContext<IGlobalContext> iGlobalContext;
-    private IContext<ISpeedRunContext> iSpeedContext;
 
-     @Inject private IGameState gameState;
-     @Inject private IGameMode gameMode;
-     @Inject private IGameManager gameManager;
-     @Inject private IPlayerManager playerManager;
-     @Inject private IUtils utils;
-     @Inject private ISpeedrunStatsCache statsCache;
-     @Inject private IWorldManager worldManager;
-     @Inject private ILocationCache locationCache;
-     @Inject private ISpeedRunJoinEvent joinEvent;
-     @Inject private IQuitEvent quitEvent;
-     @Inject private IMCUtils mcUtils;
-     @Inject private IRatingCache ratingCache;
-     @Inject private IRating rating;
-     @Inject private IRatingAPI ratingAPI;
-     @Inject private IRankMC rankMC;
-     @Inject private IPlayerProfile playerProfile;
-     @Inject private IRank rank;
-     @Inject private IDebugger debugger;
-     @Inject private ISoundManager soundManager;
-     @Inject private IRankCache rankCache;
-     @Inject private IRetentionManager retentionManager;
-     @Inject private IRedis redis;
-     @Inject private IDebug debug;
-     @Inject private IVoting voting;
-     @Inject private ISpeedRunContext speedRunContext;
-     @Inject private IGlobalContext globalContext;
-     @Inject private BlockPlaceListener blockPlaceHandler;
-     @Inject private CoreJoinListener coreJoinListener;
-     @Inject private static MainInterFace mainInterFace;
-     @Inject private IBossBarManager bossBarManager;
-     @Inject private IInventoryBuilder inventoryBuilder;
-     @Inject private IInventoryManager inventoryManager;
-     @Inject private IProxyUtils proxyUtils;
-     @Inject private IGameType gameType;
-     @Inject private IStatsManager statsManager;
-     @Inject private ILobbyStatsCache lobbyStatsCache;
-     @Inject private ISpeedrunStatsCache speedrunStatsCache;
-     @Inject private IPunishManager punishManager;
-     @Inject private IPunishLog punishLog;
-     @Inject private FireEvent fireEvent;
-     @Inject private ILocalServerMetaData localServerMetaData;
+
+      private IGameState gameState;
+      private IGameMode gameMode;
+      private IGameManager gameManager;
+      private IDebugger debugger;
+      private IRetentionManager retentionManager;
+      private BlockPlaceListener blockPlaceHandler;
+      private IGameType gameType;
      public static Plugin plugin;
      private static Main instance;
      private static final String CHANNEL = "factions:sync";
@@ -103,7 +61,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // We create a temporary helper just to run autoBind on Main
         try {
             injectionHelper.setupDISystem(this);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (Throwable e) {
             Log.exception(e);
         }
         // ===== PHASE 1: Pre-DI Setup (No dependencies needed) =====
@@ -119,8 +77,6 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // Register Plugin in both contexts so it's available everywhere
 
 
-        //TODO: Update logging to use entire context register size instead of one context
-        Log.info("[Main] Registered contexts: " + iGlobalContext.getAllContexts().size());
         Log.success("[Main] ===== DI Initialization Complete =====");
         
         // ===== PHASE 3: Post-DI Setup (Dependencies now available) =====
@@ -222,7 +178,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
     }
 
     // getContext() is now provided by ContextAccess default implementation
-    // It automatically finds the @Inject IGlobalContext globalContext field
+    // It automatically finds the  IGlobalContext globalContext field
 
 
     public void registerEvents() {
@@ -292,8 +248,3 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
 
 
 }
-
-
-
-
-

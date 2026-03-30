@@ -1,9 +1,11 @@
 package com.tjxjnoobie.speed.managers;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
 import com.tjxjnoobie.api.enums.GameStateEnum;
-import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.interfaces.IGameState;
+import com.tjxjnoobie.api.interfaces.IRankCache;
+import com.tjxjnoobie.api.interfaces.IVoting;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -17,7 +19,6 @@ public class Voting implements IVoting, IMCUtils, IRankCache, IGameState {
     public HashMap<String, Integer> voting = new HashMap<>();
     public ArrayList<UUID> voted = new ArrayList<>();
     public String winner;
-    @Inject private ISpeedRunContext speedRunContext;
     private Plugin plugin;
 
 
@@ -62,26 +63,26 @@ public class Voting implements IVoting, IMCUtils, IRankCache, IGameState {
             return;
         }
         
-        if (getRank(uuid).equals("Developer") || getRank(uuid).equals("Owner")
-                || getRank(uuid).equals("HeadAdmin")) {
+        if (getCachedRank(uuid).equals("Developer") || getCachedRank(uuid).equals("Owner")
+                || getCachedRank(uuid).equals("HeadAdmin")) {
             addVote(gamemode, getVotes(gamemode) + 100);
-        } else if (getRank(uuid).equals("Mod") || getRank(uuid).equals("SrMod")
-                || getRank(uuid).equals("Admin")) {
+        } else if (getCachedRank(uuid).equals("Mod") || getCachedRank(uuid).equals("SrMod")
+                || getCachedRank(uuid).equals("Admin")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (getRank(uuid).equals("Partner")) {
+        } else if (getCachedRank(uuid).equals("Partner")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (getRank(uuid).equals("Premier")) {
+        } else if (getCachedRank(uuid).equals("Premier")) {
             addVote(gamemode, getVotes(gamemode) + 10);
-        } else if (getRank(uuid).equals("Prime")) {
+        } else if (getCachedRank(uuid).equals("Prime")) {
             addVote(gamemode, getVotes(gamemode) + 5);
-        } else if (getRank(uuid).equals("Premium")) {
+        } else if (getCachedRank(uuid).equals("Premium")) {
             addVote(gamemode, getVotes(gamemode) + 3);
-        } else if (getRank(uuid).equals("Supporter")) {
+        } else if (getCachedRank(uuid).equals("Supporter")) {
             addVote(gamemode, getVotes(gamemode) + 2);
         } else {
             addVote(gamemode, getVotes(gamemode) + 1);
         }
-        System.out.println(uuid.toString()+" is a " +getRank(uuid)+" voting");
+        System.out.println(uuid.toString()+" is a " + getCachedRank(uuid)+" voting");
 
     }
 

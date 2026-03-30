@@ -1,10 +1,10 @@
 package com.tjxjnoobie.speed.managers;
 
-import com.tjxjnoobie.api.abstracts.AbstractGameStateManager;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.minecraft.abstracts.AbstractGameStateManager;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class GameManager extends AbstractGameStateManager<ISpeedRunContext> implements IGameManager, IWorldManager, 
+public class GameManager extends AbstractGameStateManager implements IGameManager, IWorldManager,
         IMCUtils, IGameState, IGameType, IGameMode, IBossBarManager, IVoting {
     //TODO: Better abstract and compose implmentations
     //TODO: Condense maps to use AbstractRegistry
@@ -62,11 +62,8 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
     public boolean canMove = true;
     public GameStateEnum gameStateEnum;
 
-    @Inject
-    private SpeedRunContext speedRunContext;
-    @Inject
-    private IGlobalContext globalContext;
-    @Inject
+
+
     private Plugin plugin; // Will be injected automatically from context
     private BukkitTask lobbyTimer;
     private BukkitTask lobby;
@@ -723,5 +720,3 @@ public class GameManager extends AbstractGameStateManager<ISpeedRunContext> impl
 
     }
 }
-
-
