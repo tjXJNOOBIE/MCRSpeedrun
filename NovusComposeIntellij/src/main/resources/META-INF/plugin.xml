@@ -1,0 +1,19 @@
+<idea-plugin require-restart="false">
+    <id>com.tjxjnoobie.novus.compose.intellij</id>
+    <name>Novus Compose IntelliJ</name>
+    <vendor email="tjxjnoobie@gmail.com">TJ</vendor>
+    <description>Instant composed interface regeneration and diagnostics for Novus DI domains.</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <postStartupActivity implementation="com.tjxjnoobie.tools.novuscompose.service.NovusComposeStartupActivity"/>
+        <localInspection language="JAVA"
+                         shortName="ComposesToInterfaceInspection"
+                         displayName="ComposesToInterface diagnostics"
+                         groupName="Novus DI"
+                         enabledByDefault="true"
+                         implementationClass="com.tjxjnoobie.tools.novuscompose.inspection.ComposesToInterfaceInspection"/>
+    </extensions>
+</idea-plugin>
