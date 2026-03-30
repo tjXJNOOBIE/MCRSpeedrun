@@ -1,10 +1,7 @@
 package com.tjxjnoobie.kingdomFactions.Events;
 
 
-
 import com.tjxjnoobie.api.interfaces.BlockPlaceHandler;
-import com.tjxjnoobie.api.interfaces.InterfaceManager;
-import com.tjxjnoobie.api.interfaces.MainInterFace;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,18 +19,14 @@ import java.io.IOException;
 public class BlockPlace implements Listener, BlockPlaceHandler {
 
     private Plugin plugin;
-    private MainInterFace mainInterFace;
     private BlockPlaceHandler blockPlaceHandler;
 
     public BlockPlace(){
 
     }
 
-    public BlockPlace(Plugin plugin, MainInterFace mainInterFace) {
+    public BlockPlace(Plugin plugin ) {
         this.plugin = plugin;
-        this.mainInterFace = mainInterFace;
-
-
 
     }
 
@@ -50,7 +43,6 @@ public class BlockPlace implements Listener, BlockPlaceHandler {
             dataOut.writeInt(location.getBlockY());
             dataOut.writeInt(location.getBlockZ());
             dataOut.writeUTF(e.getBlock().getType().name());
-            mainInterFace = InterfaceManager.getMainInterFace();
             // mainInterFace.sendPluginMessage(out.toByteArray());
         } catch (IOException io) {
             io.printStackTrace();
@@ -73,4 +65,3 @@ public class BlockPlace implements Listener, BlockPlaceHandler {
     }
 
 }
-

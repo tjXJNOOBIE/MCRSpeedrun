@@ -1,13 +1,11 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
-import com.tjxjnoobie.api.dependency.contexts.GlobalContext;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
-import com.tjxjnoobie.api.interfaces.ChatHandler;
 import com.tjxjnoobie.api.interfaces.IGameType;
 import com.tjxjnoobie.api.interfaces.ILobbyStatsCache;
 import com.tjxjnoobie.api.interfaces.IRankCache;
+import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.platform.minecraft.core.interfaces.ChatHandler;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -21,9 +19,8 @@ import java.util.Map;
 import java.util.UUID;
 
 
-public class ChatEvent implements Listener, ChatHandler {
+public class ChatEvent implements Listener, ChatHandler, IRankCache, IGameType, ILobbyStatsCache {
 
-    @Inject private  GlobalContext globalContext;
     private final Map<String, String> chatFormats = new HashMap<>();
     private final Map<String, String> placeholders = new HashMap<>();
 
@@ -44,15 +41,13 @@ public class ChatEvent implements Listener, ChatHandler {
     @EventHandler
     @Override
     public void onChat(AsyncChatEvent e) {
-        IRankCache rankCache = globalContext.getRankCache();
-        IGameType gameType = globalContext.getGameType();
-        ILobbyStatsCache lobbyStatsCache = globalContext.getLobbyStatsCache();
-        GameTypeEnum currentType = gameType.getGameType();
+
+        GameTypeEnum currentType = getGameType();
 
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         String plainTextMessage = PlainTextComponentSerializer.plainText().serialize(e.message());
-        String grade = "&8[&c" + lobbyStatsCache.getGlobalGrade(uuid) + "&8]";
+        String grade = "&8[&c" + getGlobalGrade(uuid) + "&8]";
         String template = "";
 
         // Create a fresh placeholders map for each event
@@ -62,11 +57,11 @@ public class ChatEvent implements Listener, ChatHandler {
         placeholders.put("grade", grade);
 
         // Determine which template to use
-        if (rankCache.getRank(uuid).equals("Member")) {
+        if (getCachedRank(uuid).equals("Member")) {
             template = chatFormats.get("defaultLobby");
-        } else if (rankCache.getPowerLevel(uuid) <= 500) {
+        } else if (getCachedPowerLevel(uuid) <= 500) {
             template = chatFormats.get("DonorLobby");
-        } else if (rankCache.isStaff(uuid)) {
+        } else if (isStaff(uuid)) {
             template = chatFormats.get("StaffLobby");
         }
 
@@ -88,7 +83,3 @@ public class ChatEvent implements Listener, ChatHandler {
         return template;
     }
 }
-
-
-
-

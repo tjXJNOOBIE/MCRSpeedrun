@@ -3,6 +3,8 @@ package com.tjxjnoobie.core.Events;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.minecraft.core.interfaces.CoreJoinHandler;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,7 +17,6 @@ import java.util.UUID;
 public class CoreJoin implements Listener, CoreJoinHandler, IMCUtils {
 
 
-    @Inject private IGlobalContext globalContext;
     @Inject private IGameState iGameState;
     @Inject private IRankCache rankCache;
     @Inject private IRankMC rankMC;

@@ -1,7 +1,7 @@
 package com.tjxjnoobie.core.Events;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.interfaces.CoreQuitHandler;
+import com.tjxjnoobie.api.platform.minecraft.core.interfaces.CoreQuitHandler;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.interfaces.IRetentionManager;
 import org.bukkit.event.EventHandler;
