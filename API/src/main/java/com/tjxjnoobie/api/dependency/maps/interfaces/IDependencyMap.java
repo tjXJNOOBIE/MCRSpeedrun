@@ -9,99 +9,33 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyClass;
-import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyInstance;
+import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+public interface IDependencyMap {
 
-/**
- * Interface defining the contract for dependency management operations.
- * All methods are abstract and provide no default implementation. Concrete
- * implementations must define the actual behavior of registering, retrieving,
- * checking, and managing dependencies.
- */
-public interface IDependencyMap<CLASS, INSTANCE>
-        extends IDependencyClass<CLASS>, IDependencyInstance<INSTANCE> {
-
-
-
-
-//    default  IDependencyMap<CLASS, INSTANCE> registerDependencyInstance(INSTANCE dependencyInstance) {
-//        return null;
-//    }
-//
-//    default  IDependencyMap<CLASS, INSTANCE> registerDependencyClass(CLASS dependencyClass) {
-//        return null;
-//    }
-
-
-//    default <ENTRYCLASS extends CLASS, ENTRYINSTANCE extends INSTANCE> void registerDependency(ENTRYCLASS dependencyClass, ENTRYINSTANCE dependencyInstance) {
-//
-//    }
-
-    default void registerDependency(Class<?> dependencyClass, Class<?> dependencyInstance){
-
-    }
-
-    default void removeDependency(CLASS dependencyClass) {
-
-    }
-
-    default boolean isRegistered(CLASS dependencyClass) {
+    default boolean isRegistered(Class<?> dependencyInterface) {
         return false;
     }
 
+    default void registerDependency(Class<?> rawDependencyInterface, IDependencyMetaData<?, ?> dependencyMetaData) {
+    }
 
-    default Set<CLASS> getClassesAsSet() {
+    default <T> IDependencyMetaData<?, ?> getMetaData(Class<T> dependencyInterface) {
         return null;
     }
 
-    default List<CLASS> getClassesAsList() {
+    default <T> T getInstance(Class<T> dependencyInterface) {
         return null;
     }
 
-    default Collection<CLASS> getClassesAsCollection() {
-        return null;
+    default void removeDependency(Class<?> dependencyInterface) {
     }
 
-    @SuppressWarnings("unchecked")
-    default CLASS[] getClassesAsArray() {
-        return null;
-    }
-
-    default Set<INSTANCE> getInstancesAsSet() {
-        return null;
-    }
-
-    default List<INSTANCE> getInstancesAsList() {
-        return null;
-    }
-
-    default Collection<INSTANCE> getInstancesAsCollection() {
-        return null;
-    }
-    @SuppressWarnings("unchecked")
-    default INSTANCE[] getInstancesAsArray() {
-        return null;
-    }
-
-
-    default DependencyMap<CLASS,INSTANCE> getDependencyMap() {
-        return null;
-    }
-
-
-
-
-    /**
-     * Gets the total number of registered dependencies in this map.
-     *
-     * @return The number of dependencies currently registered
-     */
     default int getDependencyMapSize() {
         return 0;
+    }
+
+    default boolean isDependencyMapEmpty() {
+        return false;
     }
 }

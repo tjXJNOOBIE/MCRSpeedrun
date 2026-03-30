@@ -15,12 +15,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a concrete class should be registered as the delegate for the supplied interface type.
+ * Indicates that a concrete class should be registered as the delegate for one or more supplied interface types.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DelegatesToInterface {
 
-    Class<?> getClassForDelegation();
+    Class<?> getLinkedInterface() default Void.class;
+
+    Class<?>[] getLinkedInterfaces() default {};
 
 }

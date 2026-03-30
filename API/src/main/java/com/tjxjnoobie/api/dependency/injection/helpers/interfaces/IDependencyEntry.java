@@ -7,17 +7,14 @@
  * SEE LICENSE.TXT
  */
 
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.dependency.injection.helpers.interfaces;
 
 /**
- * InterfaceInjector – TODO: implement class functionality
+ * IDpendencyEntry – TODO: implement class functionality
  * Auto-generated skeleton by MondayGPT-style template
  *
  * @author TJ
- * @since 10/2/2025
+ * @since 11/16/2025
  */
-public class InterfaceInjector {
-
-
-
+public interface IDependencyEntry {
 }

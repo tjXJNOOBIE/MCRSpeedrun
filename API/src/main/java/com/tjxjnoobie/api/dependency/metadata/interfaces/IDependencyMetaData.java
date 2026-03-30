@@ -10,7 +10,8 @@
 package com.tjxjnoobie.api.dependency.metadata.interfaces;
 
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
-import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.interfaces.IContext;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
@@ -19,265 +20,120 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Contract interface for dependency metadata representing a component's role, depth, and relationships
- * within the dependency graph. This interface defines the standard operations for managing
- * dependency resolution, lifecycle, and context ownership.
- *
- */
-public interface IDependencyMetaData<CLASS, INSTANCE >
-          extends IDependencyClass<CLASS>,
-        IDependencyInstance<INSTANCE>, IDependencyMap<CLASS,INSTANCE> {
+public interface IDependencyMetaData<INTERFACE, INSTANCE> {
 
-
-
-    default void populateMetaData(CLASS dependencyClass, INSTANCE dependencyInstance){
-
+    default void populateMetaData(
+            Class<? extends INTERFACE> rawDependencyInterface,
+            Class<? extends INSTANCE> rawDependencyConcrete,
+            IDependencyInterface<INTERFACE> wrappedInterface,
+            IDependencyInstance<INSTANCE> wrappedInstance) {
     }
-    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(){
+
+    default void createDependencyInstance(Class<? extends INSTANCE> dependencyInstance) {
+    }
+
+    default void setWrappedInterface(IDependencyInterface<INTERFACE> wrappedInterface) {
+    }
+
+    default void setWrappedInstance(IDependencyInstance<INSTANCE> wrappedInstance) {
+    }
+
+    default IDependencyInterface<INTERFACE> getWrappedInterface() {
         return null;
     }
 
-
-//    default IDependencyMetaData<T> getMetaData(IDependencyClass<T> dependencyClass) {
-//        return null;
-//    }
-
-//    /**
-//     * Returns the class of the dependency that this metadata represents.
-//     * This is the primary type being managed by the dependency graph.
-//     *
-//     * @return the class of the dependency
-//     */
-//    default IDependencyClass<T> getDependencyClass() {
-//        return null;
-//    }
-
-
-    default IDependencyMetaData<CLASS, INSTANCE> getDependencyMetaData(CLASS dependencyClass){
+    default IDependencyInstance<INSTANCE> getWrappedInstance() {
         return null;
     }
 
-    //TODO: Move to injection helper if working
-    default boolean isClassLoadable(Class<?> dependencyClass){
-        return false;
+    default Class<? extends INTERFACE> getPrimaryInterfaceType() {
+        return null;
     }
 
-    default EnumMap<LifecycleType, Method> detectLifecycleForClass(CLASS dependencyClass){
-        return  null;
+    default Class<? extends INSTANCE> getConcreteType() {
+        return null;
     }
 
-    /**
-     * Returns the set of classes that this component directly depends on.
-     * These are the types that must be resolved before this component can be initialized.
-     *
-     * @return a read-only set of dependency classes
-     */
-    default Set<CLASS> getSubDependencies() {
+    default INTERFACE getDependencyInterface() {
+        return null;
+    }
+
+    default INSTANCE getDependencyInstance() {
+        return null;
+    }
+
+    default <T> T getDependency(Class<T> dependencyType) {
+        return null;
+    }
+
+    default <T> T requireDependency(Class<T> dependencyType) {
+        return null;
+    }
+
+    default EnumMap<LifecycleType, Method> detectLifecycleForClass(INTERFACE dependencyClass) {
+        return null;
+    }
+
+    default Set<INTERFACE> getSubDependencies() {
         return new HashSet<>();
     }
 
-
-    /**
-     * Sets the direct dependencies of this component.
-     * This allows configuration of which types must be resolved prior to this component's initialization.
-     *
-     */
-    default void setSubDependencies(Set<CLASS> dependencyClassSet) {
-        // No-op: implementation may be overridden by concrete class
+    default void setSubDependencies(Set<INTERFACE> dependencyClassSet) {
     }
 
-
-    /**
-     * Returns the depth level of this component within the dependency resolution graph.
-     * Depth is used to determine the order of component initialization and resolution.
-     *
-     * @return the depth level (lower values mean earlier in the resolution order)
-     */
     default int getDepth() {
         return 0;
     }
 
-    /**
-     * Sets the depth level of this component within the dependency resolution graph.
-     * This influences the order in which components are resolved and initialized.
-     *
-     * @param depth the depth level (lower values mean earlier in the resolution order)
-     */
     default void setDepth(int depth) {
-        // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Returns the role assigned to this component in the dependency graph.
-     * Roles define responsibilities such as whether a component is a provider or consumer.
-     *
-     * @return the role of this component
-     */
     default DependencyRole getDependencyRole() {
         return DependencyRole.ISOLATED;
     }
 
-    /**
-     * Sets the role of this component in the dependency graph.
-     * This determines how the component behaves in the resolution and lifecycle management.
-     *
-     * @param dependencyRole the role assigned to this component
-     */
     default void setDependencyRole(DependencyRole dependencyRole) {
-        // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Returns the pre-construction method associated with this component.
-     * This method is invoked before the instance is fully constructed and is used for setup or validation.
-     *
-     * @return the pre-construction method, or null if not set
-     */
     default Method getPreConstruct() {
         return null;
     }
 
-    default Method getPostConstruct(){
+    default Method getPostConstruct() {
         return null;
     }
 
-    /**
-     * Sets the pre-construction method for this component.
-     * This method is called before the instance is initialized and is used for setup or validation.
-     *
-     * @param preConstruct the method to invoke before construction
-     */
     default void setPreConstruct(Method preConstruct) {
-        // No-op: implementation may be overridden by concrete class
     }
 
     default void setPostConstruct(Method preConstruct) {
-        // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Checks whether the pre-construction method executed successfully.
-     * This flag indicates whether the setup phase completed without errors.
-     *
-     * @return true if the pre-construction succeeded, false otherwise
-     */
     default boolean isPreConstructSuccess() {
         return false;
     }
 
-    /**
-     * Updates the success status of the pre-construction phase.
-     * This is used to track whether setup operations completed successfully.
-     *
-     * @param success true if the pre-construction succeeded, false otherwise
-     */
     default void setPreConstructSuccess(boolean success) {
-        // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Returns the number of retry attempts made for this component during initialization.
-     * Retries are used when dependency resolution fails and must be attempted again.
-     *
-     * @return the retry count
-     */
     default int getRetryCount() {
         return 0;
     }
 
-    /**
-     * Increments the retry count for this component.
-     * This is used to track how many times initialization has failed and been retried.
-     */
     default void incrementRetryCount() {
-        // No-op: implementation may be overridden by concrete class
     }
 
-    /**
-     * Returns the source context that owns this dependency metadata.
-     * This identifies the context in which this component is being managed.
-     *
-     * @return the source context, or null if not assigned
-     */
-    default IContext<CLASS> getSourceContext() {
+    default IContext<INTERFACE> getSourceContext() {
         return null;
     }
 
-    /**
-     * Assigns the source context that owns this dependency metadata.
-     * This is used to track which context is responsible for managing this component.
-     *
-     * @param ctx the context that owns this metadata
-     */
-    default void setSourceContext(IContext<CLASS> ctx) {
-        // No-op: implementation may be overridden by concrete class
+    default void setSourceContext(IContext<INTERFACE> ctx) {
     }
 
-    /**
-     * Returns the priority of this component within the dependency graph.
-     * Priority influences resolution and initialization precedence relative to other components.
-     *
-     * @return the priority value
-     */
     default int getPriority() {
         return 0;
     }
 
-    /**
-     * Sets the priority of this component within the dependency graph.
-     * Priority influences resolution and initialization precedence relative to other components.
-     *
-     * @param priority the priority value to assign
-     */
     default void setPriority(int priority) {
-
-    }
-
-
-
-    default void setRetryCount(int i){
-        // Implementation overridden in concrete class
-
-    }
-
-//    /**
-//     * Returns the factory supplier for creating instances of this dependency.
-//     * The factory is used to create new instances on demand rather than using a singleton.
-//     *
-//     * @return the factory supplier, or null if not set
-//     */
-//    default Supplier<?> getFactory() {
-//
-//        return null;
-//    }
-
-//    /**
-//     * Sets the factory supplier for creating instances of this dependency.
-//     * This allows dynamic instance creation rather than singleton behavior.
-//     *
-//     * @param factory the supplier that creates new instances
-//     */
-//    default void setFactory(Supplier<?> factory) {
-//        // No-op: implementation may be overridden by concrete class
-//    }
-
-
-
-
-    default int calculateDepth(CLASS dependencyClass, Set<CLASS> dependencyClassSet){
-        return 0;
-    }
-
-    default DependencyRole determineRole(Set<CLASS> dependencyClassSet){
-        return DependencyRole.ISOLATED;
-    }
-
-
-
-
-
-    default String getDependencyMetaDataSummary(){
-        return "";
     }
 }
