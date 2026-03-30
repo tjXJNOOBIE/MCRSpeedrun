@@ -11,6 +11,7 @@ package com.tjxjnoobie.api.platform.velocity.startup;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.interfaces.IRank;
@@ -41,7 +42,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
         name = "VelocityCore",
         version = "1.0"
 )
-public class VelocityEnabler extends DependencyMetaData<IRedis,Redis> implements IVelocityEnabler, IDependencyInterface<IVelocityEnabler> {
+public class VelocityEnabler extends DependencyMetaData<IRedis,Redis> implements IVelocityEnabler, IInfrastructureDomain, IDependencyInterface<IVelocityEnabler> {
 
     IDependencyInjectorHelper<?,?> injectorHelper = new DependencyInjectorHelper<>();
 
@@ -63,7 +64,7 @@ public class VelocityEnabler extends DependencyMetaData<IRedis,Redis> implements
             @Override
             public void run() {
                 Log.warn("Trying to connect to redis...");
-                getDependencyInterface().connectToRedis();
+                connectToRedis();
             }
         }.runTaskLaterAsync(15000L);
         new CustomRunnable() {

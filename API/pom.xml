@@ -34,6 +34,13 @@
               <configuration>
                   <source>21</source>
                   <target>21</target>
+                  <annotationProcessorPaths>
+                      <path>
+                          <groupId>com.tjxjnoobie</groupId>
+                          <artifactId>dependency-compose-processor</artifactId>
+                          <version>${project.version}</version>
+                      </path>
+                  </annotationProcessorPaths>
               </configuration>
           </plugin>
       </plugins>
