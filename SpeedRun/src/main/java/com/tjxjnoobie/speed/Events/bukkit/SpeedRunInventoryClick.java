@@ -1,6 +1,6 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IVoting;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;

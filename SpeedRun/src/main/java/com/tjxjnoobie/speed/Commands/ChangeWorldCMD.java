@@ -1,9 +1,7 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -15,19 +13,16 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-public class ChangeWorldCMD implements CommandExecutor, IMCUtils {
+public class ChangeWorldCMD implements CommandExecutor, IMCUtils, IRankCache {
 
-   @Inject
-   private IGlobalContext globalContext;
+
 
     @Override
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] args) {
 
         Player player = (Player) commandSender;
         UUID uuid = player.getUniqueId();
-        IRankCache rankCache = globalContext.getRankCache();
-        if(!rankCache.hasPermission(uuid,"core.world.change")||
-                rankCache.isAdmin(uuid)){
+        if(!hasCachedPermission(uuid,"core.world.change")|| isAdmin(uuid)){
             player.sendMessage(getMinecraftPrefix()+"No permission.");
             return false;
         }
@@ -52,4 +47,3 @@ public class ChangeWorldCMD implements CommandExecutor, IMCUtils {
         return true;
     }
     }
-

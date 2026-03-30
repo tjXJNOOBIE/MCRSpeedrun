@@ -2,6 +2,7 @@ package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,8 +12,6 @@ import java.util.UUID;
 
 public class AddPlayer implements CommandExecutor, IMCUtils {
 
-    @Inject private IGlobalContext globalContext;
-    @Inject private ISpeedRunContext speedRunContext;
     @Inject private IGameManager gameManager;
     @Inject IRankCache rankCache;
 
@@ -24,8 +23,8 @@ public class AddPlayer implements CommandExecutor, IMCUtils {
         Player player = (Player) commandSender;
         UUID uuid = UUID.randomUUID();
         String name = player.getName();
-        if(rankCache.getPowerLevel(player.getUniqueId()) >=10000
-          || rankCache.hasPermission(player.getUniqueId(), "speedrun.fakeplayer")) {
+        if(rankCache.getCachedPowerLevel(player.getUniqueId()) >=10000
+          || rankCache.hasCachedPermission(player.getUniqueId(), "speedrun.fakeplayer")) {
             if (length == 0) {
                 gameManager.addInGame(uuid, name);
                 player.sendMessage(getMinecraftStaffInGamePrefix() + "Added to game hash");

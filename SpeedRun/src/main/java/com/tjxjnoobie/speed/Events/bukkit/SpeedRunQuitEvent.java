@@ -2,6 +2,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -70,4 +71,3 @@ public class SpeedRunQuitEvent implements Listener, IMCUtils, IGameManager {
         }
         }
     }
-

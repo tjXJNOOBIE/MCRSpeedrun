@@ -13,8 +13,7 @@ import java.util.UUID;
 public class Debug implements CommandExecutor, IUtils, IDebug {
 
 
-    @Inject private IGlobalContext globalContext;
-    @Inject private ISpeedRunContext speedRunContext;
+
     @Inject private IGameState gameState;
     @Inject private IGameManager gameManager;
     @Inject private ILocationCache locationCache;
@@ -30,8 +29,8 @@ public class Debug implements CommandExecutor, IUtils, IDebug {
         UUID uuid = player.getUniqueId();
         String worldName = player.getWorld().getName();
         if(args.length== 0 && player.isOp()){
-            player.sendMessage("Rank: "+ rankCache.getRank(uuid));
-            player.sendMessage("Power Level: " + rankCache.getPowerLevel(uuid));
+            player.sendMessage("Rank: "+ rankCache.getCachedRank(uuid));
+            player.sendMessage("Power Level: " + rankCache.getCachedPowerLevel(uuid));
             player.sendMessage("ServerID: "+getServerID());
             player.sendMessage("GameID: "+getGameID());
             player.sendMessage("Playing: "+gameManager.getPlaying());
@@ -39,8 +38,8 @@ public class Debug implements CommandExecutor, IUtils, IDebug {
             player.sendMessage("Gamestate: "+ gameState.getCurrentState());
             player.sendMessage("Spawn: "+locationCache.getSpawn());
             player.sendMessage("Spawn World: " +worldManager.getSpawnWorld());
-            player.sendMessage("Permissions: " + rankCache.getPermissions(uuid));
-            player.sendMessage(InterfaceManager.getBlockPlaceHandler().toString());
+            player.sendMessage("Permissions: " + rankCache.getCachedPermissions(uuid));
+//            player.sendMessage(InterfaceManager.getBlockPlaceHandler().toString());
             player.sendMessage("Network debuggers: "+ debugger.getDebuggers());
             try {
                 retentionManager.updateRetentionRatings();
@@ -56,7 +55,3 @@ public class Debug implements CommandExecutor, IUtils, IDebug {
         return false;
     }
 }
-
-
-
-

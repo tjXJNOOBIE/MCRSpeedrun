@@ -1,8 +1,6 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IInventoryManager;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
+import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,8 +12,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class SpeedRunInventoryInteract implements Listener {
 
-    @Inject private ISpeedRunContext speedRunContext;
-    @Inject private IGlobalContext globalContext;
     @Inject private IInventoryManager inventoryManager;
 
 

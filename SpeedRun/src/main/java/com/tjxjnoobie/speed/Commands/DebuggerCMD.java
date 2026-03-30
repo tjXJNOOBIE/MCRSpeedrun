@@ -1,7 +1,8 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IDebugger;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
+import com.tjxjnoobie.api.interfaces.IRankCache;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -24,7 +25,7 @@ public class DebuggerCMD implements CommandExecutor, IMCUtils, IDebugger, IRankC
         String name = player.getName();
         boolean isDebugger = isDebugger(uuid);
         int length = args.length;
-        if(getPowerLevel(uuid) <= 10000 || hasPermission(uuid,"server.debugger")) {
+        if(getCachedPowerLevel(uuid) <= 10000 || hasCachedPermission(uuid,"server.debugger")) {
             if (length == 0 && !isDebugger) {
                 setDebugger(uuid, true);
                 player.sendMessage(getMinecraftStaffInGamePrefix() + "You are now a server debugger");

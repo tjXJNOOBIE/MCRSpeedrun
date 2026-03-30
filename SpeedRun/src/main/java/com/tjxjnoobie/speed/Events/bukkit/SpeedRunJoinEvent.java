@@ -4,6 +4,9 @@ import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
+import com.tjxjnoobie.api.platform.minecraft.speedrun.ISpeedrunStatsCache;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import com.tjxjnoobie.speed.Main;
 import org.bukkit.*;
 import org.bukkit.boss.BarColor;
@@ -22,7 +25,7 @@ import java.sql.SQLException;
 import java.util.UUID;
 
 public class SpeedRunJoinEvent implements Listener, IBossBarManager, IGameType, ILocationCache, IGameState, IGameManager, IRatingCache
-                        , IInventoryManager, IPlayerManager, IMCUtils, ISpeedrunStatsCache{
+                        , IInventoryManager, IPlayerManager, IMCUtils, ISpeedrunStatsCache {
     //TODO: Better compose/abstract interfaces
     public BukkitTask bossBar;
     

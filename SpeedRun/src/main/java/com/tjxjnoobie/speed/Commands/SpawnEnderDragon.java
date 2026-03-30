@@ -1,7 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Location;
@@ -21,7 +20,6 @@ public class SpawnEnderDragon implements CommandExecutor, IMCUtils, IRankCache {
 
 
    @Inject
-   private IGlobalContext globalContext;
 
 
     @Override
@@ -53,4 +51,3 @@ public class SpawnEnderDragon implements CommandExecutor, IMCUtils, IRankCache {
         enderDragon.setPhase(EnderDragon.Phase.HOVER);
     }
     }
-

@@ -1,7 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import com.tjxjnoobie.api.interfaces.IWorldManager;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import org.bukkit.Bukkit;
@@ -13,7 +12,7 @@ import org.bukkit.entity.Player;
 
 public class CreateWorld implements CommandExecutor, IMCUtils {
 
-    @Inject private IGlobalContext globalContext;
+
     @Inject IWorldManager worldManager;
 
     @Override

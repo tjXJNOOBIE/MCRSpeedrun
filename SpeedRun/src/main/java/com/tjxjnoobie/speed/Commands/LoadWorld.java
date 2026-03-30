@@ -2,6 +2,7 @@ package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -11,8 +12,7 @@ import java.util.UUID;
 
 public class LoadWorld implements CommandExecutor, IMCUtils, IUtils {
 
-    @Inject
-    private IGlobalContext globalContext;
+
     @Inject
     private IRankCache rankCache;
     @Inject
@@ -25,8 +25,8 @@ public class LoadWorld implements CommandExecutor, IMCUtils, IUtils {
         Player player = (Player) commandSender;
         UUID uuid = player.getUniqueId();
 
-        if (rankCache.getPowerLevel(uuid) >= 10000||
-           rankCache.hasPermission(uuid,"server.command.world")) {
+        if (rankCache.getCachedPowerLevel(uuid) >= 10000||
+           rankCache.hasCachedPermission(uuid,"server.command.world")) {
             if (length <= 1) {
                 player.sendMessage(getMinecraftPrefix() + "Usage: /world <load/unload> <worldname> [true/false]");
                 return false;
@@ -52,9 +52,3 @@ public class LoadWorld implements CommandExecutor, IMCUtils, IUtils {
     }
 
     }
-
-
-
-
-
-

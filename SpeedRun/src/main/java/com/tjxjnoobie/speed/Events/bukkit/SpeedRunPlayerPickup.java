@@ -2,6 +2,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,11 +17,6 @@ import java.util.UUID;
 
  public class SpeedRunPlayerPickup implements Listener, IMCUtils, IGameManager {
 
-    private final ISpeedRunContext speedRunContext;
-
-    public SpeedRunPlayerPickup(ISpeedRunContext speedRunContext) {
-        this.speedRunContext = speedRunContext;
-    }
 
     @EventHandler
     public void onPickup(EntityPickupItemEvent e) {

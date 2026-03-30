@@ -1,7 +1,5 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,7 +12,6 @@ import org.bukkit.entity.Player;
  */
 public class FireEvent implements CommandExecutor, IUtils {
 
-   @Inject private ISpeedRunContext speedRunContext;
 
 
 
@@ -54,4 +51,3 @@ public class FireEvent implements CommandExecutor, IUtils {
         return true;
     }
 }
-

@@ -3,6 +3,7 @@ package com.tjxjnoobie.speed.Commands;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +16,6 @@ import java.util.UUID;
 
 public class Vote implements CommandExecutor, IMCUtils {
 
-    @Inject private ISpeedRunContext speedRunContext;
     @Inject private IVoting voting;
     @Inject private IGameState gameState;
 
