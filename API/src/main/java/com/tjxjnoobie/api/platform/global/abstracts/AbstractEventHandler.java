@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.global.abstracts;
 
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;

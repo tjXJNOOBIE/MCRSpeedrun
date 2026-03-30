@@ -1,13 +1,12 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.global.abstracts;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
 
 /**
  * Abstract base class for all managers providing common functionality
  * @param <T> The context type this manager operates with
  */
-public abstract class AbstractManager<T extends IGlobalContext>  {
+public abstract class AbstractManager<T>  {
 
     @Inject protected T context;
     protected volatile boolean initialized = false;

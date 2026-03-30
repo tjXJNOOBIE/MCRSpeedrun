@@ -101,7 +101,7 @@ public abstract class AbstractRegistry<REG_TYPE extends RegistryType<REG_TYPE,RE
     @SuppressWarnings("unchecked")
     @Override
     public REG_DATA[] getRegistryDataByArray() {
-        return values().toArray((REG_DATA[]) new IRegistryData<?>[keySet().size()]);
+        return values().toArray((REG_DATA[]) new IRegistryData<?,?>[keySet().size()]);
     }
 
 

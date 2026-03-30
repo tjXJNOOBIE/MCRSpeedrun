@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.global.abstracts;
 
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.enums.*;
@@ -332,5 +332,3 @@ public abstract class AbstractEvent {
 
 
 }
-
-

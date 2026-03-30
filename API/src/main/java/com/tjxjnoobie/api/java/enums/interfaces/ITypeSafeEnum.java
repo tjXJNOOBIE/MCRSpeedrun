@@ -7,7 +7,7 @@
  * SEE LICENSE.TXT
  */
 
-package com.tjxjnoobie.api.platform;
+package com.tjxjnoobie.api.java.enums.interfaces;
 
-public enum FillerClass {
+public interface ITypeSafeEnum {
 }

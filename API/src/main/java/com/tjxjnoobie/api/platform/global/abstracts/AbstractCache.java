@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.global.abstracts;
 
 import com.tjxjnoobie.api.interfaces.ICacheStats;
 import com.tjxjnoobie.api.platform.cache.enums.CacheDomain;
@@ -204,4 +204,3 @@ public abstract class AbstractCache<K extends CacheKey<K>, V extends CacheValue<
     protected abstract ICacheStats create(int total, int alive, int expired);
 
 }
-

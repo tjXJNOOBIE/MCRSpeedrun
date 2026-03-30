@@ -12,7 +12,6 @@ package com.tjxjnoobie.api.platform.global.console;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.style.LogColors;
 import com.tjxjnoobie.api.platform.global.console.style.LogText;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.platform.global.metadata.AbstractLogMetaData;
 
 import java.util.HashSet;
@@ -23,7 +22,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Log extends AbstractLogMetaData<Log> {
     //TODO: Remove/finish testing of AbstractLogMetaData system
     @Inject
-    private IGlobalContext globalContext;
     private static final BlockingQueue<String> asyncQueue = new LinkedBlockingQueue<>();
     private static final Thread logThread;
 
