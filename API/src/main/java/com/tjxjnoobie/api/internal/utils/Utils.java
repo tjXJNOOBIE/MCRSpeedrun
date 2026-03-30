@@ -2,7 +2,6 @@ package com.tjxjnoobie.api.internal.utils;
 
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.IGameType;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
@@ -20,12 +19,11 @@ import java.util.Map;
 import java.util.TimeZone;
 
 
-public class Utils implements IUtils {
+public class Utils implements IUtils, IGameType {
 
     public final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     
-    @Inject private IGlobalContext globalContext;
     @Inject private ILocalServerMetaData localServerMetaData;
     @Inject private IGameType gameType;
 
@@ -44,13 +42,9 @@ public class Utils implements IUtils {
     }
 
 
-    @Override
-    public IGlobalContext getGlobalContext(){
-        return globalContext;
-    }
 
     @Override
-    public void setConfigValue(String key, Object value, IGlobalContext globalContext) {
+    public void setConfigValue(String key, Object value) {
         if (key != null && !key.trim().isEmpty()) {
             configValues.put(key, value);
         }
@@ -175,40 +169,25 @@ public class Utils implements IUtils {
         }
     }
 
-    @Override
-    public Map<String, Object> getConfigValues(IGlobalContext globalContext) {
-        //TODO: Remove context from parameters in favor of custom DI approach
-        if (globalContext == null) {
-            Log.error("[Config] Failed to get config values: GlobalContext is null");
-            return null;
-        }
-        return configValues;
-    }
 
 
 
-    @Override
-    public Object getConfigValue(IGlobalContext globalContext, String key) {
-        if (globalContext == null) {
-            Log.error("[Config] Failed to get config value: GlobalContext is null");
-            return null;
-        }
+
+    public Object getConfigValue(String key) {
         if (key == null || key.trim().isEmpty()) {
             Log.error("[Config] Failed to get key: key is null or key map is empty");
             return null;
 
         }
-        return getConfigValues(globalContext).get(key);
+        return getConfigValues().get(key);
     }
 
     @Override
-    public void setGameType(IGlobalContext globalContext, GameTypeEnum gameTypeEnum) throws SQLException {
-        if (globalContext == null) {
-            Log.error("[GameType] Failed to set game type: GlobalContext is null");
+    public void setGameType(GameTypeEnum gameTypeEnum) throws SQLException {
+        if (gameTypeEnum == null) {
+            Log.error("[GameType] Failed to set game type: gameTypeEnum is null");
             return;
         }
-        globalContext.getGameType().setGameType(gameTypeEnum, getServerID());
+        setGameType(gameTypeEnum, getServerID());
     }
 }
-
-

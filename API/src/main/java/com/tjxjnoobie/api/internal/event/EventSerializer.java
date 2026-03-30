@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.internal.event;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 
 public class EventSerializer {
 

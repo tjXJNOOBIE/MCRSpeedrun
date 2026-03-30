@@ -16,19 +16,19 @@ public interface IRankCache {
     default void removeRankCache(UUID uuid) {
     }
 
-    default String getRank(UUID uuid) {
+    default String getCachedRank(UUID uuid) {
         return null;
     }
 
-    default int getPowerLevel(UUID uuid) {
+    default int getCachedPowerLevel(UUID uuid) {
         return 0;
     }
 
-    default Set<String> getPermissions(UUID uuid) {
+    default Set<String> getCachedPermissions(UUID uuid) {
         return null;
     }
 
-    default boolean hasPermission(UUID uuid, String permission) {
+    default boolean hasCachedPermission(UUID uuid, String permission) {
         return false;
     }
 

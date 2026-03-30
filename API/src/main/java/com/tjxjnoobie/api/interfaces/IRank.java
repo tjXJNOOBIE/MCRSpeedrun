@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Interface for rank management operations
  */
-public interface IRank  {
+public interface IRank extends IRankCache  {
 
     default String getRank(UUID uuid) throws SQLException {
         return null;

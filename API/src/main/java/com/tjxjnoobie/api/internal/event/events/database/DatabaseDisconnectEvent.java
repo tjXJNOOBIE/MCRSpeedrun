@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.internal.event.events.database;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 import com.tjxjnoobie.api.enums.*;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.Redis;
@@ -50,4 +50,3 @@ abstract class DatabaseDisconnectEvent extends AbstractEvent {
         return redis;
     }
 }
-

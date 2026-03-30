@@ -1,9 +1,7 @@
 package com.tjxjnoobie.api.platform.cache;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.ISpeedrunStatsCache;
 import com.tjxjnoobie.api.interfaces.IStatsManager;
+import com.tjxjnoobie.api.platform.minecraft.speedrun.ISpeedrunStatsCache;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ public class SpeedrunStatsCache implements ISpeedrunStatsCache, IStatsManager {
     public HashMap<UUID, String> best_time = new HashMap<>();
     public HashMap<UUID, Long> best_timelong = new HashMap<>();
 
-    @Inject private IGlobalContext globalContext;
 
 
 

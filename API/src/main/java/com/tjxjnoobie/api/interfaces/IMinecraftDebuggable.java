@@ -8,9 +8,7 @@ import org.bukkit.entity.Player;
 public interface IMinecraftDebuggable {
 
 
-    default ISpeedRunContext getSpeedRunContext(){
-        return null;
-    }
+
 
     /**
      * Sends a debug message to a player if they are a debugger

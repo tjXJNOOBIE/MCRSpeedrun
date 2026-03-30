@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.internal.event.tags.interfaces;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 
 public interface SuppressibleEvent {
 
@@ -39,4 +39,3 @@ public interface SuppressibleEvent {
      */
     AbstractEvent setSuppressible(boolean suppressible);
 }
-

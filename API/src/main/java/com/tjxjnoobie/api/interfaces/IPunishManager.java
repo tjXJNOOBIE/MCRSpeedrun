@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
+import com.tjxjnoobie.api.platform.velocity.logs.PunishLog;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;

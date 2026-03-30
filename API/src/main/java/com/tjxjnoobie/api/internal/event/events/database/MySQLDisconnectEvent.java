@@ -1,5 +1,5 @@
 package com.tjxjnoobie.api.internal.event.events.database;
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 
 /**
  * Represents a MySQL disconnection event with suppression logic to avoid spamming.

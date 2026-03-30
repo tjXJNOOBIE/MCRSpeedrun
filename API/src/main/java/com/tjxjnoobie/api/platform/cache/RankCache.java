@@ -39,7 +39,7 @@ public class RankCache implements IRankCache {
         rank.put(uuid, playerRank);
         powerLevel.put(uuid, pLevel);
         permissions.put(uuid, perms);
-        System.out.println(uuid.toString() + " Loaded with permissions: Rank: " + getRank(uuid) + " Power Level: " +getPowerLevel(uuid));
+        System.out.println(uuid.toString() + " Loaded with permissions: Rank: " + getCachedRank(uuid) + " Power Level: " + getCachedPowerLevel(uuid));
     }
 
     @Override
@@ -51,25 +51,25 @@ public class RankCache implements IRankCache {
     }
 
     @Override
-    public String getRank(UUID uuid) {
+    public String getCachedRank(UUID uuid) {
 
         return rank.get(uuid);
     }
 
     @Override
-    public int getPowerLevel(UUID uuid) {
+    public int getCachedPowerLevel(UUID uuid) {
 
         return powerLevel.get(uuid);
     }
 
     @Override
-    public Set<String> getPermissions(UUID uuid) {
+    public Set<String> getCachedPermissions(UUID uuid) {
 
         return permissions.get(uuid);
     }
 
     @Override
-    public boolean hasPermission(UUID uuid, String permission) {
+    public boolean hasCachedPermission(UUID uuid, String permission) {
         Set<String> userPermissions = permissions.get(uuid);
         return userPermissions != null && userPermissions.contains(permission);
     }
@@ -95,20 +95,20 @@ public class RankCache implements IRankCache {
     }
     @Override
     public boolean isStaff(UUID uuid){
-        return getRank(uuid).equals("Owner") || getRank(uuid).equals("Developer")
-                || getRank(uuid).equals("HeadAdmin") || getRank(uuid).equals("SrMod")
-                || getRank(uuid).equals("Mod") || getRank(uuid).equals("Admin");
+        return getCachedRank(uuid).equals("Owner") || getCachedRank(uuid).equals("Developer")
+                || getCachedRank(uuid).equals("HeadAdmin") || getCachedRank(uuid).equals("SrMod")
+                || getCachedRank(uuid).equals("Mod") || getCachedRank(uuid).equals("Admin");
 
     }
     @Override
     public boolean isAdmin(UUID uuid){
-        return getRank(uuid).equals("Owner") || getRank(uuid).equals("Developer")
-                || getRank(uuid).equals("HeadAdmin") || getRank(uuid).equals("Admin");
+        return getCachedRank(uuid).equals("Owner") || getCachedRank(uuid).equals("Developer")
+                || getCachedRank(uuid).equals("HeadAdmin") || getCachedRank(uuid).equals("Admin");
     }
     @Override
     public boolean isDonor(UUID uuid){
-        return getRank(uuid).equals("Partner") || getRank(uuid).equals("Premier")
-                || getRank(uuid).equals("Prime") || getRank(uuid).equals("Premium")
-                || getRank(uuid).equals("Supporter");
+        return getCachedRank(uuid).equals("Partner") || getCachedRank(uuid).equals("Premier")
+                || getCachedRank(uuid).equals("Prime") || getCachedRank(uuid).equals("Premium")
+                || getCachedRank(uuid).equals("Supporter");
     }
 }

@@ -1,8 +1,7 @@
 package com.tjxjnoobie.api.managers;
 
-import com.tjxjnoobie.api.abstracts.AbstractManager;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
@@ -10,8 +9,8 @@ import com.tjxjnoobie.api.platform.minecraft.HandleBlocks;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-@DelegatesToInterface(getClassForDelegation = IRedis.class)
-public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
+@DelegatesToInterface(getLinkedInterface = IRedis.class)
+public class Redis implements IRedis, IDependencyInstance<Redis> {
 
     public static Jedis jedis;
     public String host = Config.redis_host;
@@ -24,14 +23,15 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
     public Redis(){
 
     }
+
     //TODO: Testing method fire without annotation
 
     @Override
     public void connectToRedis() {
+        Log.info("Connecting to Redis...");
 
         jedis = new Jedis(host, Integer.parseInt(port)); // Change this if your Redis server is different
         jedis.auth(password);
-        Log.info("Connecting to Redis...");
 
         subscriberThread = new Thread(() -> {
             try (Jedis subJedis = new Jedis(host, 6379)) {
@@ -80,7 +80,7 @@ public class Redis extends AbstractManager<IGlobalContext> implements IRedis {
         }
     }
 
-    @Override
+
     protected void doInitialize() throws Exception {
         connectToRedis();
     }

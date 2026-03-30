@@ -7,7 +7,6 @@ public interface IRedis {
     
 
 
-
     default void connectToRedis() {
     }
 

@@ -9,7 +9,11 @@ public interface ILobbyStatsCache {
     
 
 
-    String getGlobalGrade(UUID uuid);
+    default String getGlobalGrade(UUID uuid){
+        return null;
+    }
 
-    void loadLobbyStats(UUID uuid);
+    default void loadLobbyStats(UUID uuid){
+
+    }
 }

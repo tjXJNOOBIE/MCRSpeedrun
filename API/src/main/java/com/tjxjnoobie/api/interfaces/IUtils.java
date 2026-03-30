@@ -19,14 +19,6 @@ public interface IUtils extends ILocalServerMetaData {
 
 
 
-    /**
-     * Gets the context instance
-     * 
-     * @return The context instance
-     */
-    default IGlobalContext getGlobalContext() {
-        return null;
-    }
 
 
 
@@ -71,13 +63,6 @@ public interface IUtils extends ILocalServerMetaData {
         return "";
     }
 
-    /**
-     * Gets configuration values map
-     * @return Map of configuration values
-     */
-    default Map<String, Object> getConfigValues() {
-        return new java.util.HashMap<>();
-    }
 
     /**
      * Sets the game type based on the current directory
@@ -141,39 +126,20 @@ public interface IUtils extends ILocalServerMetaData {
 
     /**
      * Gets configuration values from the global context
-     * @param globalContext The global context
      * @return Map of configuration values
      */
-    default Map<String, Object> getConfigValues(IGlobalContext globalContext) {
+    default Map<String, Object> getConfigValues() {
         return new java.util.HashMap<>();
     }
 
-    /**
-     * Broadcasts a message to all players
-     * @param globalContext The global context
-     * @param message The message to broadcast
-     */
-    default void broadcastMessage(IGlobalContext globalContext, String message) {
-        // Default empty implementation - override in concrete class
-    }
 
-    /**
-     * Gets a configuration value by key
-     * @param globalContext The global context
-     * @param key The configuration key
-     * @return The configuration value
-     */
-    default Object getConfigValue(IGlobalContext globalContext, String key) {
-        return null;
-    }
 
     /**
      * Sets the game type for the server
-     * @param globalContext The global context
      * @param gameTypeEnum The game type to set
      * @throws SQLException if database operation fails
      */
-    default void setGameType(IGlobalContext globalContext, GameTypeEnum gameTypeEnum) throws SQLException {
+    default void setGameType(GameTypeEnum gameTypeEnum) throws SQLException {
         // Default empty implementation - override in concrete class
     }
 
@@ -183,7 +149,7 @@ public interface IUtils extends ILocalServerMetaData {
      * @param value The value to set
      * @param globalContext The global context
      */
-    default void setConfigValue(String key, Object value, IGlobalContext globalContext){
+    default void setConfigValue(String key, Object value){
         // Default empty implementation - override in concrete class
     }
 }

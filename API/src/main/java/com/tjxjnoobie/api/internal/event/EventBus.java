@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.internal.event;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 import com.tjxjnoobie.api.platform.global.annotations.ModuleScope;
 import com.tjxjnoobie.api.platform.global.annotations.SubscribeEvent;
 import com.tjxjnoobie.api.enums.EventCapability;
@@ -139,5 +139,3 @@ public class EventBus {
         post(event, EventDomain.GLOBAL);
     }
 }
-
-

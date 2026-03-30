@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.managers;
 
 import com.tjxjnoobie.api.interfaces.IDebugger;
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
