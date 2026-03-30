@@ -1,7 +1,6 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.Player;
@@ -11,19 +10,11 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.sql.SQLException;
 import java.util.UUID;
 
-public class RankCMD implements SimpleCommand, IUtils {
-
-    @Inject private IGlobalContext globalContext;
-
-
-
+public class RankCMD implements SimpleCommand, IUtils, IRankCache,IPlayerProfile, IRank, IProxyUtils {
 
     @Override
     public void execute(Invocation invocation) {
-        IProxyUtils proxyUtils = globalContext.getProxyUtils();
-        IPlayerProfile playerProfile = globalContext.getPlayerProfile();
-        IRank rank = globalContext.getRank();
-        IRankCache rankCache = globalContext.getRankCache();
+
         CommandSource source = invocation.source();
         Player player = (Player) source;
 
@@ -34,44 +25,44 @@ public class RankCMD implements SimpleCommand, IUtils {
         String doesntExist = "Rank does not exist!";
         String noPermission = "No permission";
         UUID uuid = ((Player) source).getUniqueId();
-        Component existMessage = proxyUtils.withStaffPrefix(doesntExist);
-        Component usageMessage = proxyUtils.withStaffPrefix(usage);
-        Component noPermMessage = proxyUtils.withPrefix(noPermission);
+        Component existMessage = withStaffPrefix(doesntExist);
+        Component usageMessage = withStaffPrefix(usage);
+        Component noPermMessage = withPrefix(noPermission);
 
-        if (args.length < 3 && (rankCache.isAdmin(uuid) || rankCache.hasPermission(uuid,"network.rank"))) {
+        if (args.length < 3 && (isAdmin(uuid) || hasCachedPermission(uuid,"network.rank"))) {
             source.sendMessage(usageMessage);
             return;
         }
 
         String action = args[0];
         String userName = args[1];
-        if (rankCache.isAdmin(uuid) || rankCache.hasPermission(uuid, "network.rank")) {
+        if (isAdmin(uuid) || hasCachedPermission(uuid, "network.rank")) {
             try {
                 if (action.equalsIgnoreCase("set") && args.length == 3) {
                     String rankName = args[2];
 
-                    if (!rankCache.rankExists(rankName)) {
+                    if (!rankExists(rankName)) {
                         source.sendMessage(existMessage);
                         return;
                     }
-                    if (playerProfile.playerExistsFromUsername(userName, "player_profile", "profile")) {
-                        proxyUtils.sendMessageToPlayer(name, proxyUtils.getStaffPrefixString() + "Player does not exist in database");
+                    if (playerExistsFromUsername(userName, "player_profile", "profile")) {
+                        sendMessageToPlayer(name, getStaffPrefixString() + "Player does not exist in database");
                         return;
                     }
                     String success = "Set rank for " + userName + " to " + rankName;
-                    Component successMessage = proxyUtils.withStaffPrefix(success);
-                    rank.setRankFromUsername(userName, rankName);
+                    Component successMessage = withStaffPrefix(success);
+                    setRankFromUsername(userName, rankName);
                     source.sendMessage(successMessage);
-                    proxyUtils.sendMessageToPlayer(name, "d");
+                    sendMessageToPlayer(name, "d");
                 } else {
                     source.sendMessage(usageMessage);
                 }
             } catch (SQLException e) {
-                proxyUtils.sendMessageToPlayer(name, proxyUtils.getStaffPrefixString() + "An error occurred while updating rank.");
+                sendMessageToPlayer(name, getStaffPrefixString() + "An error occurred while updating ");
                 e.printStackTrace();
             }
-        }else{
-            proxyUtils.sendMessageToPlayer(name, proxyUtils.getPrefixString() + "&cNo permission");
+        }else{ 
+            sendMessageToPlayer(name, getPrefixString() + "&cNo permission");
 
         }
     }

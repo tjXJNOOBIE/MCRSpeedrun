@@ -1,4 +1,4 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.internal.utils.glickov2.Rating;
@@ -6,11 +6,12 @@ import com.tjxjnoobie.api.internal.utils.glickov2.RatingCalculator;
 import com.tjxjnoobie.api.internal.utils.glickov2.RatingPeriodResults;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.console.style.LogColors;
+import com.tjxjnoobie.api.platform.velocity.commands.interfaces.ISim;
 import com.velocitypowered.api.command.SimpleCommand;
 
 import java.util.*;
 
-public class Sim implements SimpleCommand, IUtils {
+public class Sim implements SimpleCommand, IUtils, ISim {
 
 
     private static final Map<UUID, Double> final_time = new HashMap<>();

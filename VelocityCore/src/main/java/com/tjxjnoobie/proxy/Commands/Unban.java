@@ -1,7 +1,9 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IPlayerProfile;
+import com.tjxjnoobie.api.interfaces.IProxyUtils;
+import com.tjxjnoobie.api.interfaces.IPunishManager;
+import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
@@ -18,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class Unban implements SimpleCommand, IProxyUtils, IRankCache, IPlayerProfile, IPunishManager {
 
-   @Inject private IGlobalContext globalContext;
    @com.google.inject.Inject private ProxyServer proxyServer;
 
 
@@ -47,7 +48,7 @@ public class Unban implements SimpleCommand, IProxyUtils, IRankCache, IPlayerPro
         if (source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
             String senderName = sender.getUsername();
-            if (!isStaff(senderUUID) && !hasPermission(senderUUID, "network.unban")) {
+            if (!isStaff(senderUUID) && !hasCachedPermission(senderUUID, "network.unban")) {
                 source.sendMessage(withPrefix("No permission."));
                 return;
             }

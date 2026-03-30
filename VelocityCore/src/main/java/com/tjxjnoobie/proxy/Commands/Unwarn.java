@@ -1,4 +1,4 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
 public class Unwarn {
 }

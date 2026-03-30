@@ -1,7 +1,6 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
 import com.tjxjnoobie.api.interfaces.IProxyUtils;
 import com.tjxjnoobie.api.interfaces.IPunishManager;
 import com.tjxjnoobie.api.interfaces.IRankCache;
@@ -20,7 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class Kick implements SimpleCommand, IPunishManager, IRankCache, IProxyUtils {
-    @Inject private  IGlobalContext globalContext;
+
     @com.google.inject.Inject private ProxyServer proxyServer;
 
 
@@ -43,7 +42,7 @@ public class Kick implements SimpleCommand, IPunishManager, IRankCache, IProxyUt
         if (source instanceof Player sender) {
             String senderName = sender.getUsername();
             UUID uuid = sender.getUniqueId();
-            if (isStaff(uuid) || hasPermission(uuid, "network.kick")) {
+            if (isStaff(uuid) || hasCachedPermission(uuid, "network.kick")) {
                 if (length < 1 || length > 3) {
                     sender.sendMessage(withStaffPrefix("&cUsage: /kick <player> [reason]"));
                     return;

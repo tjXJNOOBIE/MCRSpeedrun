@@ -1,7 +1,9 @@
-package com.tjxjnoobie.proxy.Commands;
+package com.tjxjnoobie.proxy.commands;
 
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IPlayerProfile;
+import com.tjxjnoobie.api.interfaces.IProxyUtils;
+import com.tjxjnoobie.api.interfaces.IPunishManager;
+import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.command.SimpleCommand;
 import com.velocitypowered.api.proxy.ConsoleCommandSource;
@@ -19,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class Warn implements SimpleCommand, IRankCache, IProxyUtils, IPlayerProfile, IPunishManager {
 
-    @Inject private IGlobalContext globalContext;
+
     @com.google.inject.Inject private ProxyServer proxyServer;
     private static final String PUNISHMENT_TYPE_WARNS = "WARNS";
     private static final String PUNISHMENT_STATUS_WARNED = "WARNED";
@@ -45,7 +47,7 @@ public class Warn implements SimpleCommand, IRankCache, IProxyUtils, IPlayerProf
 
         if (source instanceof Player sender) {
             UUID senderUUID = sender.getUniqueId();
-            if (isStaff(senderUUID) || hasPermission(senderUUID, "network.warn")) {
+            if (isStaff(senderUUID) || hasCachedPermission(senderUUID, "network.warn")) {
                 try {
                     handleWarn(sender, targetPlayer, targetName, reason);
                 } catch (SQLException e) {
