@@ -1,8 +1,10 @@
 package com.tjxjnoobie.proxy.Events;
 
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.minecraft.velocity.logs.PunishLog;
+import com.tjxjnoobie.api.interfaces.IPlayerProfile;
+import com.tjxjnoobie.api.interfaces.IProxyUtils;
+import com.tjxjnoobie.api.interfaces.IPunishManager;
+import com.tjxjnoobie.api.interfaces.IRankCache;
+import com.tjxjnoobie.api.platform.velocity.logs.PunishLog;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -16,7 +18,6 @@ import java.util.UUID;
 
 public class VelocityLoginEvent implements IPunishManager, IPlayerProfile, IProxyUtils, IRankCache {
 
-   @Inject private IGlobalContext globalContext;
 
 
 
