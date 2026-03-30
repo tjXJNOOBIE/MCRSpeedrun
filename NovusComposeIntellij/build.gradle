@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.intellij.platform' version '2.13.1'
+}
+
+group = 'com.tjxjnoobie'
+version = '0.1.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        local 'C:/Program Files/JetBrains/IntelliJ IDEA 2025.3'
+        bundledPlugin 'com.intellij.java'
+        testFramework org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform.INSTANCE
+    }
+    implementation 'org.jgrapht:jgrapht-core:1.5.2'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+intellijPlatform {
+    autoReload = true
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = '253'
+            untilBuild = '253.*'
+        }
+    }
+}
