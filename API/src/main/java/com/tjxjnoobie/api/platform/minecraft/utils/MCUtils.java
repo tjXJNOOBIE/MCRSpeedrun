@@ -1,8 +1,9 @@
 package com.tjxjnoobie.api.platform.minecraft.utils;
 
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
-import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.interfaces.IDebugger;
+import com.tjxjnoobie.api.interfaces.IRankCache;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -13,18 +14,12 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.ArrayList;
 import java.util.UUID;
 
-@DelegatesToInterface(getClassForDelegation = IMCUtils.class)
+@DelegatesToInterface(getLinkedInterface = IMCUtils.class)
 public class MCUtils implements IMCUtils, IDebugger, IRankCache {
     //TODO: First test candidate for our new injection system
     private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();
-    @Inject
-    private ISpeedRunContext speedRunContext;
 
-    @Override
-    public ISpeedRunContext getSpeedRunContext(){
-        return speedRunContext;
-    }
 
     @Override
     public String getMinecraftPrefix(){
@@ -94,8 +89,8 @@ public class MCUtils implements IMCUtils, IDebugger, IRankCache {
     public void sendDebugMessage(Player player, String message) {
         //TODO: Move depends to field injection
         UUID uuid = player.getUniqueId();
-        if (getPowerLevel(uuid) <= 10000 ||
-                hasPermission(uuid, "network.debug")
+        if (getCachedPowerLevel(uuid) <= 10000 ||
+                hasCachedPermission(uuid, "network.debug")
                         && isDebugger(uuid)) {
             player.sendMessage(getMinecraftStaffInGamePrefix() + message);
         }

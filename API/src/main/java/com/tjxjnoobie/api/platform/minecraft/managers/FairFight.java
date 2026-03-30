@@ -1,8 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IFairFight;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class FairFight implements Listener, IFairFight {
 
-    @Inject private ISpeedRunContext speedRunContext;
     private Plugin plugin;
 
 
@@ -195,5 +192,3 @@ public class FairFight implements Listener, IFairFight {
     // Someone must die or leave for the fight to end
 
 }
-        
-

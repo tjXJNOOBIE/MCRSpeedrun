@@ -1,7 +1,6 @@
 package com.tjxjnoobie.api.listeners;
 
 import com.tjxjnoobie.api.interfaces.BlockPlaceHandler;
-import com.tjxjnoobie.api.interfaces.InterfaceManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -21,8 +20,8 @@ public class BlockPlaceListener implements Listener, BlockPlaceHandler {
     @Override
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        blockPlaceHandler = InterfaceManager.getBlockPlaceHandler();
-        blockPlaceHandler.onPlace(e);
+//        blockPlaceHandler = InterfaceManager.getBlockPlaceHandler();
+//        blockPlaceHandler.onPlace(e);
     }
 
     @Override

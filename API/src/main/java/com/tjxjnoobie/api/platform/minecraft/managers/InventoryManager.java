@@ -1,14 +1,15 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.builders.InventoryBuilder;
+import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
+import com.tjxjnoobie.api.platform.minecraft.inventory.builders.InventoryBuilder;
 import com.tjxjnoobie.api.enums.InventoryType;
 import com.tjxjnoobie.api.exceptions.InvalidInventoryTypeException;
 import com.tjxjnoobie.api.exceptions.InvalidPageNumberException;
 import com.tjxjnoobie.api.exceptions.InventoryCreationException;
 import com.tjxjnoobie.api.exceptions.InventoryNotPageableException;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.minecraft.inventory.InventoryHistory;
+import com.tjxjnoobie.api.platform.minecraft.inventory.metadata.InventoryHistory;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,7 +21,6 @@ import java.util.*;
 
 public  class InventoryManager implements IInventoryManager, IMinecraftDebuggable, IUtils {
     
-   @Inject private IGlobalContext globalContext;
    @Inject private IVoting voting;
     // Instance maps to track player inventory types
     private final Map<UUID, InventoryType> playerInventoryTypes = new HashMap<>();

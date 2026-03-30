@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.wrappers;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 import com.tjxjnoobie.api.enums.EventDomain;
 
 import java.lang.reflect.Method;

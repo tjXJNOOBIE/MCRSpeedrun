@@ -3,7 +3,7 @@ package com.tjxjnoobie.api.platform.minecraft;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRankMC;
 import com.tjxjnoobie.api.platform.cache.RankCache;
-import com.tjxjnoobie.api.platform.minecraft.velocity.Rank;
+import com.tjxjnoobie.api.platform.velocity.Rank;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -27,7 +27,7 @@ public class RankMC implements IRankMC {
     public void setDisplayName(Player player) {
         UUID uuid = player.getUniqueId();
         String name = player.getName();
-        if(rankCache.getRank(uuid).equals("Developer")){
+        if(rankCache.getCachedRank(uuid).equals("Developer")){
             String[] parts = "Developer ".split("");
             String[] parts1 = player.getName().split("");
             StringBuffer buffer = new StringBuffer();
@@ -52,15 +52,15 @@ public class RankMC implements IRankMC {
 
 
 
-        }else if (rankCache.getRank(uuid).equals("Owner")){
+        }else if (rankCache.getCachedRank(uuid).equals("Owner")){
             player.setDisplayName("§4§l"+name);
-        }else if(rankCache.getRank(uuid).equals("HeadAdmin")){
+        }else if(rankCache.getCachedRank(uuid).equals("HeadAdmin")){
             player.setDisplayName("§4"+name);
-        }else if(rankCache.getRank(uuid).equals("SrMod")){
+        }else if(rankCache.getCachedRank(uuid).equals("SrMod")){
             player.setDisplayName("§c§l"+name);
-        }else if(rankCache.getRank(uuid).equals("Mod")){
+        }else if(rankCache.getCachedRank(uuid).equals("Mod")){
             player.setDisplayName("§c"+name);
-        }else if(rankCache.getRank(uuid).equals("Partner")){
+        }else if(rankCache.getCachedRank(uuid).equals("Partner")){
             player.setDisplayName("§d"+name);
 
         }

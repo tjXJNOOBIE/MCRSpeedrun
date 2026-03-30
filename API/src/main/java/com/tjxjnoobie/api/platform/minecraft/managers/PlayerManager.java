@@ -2,6 +2,7 @@ package com.tjxjnoobie.api.platform.minecraft.managers;
 
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -9,8 +10,6 @@ import java.util.UUID;
 
 public class PlayerManager implements IPlayerManager, IMCUtils {
 
-    @Inject private IGlobalContext globalContext;
-    @Inject private ISpeedRunContext speedRunContext;
     @Inject private IGameManager gameManager;
 
     @Override

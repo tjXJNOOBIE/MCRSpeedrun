@@ -1,7 +1,6 @@
 package com.tjxjnoobie.api.listeners;
 
-import com.tjxjnoobie.api.interfaces.CoreQuitHandler;
-import com.tjxjnoobie.api.interfaces.InterfaceManager;
+import com.tjxjnoobie.api.platform.minecraft.core.interfaces.CoreQuitHandler;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -14,7 +13,7 @@ public class CoreQuitListener implements CoreQuitHandler, Listener {
 
     @EventHandler
     public void onCoreQuit(PlayerQuitEvent e) throws SQLException {
-    CoreQuitHandler coreQuitHandler = InterfaceManager.getCoreQuitHandler();
-    coreQuitHandler.onCoreQuit(e);
+//    CoreQuitHandler coreQuitHandler = InterfaceManager.getCoreQuitHandler();
+//    coreQuitHandler.onCoreQuit(e);
     }
 }

@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.wrappers.bukkit;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -25,5 +25,3 @@ import org.bukkit.event.HandlerList;
         return handlers;
     }
     }
-
-

@@ -1,10 +1,8 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
-import com.tjxjnoobie.api.interfaces.IMCUtils;
-import com.tjxjnoobie.api.interfaces.ISpeedRunContext;
 import com.tjxjnoobie.api.interfaces.IWorldManager;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -20,7 +18,6 @@ public class WorldManager implements IMCUtils, IWorldManager {
 
 
 
-    @Inject private ISpeedRunContext speedRunContext;
 
 
     @Override
@@ -251,7 +248,3 @@ public class WorldManager implements IMCUtils, IWorldManager {
 
 
 }
-
-
-
-
