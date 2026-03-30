@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.minecraft.abstracts;
 
 import com.tjxjnoobie.api.enums.GameStateEnum;
 

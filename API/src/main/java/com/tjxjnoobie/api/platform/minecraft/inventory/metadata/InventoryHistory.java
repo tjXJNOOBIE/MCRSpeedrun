@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.minecraft.inventory;
+package com.tjxjnoobie.api.platform.minecraft.inventory.metadata;
 
 import com.tjxjnoobie.api.enums.InventoryType;
 

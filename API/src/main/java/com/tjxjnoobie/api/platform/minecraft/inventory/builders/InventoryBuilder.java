@@ -1,10 +1,10 @@
-package com.tjxjnoobie.api.builders;
+package com.tjxjnoobie.api.platform.minecraft.inventory.builders;
 
 import com.tjxjnoobie.api.enums.InventoryType;
 import com.tjxjnoobie.api.exceptions.*;
 import com.tjxjnoobie.api.interfaces.IMinecraftDebuggable;
-import com.tjxjnoobie.api.interfaces.IInventoryBuilder;
-import com.tjxjnoobie.api.platform.minecraft.inventory.InventoryHistory;
+import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryBuilder;
+import com.tjxjnoobie.api.platform.minecraft.inventory.metadata.InventoryHistory;
 import com.tjxjnoobie.api.platform.minecraft.managers.InventoryManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

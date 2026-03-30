@@ -1,7 +1,6 @@
-package com.tjxjnoobie.api.abstracts;
+package com.tjxjnoobie.api.platform.minecraft.abstracts;
 
-import com.tjxjnoobie.api.interfaces.IGlobalContext;
-import com.tjxjnoobie.api.interfaces.IMCUtils;
+import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,7 +14,7 @@ import java.util.List;
  * Abstract base class for commands providing common functionality
  * @param <T> The context type this command operates with
  */
-public abstract class AbstractCommand<T extends IGlobalContext> implements CommandExecutor, TabCompleter, IMCUtils {
+public abstract class AbstractCommand<T> implements CommandExecutor, TabCompleter, IMCUtils {
 
 
     protected final T context;

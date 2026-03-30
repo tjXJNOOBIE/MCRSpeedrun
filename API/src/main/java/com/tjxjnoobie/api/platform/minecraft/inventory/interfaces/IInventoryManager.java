@@ -1,9 +1,9 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.inventory.interfaces;
 
 
-import com.tjxjnoobie.api.builders.InventoryBuilder;
+import com.tjxjnoobie.api.platform.minecraft.inventory.metadata.InventoryHistory;
+import com.tjxjnoobie.api.platform.minecraft.inventory.builders.InventoryBuilder;
 import com.tjxjnoobie.api.enums.InventoryType;
-import com.tjxjnoobie.api.platform.minecraft.inventory.InventoryHistory;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 

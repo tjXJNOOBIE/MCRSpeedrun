@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.core.interfaces;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import org.bukkit.event.EventHandler;

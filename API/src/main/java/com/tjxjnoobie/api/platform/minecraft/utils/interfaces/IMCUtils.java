@@ -1,5 +1,7 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.utils.interfaces;
 
+import com.tjxjnoobie.api.interfaces.IBossBarManager;
+import com.tjxjnoobie.api.interfaces.IDebugger;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -12,15 +14,13 @@ import org.bukkit.scheduler.BukkitTask;
 /**
  * Interface for Minecraft utility functions
  */
-public interface IMCUtils extends ILocalServerMetaData, IDebugger {
+public interface IMCUtils extends ILocalServerMetaData, IDebugger, IBossBarManager {
 
 
     //TODO: Replace class methods parameters for custom DI system
 
     //TODO: Make a more concerned context for IMCutils instead of using SpeedRunContext
-    default ISpeedRunContext getSpeedRunContext() {
-        return null;
-    }
+
 
 
     default String getMinecraftPrefix(){
@@ -156,4 +156,3 @@ public interface IMCUtils extends ILocalServerMetaData, IDebugger {
         return false;
     }
 }
-

@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.speedrun;
 
 import java.sql.SQLException;
 import java.util.UUID;

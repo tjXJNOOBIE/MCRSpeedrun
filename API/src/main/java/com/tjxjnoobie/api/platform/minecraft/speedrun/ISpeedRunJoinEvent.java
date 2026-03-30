@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.speedrun;
 
 /**
  * Interface for join event handling

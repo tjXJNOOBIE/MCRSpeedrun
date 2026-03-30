@@ -1,6 +1,7 @@
-package com.tjxjnoobie.api.interfaces;
+package com.tjxjnoobie.api.platform.minecraft.inventory.interfaces;
 
 import com.tjxjnoobie.api.enums.InventoryType;
+import com.tjxjnoobie.api.interfaces.IMinecraftDebuggable;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
