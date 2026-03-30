@@ -1,6 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
 
+import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
+import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 
@@ -15,6 +17,7 @@ import java.util.Map;
  * time formatting, and configuration handling.
  * 
  */
+@ComposesToInterface(IInfrastructureDomain.class)
 public interface IUtils extends ILocalServerMetaData {
 
 
