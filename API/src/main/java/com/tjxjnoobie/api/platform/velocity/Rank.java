@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.minecraft.velocity;
+package com.tjxjnoobie.api.platform.velocity;
 
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
@@ -11,7 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
-@DelegatesToInterface(getClassForDelegation = IRank.class)
+@DelegatesToInterface(getLinkedInterface = IRank.class)
 public class Rank implements IRank {
 
     @Inject private PlayerProfile playerProfile;
@@ -130,7 +130,3 @@ public class Rank implements IRank {
         return ranks;
     }
     }
-
-
-
-

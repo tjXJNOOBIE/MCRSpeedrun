@@ -1,4 +1,4 @@
-package com.tjxjnoobie.api.platform.minecraft.velocity.cache;
+package com.tjxjnoobie.api.platform.velocity.cache;
 
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import redis.clients.jedis.Jedis;

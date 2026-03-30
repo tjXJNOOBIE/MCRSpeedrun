@@ -7,7 +7,7 @@
  * SEE LICENSE.TXT
  */
 
-package com.tjxjnoobie.api.platform.minecraft.velocity.bridge;
+package com.tjxjnoobie.api.platform.velocity.bridge;
 
 import com.velocitypowered.api.plugin.PluginContainer;
 

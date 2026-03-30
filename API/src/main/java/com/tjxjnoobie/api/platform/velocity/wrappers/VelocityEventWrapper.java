@@ -1,6 +1,6 @@
-package com.tjxjnoobie.api.platform.minecraft.velocity.wrappers;
+package com.tjxjnoobie.api.platform.velocity.wrappers;
 
-import com.tjxjnoobie.api.abstracts.AbstractEvent;
+import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.internal.event.EventBus;
 import com.tjxjnoobie.api.internal.event.tags.interfaces.CancellableEvent;
