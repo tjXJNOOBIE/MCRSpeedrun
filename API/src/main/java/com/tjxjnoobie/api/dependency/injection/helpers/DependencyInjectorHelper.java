@@ -61,6 +61,18 @@ public class DependencyInjectorHelper<
     String BASE_PACKAGE = "com.tjxjnoobie";
 
     /**
+     * Replaces the package prefix scanned by this helper.
+     *
+     * @param basePackage the package prefix to scan
+     */
+    public void setBasePackage(String basePackage) {
+        if (basePackage == null || basePackage.isBlank()) {
+            throw new IllegalArgumentException("basePackage is required");
+        }
+        this.BASE_PACKAGE = basePackage;
+    }
+
+    /**
      * Scans and registers dependencies using the helper's own class loader.
      */
     @Override
@@ -207,6 +219,8 @@ public class DependencyInjectorHelper<
 
         int skipped = 0;
         int registeredBindings = 0;
+        Set<IDependencyMetaData<INTERFACE, INSTANCE>> registeredMetaData = new LinkedHashSet<>();
+        Set<RegisteredBinding> seenBindings = new LinkedHashSet<>();
 
         for (Class<? extends INSTANCE> rawScannedConcrete : loadedConcretes) {
             DelegatesToInterface concreteAnnotation = rawScannedConcrete.getAnnotation(DelegatesToInterface.class);
@@ -249,8 +263,15 @@ public class DependencyInjectorHelper<
             IDependencyInstance<INSTANCE> wrappedLinkedConcrete = new DependencyInstance<>(rawScannedConcrete);
             IDependencyMetaData<INTERFACE, INSTANCE> dependencyMetaData = new DependencyMetaData<>();
             dependencyMetaDataHelper.populateMetaData(dependencyMetaData, wrappedLinkedInterface, wrappedLinkedConcrete);
+            registeredMetaData.add(dependencyMetaData);
 
             for (Class<? extends INTERFACE> linkedInterface : validInterfaces) {
+                RegisteredBinding binding = new RegisteredBinding(linkedInterface, rawScannedConcrete);
+                if (!seenBindings.add(binding)) {
+                    Log.info("[DI-Helper] Duplicate scanned binding for "
+                            + linkedInterface.getName() + " -> " + rawScannedConcrete.getName() + ", skipping");
+                    continue;
+                }
                 DependencyMap.getDependencyMap().registerDependency(linkedInterface, dependencyMetaData);
                 Object registeredInstance = DependencyLoaderAccess.findInstance(
                         (Class<IDependencyInjectableInterface>) linkedInterface);
@@ -259,6 +280,10 @@ public class DependencyInjectorHelper<
                 }
                 registeredBindings++;
             }
+        }
+
+        for (IDependencyMetaData<INTERFACE, INSTANCE> dependencyMetaData : registeredMetaData) {
+            dependencyMetaData.initializeDependencyInstance();
         }
 
         Log.warn("[DI-Helper] Finished annotation DI registration, skipped classes: " + skipped
@@ -587,5 +612,8 @@ public class DependencyInjectorHelper<
     }
 
     private record BootstrapKey(String basePackage, int classLoaderIdentity) {
+    }
+
+    private record RegisteredBinding(Class<?> interfaceType, Class<?> concreteType) {
     }
 }

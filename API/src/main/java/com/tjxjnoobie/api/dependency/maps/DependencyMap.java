@@ -90,6 +90,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 concreteInstance,
                 () -> concreteInstance);
         registerDependency(dependencyInterface.asSubclass(IDependencyInjectableInterface.class), metaData);
+        metaData.initializeDependencyInstance();
         return dependencyInterface.cast(dependencyInstance);
     }
 
@@ -127,6 +128,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                 concreteInstance,
                 (Supplier) supplier);
         registerDependency(dependencyInterface.asSubclass(IDependencyInjectableInterface.class), metaData);
+        metaData.initializeDependencyInstance();
         return dependencyInterface.cast(instance);
     }
 

@@ -16,14 +16,18 @@ import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.interfaces.IContext;
+import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.enums.DependencyRole;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -218,6 +222,8 @@ public class DependencyMetaData<
         if (wrappedInterface != null) {
             wrappedInterface.setDependencyInterface(getDependencyInterface());
         }
+
+        initializeDependencyInstance();
     }
 
     @Override
@@ -266,6 +272,18 @@ public class DependencyMetaData<
     @Override
     public INSTANCE getDependencyInstance() {
         return dependencyInstance;
+    }
+
+    @Override
+    public void initializeDependencyInstance() {
+        if (dependencyInstance == null) {
+            throw new IllegalStateException("[DependencyMetaData] dependency instance has not been created");
+        }
+
+        detectLifecycleMethods(dependencyInstance);
+        invokeLifecycleMethods(dependencyInstance, LifecycleType.PRE_CONSTRUCT);
+        injectAnnotatedFields(dependencyInstance);
+        invokeLifecycleMethods(dependencyInstance, LifecycleType.POST_CONSTRUCT);
     }
 
     @Override
@@ -426,6 +444,62 @@ public class DependencyMetaData<
         if (requireInstantiable && java.lang.reflect.Modifier.isAbstract(concreteType.getModifiers())) {
             throw new IllegalArgumentException("[DependencyMetaData] concrete token cannot be abstract: "
                     + concreteType.getName());
+        }
+    }
+
+    private void detectLifecycleMethods(INSTANCE instance) {
+        Class<?> instanceClass = instance.getClass();
+        LifecycleType.PRE_CONSTRUCT.findIn(instanceClass).ifPresent(this::setPreConstruct);
+        LifecycleType.POST_CONSTRUCT.findIn(instanceClass).ifPresent(this::setPostConstruct);
+    }
+
+    private void invokeLifecycleMethods(INSTANCE instance, LifecycleType lifecycleType) {
+        List<Method> methods = lifecycleType.findAllIn(instance.getClass());
+        for (Method method : methods) {
+            try {
+                method.setAccessible(true);
+                method.invoke(instance);
+                if (lifecycleType == LifecycleType.PRE_CONSTRUCT) {
+                    setPreConstructSuccess(true);
+                }
+            } catch (Exception e) {
+                incrementRetryCount();
+                throw new IllegalStateException("[DependencyMetaData] failed to invoke "
+                        + lifecycleType.name() + " on " + instance.getClass().getName(), e);
+            }
+        }
+    }
+
+    private void injectAnnotatedFields(INSTANCE instance) {
+        Class<?> current = instance.getClass();
+        while (current != null && current != Object.class) {
+            for (Field field : current.getDeclaredFields()) {
+                Inject inject = field.getAnnotation(Inject.class);
+                if (inject == null || Modifier.isStatic(field.getModifiers())) {
+                    continue;
+                }
+
+                Object resolvedDependency = findInstance(field.getType());
+                if (resolvedDependency == null) {
+                    if (inject.optional()) {
+                        continue;
+                    }
+                    incrementRetryCount();
+                    throw new IllegalStateException("[DependencyMetaData] no dependency registered for injected field "
+                            + field.getDeclaringClass().getName() + "#" + field.getName()
+                            + " of type " + field.getType().getName());
+                }
+
+                try {
+                    field.setAccessible(true);
+                    field.set(instance, resolvedDependency);
+                } catch (IllegalAccessException e) {
+                    incrementRetryCount();
+                    throw new IllegalStateException("[DependencyMetaData] failed to inject field "
+                            + field.getDeclaringClass().getName() + "#" + field.getName(), e);
+                }
+            }
+            current = current.getSuperclass();
         }
     }
 }

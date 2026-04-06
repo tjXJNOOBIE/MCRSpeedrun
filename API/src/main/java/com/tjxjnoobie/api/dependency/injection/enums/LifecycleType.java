@@ -14,6 +14,9 @@ import com.tjxjnoobie.api.platform.global.annotations.PreConstruct;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 public enum LifecycleType {
@@ -26,15 +29,32 @@ public enum LifecycleType {
         this.annotationType = annotationType;
     }
 
-    boolean matches(Method method) {
+    public boolean matches(Method method) {
         return method.isAnnotationPresent(annotationType) && method.getParameterCount() == 0;
     }
 
     public Optional<Method> findIn(Class<?> clazz) {
-        if (clazz == null) return Optional.empty();
-        for (Method m : clazz.getDeclaredMethods()) {
-            if (matches(m)) return Optional.of(m);
+        List<Method> methods = findAllIn(clazz);
+        return methods.isEmpty() ? Optional.empty() : Optional.of(methods.getFirst());
+    }
+
+    public List<Method> findAllIn(Class<?> clazz) {
+        if (clazz == null) {
+            return List.of();
         }
-        return Optional.empty();
+
+        return Arrays.stream(clazz.getDeclaredMethods())
+                .filter(this::matches)
+                .sorted(Comparator
+                        .comparingInt(this::priority)
+                        .thenComparing(Method::getName))
+                .toList();
+    }
+
+    private int priority(Method method) {
+        if (annotationType == PreConstruct.class) {
+            return method.getAnnotation(PreConstruct.class).priority();
+        }
+        return 0;
     }
 }

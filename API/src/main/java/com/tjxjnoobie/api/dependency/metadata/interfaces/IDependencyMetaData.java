@@ -130,6 +130,12 @@ public interface IDependencyMetaData<
     INSTANCE getDependencyInstance();
 
     /**
+     * Executes runtime initialization for the currently bound dependency instance.
+     * This includes lifecycle callbacks and field injection.
+     */
+    void initializeDependencyInstance();
+
+    /**
      * Replaces the concrete dependency instance owned by this metadata.
      *
      * @param dependencySupplier the factory used to refresh the concrete instance
