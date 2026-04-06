@@ -32,13 +32,15 @@ public final class CompositionModel {
 
     public record SourceInterfaceModel(
             String qualifiedName,
-            String resolverName) {
+            String resolverName,
+            String methodPrefix) {
     }
 
     public record MethodModel(
             String ownerQualifiedName,
             String resolverName,
-            String methodName,
+            String declaredMethodName,
+            String generatedMethodName,
             String returnType,
             List<String> parameterTypes,
             List<String> thrownTypes) {

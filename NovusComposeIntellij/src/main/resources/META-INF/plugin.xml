@@ -9,6 +9,10 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <postStartupActivity implementation="com.tjxjnoobie.tools.novuscompose.service.NovusComposeStartupActivity"/>
+        <toolWindow id="Novus Compose"
+                    anchor="right"
+                    icon="/icons/novusComposeToolWindow.svg"
+                    factoryClass="com.tjxjnoobie.tools.novuscompose.toolwindow.NovusComposeToolWindowFactory"/>
         <localInspection language="JAVA"
                          shortName="ComposesToInterfaceInspection"
                          displayName="ComposesToInterface diagnostics"

@@ -110,25 +110,40 @@ public final class CompositionProjectAnalyzer {
     }
 
     private static List<PsiClass> extractTargets(PsiClass sourceInterface) {
+        return readAnnotationMetadata(sourceInterface).targets();
+    }
+
+    private static String extractMethodPrefix(PsiClass sourceInterface) {
+        return readAnnotationMetadata(sourceInterface).methodPrefix();
+    }
+
+    private static AnnotationMetadata readAnnotationMetadata(PsiClass sourceInterface) {
         PsiAnnotation annotation = sourceInterface.getAnnotation(CompositionConstants.ANNOTATION_FQCN);
         if (annotation == null) {
-            return List.of();
+            return new AnnotationMetadata(List.of(), "");
         }
 
         List<PsiClass> targets = new ArrayList<>();
+        String methodPrefix = "";
         PsiAnnotationMemberValue attributeValue = annotation.findAttributeValue("value");
-        if (attributeValue == null) {
-            return targets;
+        if (attributeValue != null) {
+            if (attributeValue instanceof com.intellij.psi.PsiArrayInitializerMemberValue arrayValue) {
+                for (PsiAnnotationMemberValue initializer : arrayValue.getInitializers()) {
+                    addTargetClass(initializer, targets);
+                }
+            } else {
+                addTargetClass(attributeValue, targets);
+            }
         }
 
-        if (attributeValue instanceof com.intellij.psi.PsiArrayInitializerMemberValue arrayValue) {
-            for (PsiAnnotationMemberValue initializer : arrayValue.getInitializers()) {
-                addTargetClass(initializer, targets);
+        PsiAnnotationMemberValue prefixValue = annotation.findAttributeValue("methodPrefix");
+        if (prefixValue instanceof com.intellij.psi.PsiLiteralExpression literalExpression) {
+            Object value = literalExpression.getValue();
+            if (value instanceof String prefix) {
+                methodPrefix = prefix;
             }
-        } else {
-            addTargetClass(attributeValue, targets);
         }
-        return targets;
+        return new AnnotationMetadata(targets, methodPrefix);
     }
 
     private static void addTargetClass(PsiAnnotationMemberValue memberValue, List<PsiClass> targets) {
@@ -163,12 +178,12 @@ public final class CompositionProjectAnalyzer {
     }
 
     private static MethodSignature signatureFor(MethodModel methodModel) {
-        return new MethodSignature(methodModel.methodName(), methodModel.parameterTypes(), methodModel.returnType());
+        return new MethodSignature(methodModel.generatedMethodName(), methodModel.parameterTypes(), methodModel.returnType());
     }
 
     private static String resolverNameFor(String interfaceName, Map<String, Integer> resolverNameCounts) {
         String stripped = stripInterfacePrefix(interfaceName == null ? "dependency" : interfaceName);
-        String baseName = lowerCamel(stripped) + "Dependency";
+        String baseName = "get" + stripped;
         int count = resolverNameCounts.merge(baseName, 1, Integer::sum);
         return count == 1 ? baseName : baseName + count;
     }
@@ -231,7 +246,8 @@ public final class CompositionProjectAnalyzer {
 
             SourceInterfaceModel sourceModel = new SourceInterfaceModel(
                     qualifiedName,
-                    resolverNameFor(sourceInterface.getName(), resolverNameCounts));
+                    resolverNameFor(sourceInterface.getName(), resolverNameCounts),
+                    normalizeMethodPrefix(extractMethodPrefix(sourceInterface)));
             sources.put(qualifiedName, sourceModel);
 
             for (PsiMethod method : sourceInterface.getAllMethods()) {
@@ -239,10 +255,12 @@ public final class CompositionProjectAnalyzer {
                     continue;
                 }
 
+                String declaredMethodName = method.getName();
                 MethodModel methodModel = new MethodModel(
                         qualifiedName,
                         sourceModel.resolverName(),
-                        method.getName(),
+                        declaredMethodName,
+                        generatedMethodName(sourceModel.methodPrefix(), declaredMethodName),
                         method.getReturnType() == null ? "void" : method.getReturnType().getCanonicalText(),
                         java.util.Arrays.stream(method.getParameterList().getParameters())
                                 .map(parameter -> parameter.getType().getCanonicalText())
@@ -252,7 +270,7 @@ public final class CompositionProjectAnalyzer {
                                 .toList());
                 MethodSignature signature = signatureFor(methodModel);
                 methodsBySignature.computeIfAbsent(signature, ignored -> new ArrayList<>()).add(methodModel);
-                methodsByName.computeIfAbsent(methodModel.methodName(), ignored -> new ArrayList<>()).add(methodModel);
+                methodsByName.computeIfAbsent(methodModel.generatedMethodName(), ignored -> new ArrayList<>()).add(methodModel);
             }
         }
 
@@ -284,5 +302,19 @@ public final class CompositionProjectAnalyzer {
                     methodsBySignature,
                     methodsByName);
         }
+
+        private String normalizeMethodPrefix(String methodPrefix) {
+            return methodPrefix == null ? "" : methodPrefix.trim();
+        }
+
+        private String generatedMethodName(String methodPrefix, String declaredMethodName) {
+            if (methodPrefix.isBlank()) {
+                return declaredMethodName;
+            }
+            return lowerCamel(methodPrefix) + Character.toUpperCase(declaredMethodName.charAt(0)) + declaredMethodName.substring(1);
+        }
+    }
+
+    private record AnnotationMetadata(List<PsiClass> targets, String methodPrefix) {
     }
 }
