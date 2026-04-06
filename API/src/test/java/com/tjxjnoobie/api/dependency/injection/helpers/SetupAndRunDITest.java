@@ -44,8 +44,7 @@ class SetupAndRunDITest {
         TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
         helper.BASE_PACKAGE = FIXTURE_PACKAGE;
 
-        helper.scanPackage(FIXTURE_PACKAGE, getClass().getClassLoader());
-        helper.registerDependenciesViaAnnotation();
+        helper.setupDISystem();
 
         IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
         IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
@@ -67,8 +66,7 @@ class SetupAndRunDITest {
 
         TestableDependencyInjectorHelper multiHelper = new TestableDependencyInjectorHelper();
         multiHelper.BASE_PACKAGE = MULTI_FIXTURE_PACKAGE;
-        multiHelper.scanPackage(MULTI_FIXTURE_PACKAGE, getClass().getClassLoader());
-        multiHelper.registerDependenciesViaAnnotation();
+        multiHelper.setupDISystem();
 
         IRedis annotationRedis = DependencyLoaderAccess.findInstance(IRedis.class);
         IUtils annotationUtils = DependencyLoaderAccess.findInstance(IUtils.class);

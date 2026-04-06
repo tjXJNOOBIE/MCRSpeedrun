@@ -43,7 +43,7 @@ public class VelocityEnabler implements IVelocityEnabler, IInfrastructureDomain 
         ReflectUtil.loadLibs();
         Config.createConfig();
         Config.loadConfig();
-        injectorHelper.setupDISystem(this);
+        injectorHelper.setupDISystem();
         new CustomRunnable() {
 
             @Override

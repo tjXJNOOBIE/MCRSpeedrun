@@ -59,7 +59,7 @@ public class Main extends JavaPlugin implements PluginMessageListener, Listener,
         // This ensures Main's fields are scanned and registered before contexts are created
         // We create a temporary helper just to run autoBind on Main
         try {
-            injectionHelper.setupDISystem(this);
+            injectionHelper.setupDISystem();
         } catch (Throwable e) {
             Log.exception(e);
         }

@@ -37,13 +37,93 @@ class DependencyInjectorHelperIntegrationTest {
     }
 
     @Test
-    void scansAnnotatedFixturesAndRegistersRealProjectInterfaces() throws Throwable {
+    void setupDISystemRegistersDependenciesImmediately() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
+        helper.setupDISystem();
+
+        assertFixtureBindingsRegistered();
+    }
+
+    @Test
+    void setupDISystemOverloadsProduceTheSameFixtureBindings() throws Throwable {
+        runBootstrapAndAssertFixtureBindings(helper -> helper.setupDISystem());
+        runBootstrapAndAssertFixtureBindings(helper -> helper.setupDISystem(getClass().getClassLoader()));
+        runBootstrapAndAssertFixtureBindings(helper -> helper.setupDISystem(DependencyInjectorHelperIntegrationTest.class));
+        runBootstrapAndAssertFixtureBindings(helper -> helper.setupDISystem(new TestEntryPoint()));
+    }
+
+    @Test
+    void setupDISystemWithExplicitClassLoaderStillDrivesReflectiveScanning() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+        helper.BASE_PACKAGE = MULTI_FIXTURE_PACKAGE;
+
+        helper.setupDISystem(getClass().getClassLoader());
+
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(ILocalServerMetaData.class));
+
+        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = DependencyLoaderAccess.findInstance(ILocalServerMetaData.class);
+
+        assertNotNull(redis);
+        assertNotNull(utils);
+        assertNotNull(localServerMetaData);
+        assertSame(redis, utils);
+        assertSame(redis, localServerMetaData);
+    }
+
+    @Test
+    void scansMultiInterfaceFixtureAndRegistersEveryDeclaredInterfaceAgainstTheSameSingleton() throws Throwable {
         TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
 
-        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
-        helper.scanPackage(FIXTURE_PACKAGE, getClass().getClassLoader());
-        helper.registerDependenciesViaAnnotation();
+        helper.BASE_PACKAGE = MULTI_FIXTURE_PACKAGE;
+        helper.setupDISystem();
 
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(ILocalServerMetaData.class));
+
+        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = DependencyLoaderAccess.findInstance(ILocalServerMetaData.class);
+
+        assertNotNull(redis);
+        assertNotNull(utils);
+        assertNotNull(localServerMetaData);
+        assertSame(redis, utils);
+        assertSame(redis, localServerMetaData);
+
+        redis.connectToRedis();
+        utils.createServerID();
+        utils.createGameID();
+        utils.setConfigValue("surface", "annotation-multi");
+        localServerMetaData.setServerID("delegated-local-server");
+
+        assertEquals(1, DelegatingMultiInterfaceService.getConnectCalls());
+        assertEquals("delegated-local-server", utils.getServerID());
+        assertEquals("delegated-local-server", localServerMetaData.getLocalServerID());
+        assertEquals("annotated-multi-game", localServerMetaData.getGameID());
+        assertEquals("annotation-multi", utils.getConfigValues().get("surface"));
+        assertEquals("annotated-multi-4", utils.generateRandomID(4));
+    }
+
+    private void runBootstrapAndAssertFixtureBindings(ThrowingHelperBootstrap bootstrap) throws Throwable {
+        DependencyMap.getDependencyMap().clear();
+        DelegatingRedisService.reset();
+        DelegatingVelocityMainService.reset();
+        DelegatingMultiInterfaceService.reset();
+
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
+
+        bootstrap.run(helper);
+        assertFixtureBindingsRegistered();
+    }
+
+    private void assertFixtureBindingsRegistered() throws Throwable {
         assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
         assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
         assertTrue(DependencyLoaderAccess.isInstanceRegistered(IVelocityMain.class));
@@ -74,44 +154,16 @@ class DependencyInjectorHelperIntegrationTest {
         assertEquals(1, DelegatingVelocityMainService.getLastAliasCount());
     }
 
-    @Test
-    void scansMultiInterfaceFixtureAndRegistersEveryDeclaredInterfaceAgainstTheSameSingleton() throws Throwable {
-        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
-
-        helper.BASE_PACKAGE = MULTI_FIXTURE_PACKAGE;
-        helper.scanPackage(MULTI_FIXTURE_PACKAGE, getClass().getClassLoader());
-        helper.registerDependenciesViaAnnotation();
-
-        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
-        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
-        assertTrue(DependencyLoaderAccess.isInstanceRegistered(ILocalServerMetaData.class));
-
-        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
-        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
-        ILocalServerMetaData localServerMetaData = DependencyLoaderAccess.findInstance(ILocalServerMetaData.class);
-
-        assertNotNull(redis);
-        assertNotNull(utils);
-        assertNotNull(localServerMetaData);
-        assertSame(redis, utils);
-        assertSame(redis, localServerMetaData);
-
-        redis.connectToRedis();
-        utils.createServerID();
-        utils.createGameID();
-        utils.setConfigValue("surface", "annotation-multi");
-        localServerMetaData.setServerID("delegated-local-server");
-
-        assertEquals(1, DelegatingMultiInterfaceService.getConnectCalls());
-        assertEquals("delegated-local-server", utils.getServerID());
-        assertEquals("delegated-local-server", localServerMetaData.getLocalServerID());
-        assertEquals("annotated-multi-game", localServerMetaData.getGameID());
-        assertEquals("annotation-multi", utils.getConfigValues().get("surface"));
-        assertEquals("annotated-multi-4", utils.generateRandomID(4));
-    }
-
     private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<
             com.tjxjnoobie.api.dependency.IDependencyInjectableInterface,
             com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete> {
+    }
+
+    private static class TestEntryPoint {
+    }
+
+    @FunctionalInterface
+    private interface ThrowingHelperBootstrap {
+        void run(TestableDependencyInjectorHelper helper) throws Throwable;
     }
 }

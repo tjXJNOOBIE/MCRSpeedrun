@@ -25,7 +25,6 @@ import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyIns
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.platform.global.console.Log;
 import com.tjxjnoobie.api.platform.global.console.style.LogColor;
-import com.tjxjnoobie.api.platform.global.utils.CustomRunnable;
 
 import java.io.File;
 import java.io.InputStream;
@@ -59,23 +58,75 @@ public class DependencyInjectorHelper<
 
     String BASE_PACKAGE = "com.tjxjnoobie";
 
+    /**
+     * Scans and registers dependencies using the helper's own class loader.
+     */
     @Override
-    public void setupDISystem(Object entryPoint) {
+    public void setupDISystem() {
+        setupDISystem(getClass().getClassLoader());
+    }
+
+    /**
+     * Scans and registers dependencies using the supplied class loader.
+     *
+     * @param loader the class loader used for reflective package scanning
+     */
+    @Override
+    public void setupDISystem(ClassLoader loader) {
+        ClassLoader resolvedLoader = resolveClassLoader(loader);
+
         Log.warn("[DI] ===== DI System Initialization Started =====");
         Log.info(" %YELLOW% [DI] --- Phase 1: Class Scanning ");
-        scanPackage(BASE_PACKAGE, entryPoint.getClass().getClassLoader());
+        loadedInterfaces.clear();
+        loadedConcretes.clear();
+        scanPackage(BASE_PACKAGE, resolvedLoader);
         Log.info("[DI] --- Phase 2: Annotation Scanning & Map Registration ");
-        new CustomRunnable() {
-            @Override
-            public void run() {
-                try {
-                    registerDependenciesViaAnnotation();
-                } catch (Throwable e) {
-                    Log.exception(e);
-                }
-            }
-        }.runTaskLater(5000L);
+        registerDependenciesViaAnnotation();
         Log.warn("[DI] ===== DI System Initialization Ended =====");
+    }
+
+    /**
+     * Scans and registers dependencies using the supplied type's class loader.
+     *
+     * @param type the type whose class loader should be used for scanning
+     */
+    @Override
+    public void setupDISystem(Class<?> type) {
+        if (type == null) {
+            throw new IllegalArgumentException("type is required");
+        }
+        setupDISystem(type.getClassLoader());
+    }
+
+    /**
+     * Scans and registers dependencies using the supplied entrypoint object's class loader.
+     *
+     * @param entryPoint the object whose class loader should be used for scanning
+     */
+    @Override
+    public void setupDISystem(Object entryPoint) {
+        if (entryPoint == null) {
+            throw new IllegalArgumentException("entryPoint is required");
+        }
+        setupDISystem(entryPoint.getClass());
+    }
+
+    private ClassLoader resolveClassLoader(ClassLoader loader) {
+        if (loader != null) {
+            return loader;
+        }
+
+        ClassLoader helperLoader = getClass().getClassLoader();
+        if (helperLoader != null) {
+            return helperLoader;
+        }
+
+        ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
+        if (contextLoader != null) {
+            return contextLoader;
+        }
+
+        throw new IllegalStateException("[DI] Unable to resolve a class loader for DI scanning");
     }
 
     /**
