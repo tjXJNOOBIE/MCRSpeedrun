@@ -28,6 +28,16 @@ public interface IDependencyAccess {
     }
 
     /**
+     * Returns the dependency loader for the supplied logical scope.
+     *
+     * @param scopeName the DI scope to resolve
+     * @return the scoped dependency loader
+     */
+    default DependencyLoader getDependencyLoader(String scopeName) {
+        return DependencyLoader.getDependencyLoader(scopeName);
+    }
+
+    /**
      * Resolves metadata for the supplied dependency token.
      *
      * @param dependencyType the interface token used for lookup
@@ -103,6 +113,30 @@ public interface IDependencyAccess {
      */
     default <T> T replaceInstance(Class<T> dependencyType, Supplier<? extends T> supplier) {
         return getDependencyLoader().replaceInstance(dependencyType, supplier);
+    }
+
+    /**
+     * Registers an already-constructed dependency instance in the default loader.
+     *
+     * @param dependencyType the interface token to bind
+     * @param dependencyInstance the instance to register
+     * @param <T> the dependency token type
+     * @return the registered instance
+     */
+    default <T> T registerInstance(Class<T> dependencyType, T dependencyInstance) {
+        return getDependencyLoader().registerInstance(dependencyType, dependencyInstance);
+    }
+
+    /**
+     * Registers a dependency instance in the default loader using the supplied supplier.
+     *
+     * @param dependencyType the interface token to bind
+     * @param supplier the factory that creates the instance
+     * @param <T> the dependency token type
+     * @return the registered instance
+     */
+    default <T> T registerInstance(Class<T> dependencyType, Supplier<? extends T> supplier) {
+        return getDependencyLoader().registerInstance(dependencyType, supplier);
     }
 
     /**

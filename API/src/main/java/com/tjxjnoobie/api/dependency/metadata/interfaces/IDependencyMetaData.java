@@ -49,6 +49,24 @@ public interface IDependencyMetaData<
             IDependencyInstance<INSTANCE> wrappedInstance);
 
     /**
+     * Populates metadata around an already-constructed dependency instance.
+     *
+     * @param rawDependencyInterface the interface token used for registration
+     * @param rawDependencyConcrete the concrete class of the supplied instance
+     * @param wrappedInterface the wrapper that holds interface-facing state
+     * @param wrappedInstance the wrapper that holds concrete-facing state
+     * @param dependencyInstance the concrete instance to bind without reflective construction
+     * @param dependencySupplier the supplier that should be used for future replacements
+     */
+    void bindDependencyInstance(
+            Class<? extends INTERFACE> rawDependencyInterface,
+            Class<? extends INSTANCE> rawDependencyConcrete,
+            IDependencyInterface<INTERFACE> wrappedInterface,
+            IDependencyInstance<INSTANCE> wrappedInstance,
+            INSTANCE dependencyInstance,
+            Supplier<? extends INSTANCE> dependencySupplier);
+
+    /**
      * Instantiates and stores the concrete dependency represented by this metadata.
      *
      * @param dependencyInstance the concrete class to instantiate

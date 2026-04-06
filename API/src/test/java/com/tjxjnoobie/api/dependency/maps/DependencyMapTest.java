@@ -1,6 +1,7 @@
 package com.tjxjnoobie.api.dependency.maps;
 
 import com.tjxjnoobie.api.dependency.DependencyLoaderAccess;
+import com.tjxjnoobie.api.dependency.fixtures.ConstructorBoundUtilsService;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingUtilsService;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.DependencyInstance;
@@ -75,5 +76,16 @@ class DependencyMapTest {
         assertNotSame(original, replacement);
         assertSame(replacement, metaData.getDependencyInstance());
         assertSame(replacement, DependencyLoaderAccess.findInstance(IUtils.class));
+    }
+
+    @Test
+    void rejectsDuplicateRegistrationsForTheSameInterfaceToken() {
+        ConstructorBoundUtilsService first = new ConstructorBoundUtilsService("first");
+        ConstructorBoundUtilsService second = new ConstructorBoundUtilsService("second");
+
+        DependencyMap.getDependencyMap().registerInstance(IUtils.class, first);
+
+        assertThrows(IllegalStateException.class,
+                () -> DependencyMap.getDependencyMap().registerInstance(IUtils.class, second));
     }
 }

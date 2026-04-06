@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,6 +44,36 @@ class DependencyInjectorHelperIntegrationTest {
         helper.setupDISystem();
 
         assertFixtureBindingsRegistered();
+    }
+
+    @Test
+    void setupDISystemIsIdempotentForTheSamePackageAndClassLoader() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
+
+        helper.setupDISystem();
+        IUtils first = DependencyLoaderAccess.requireInstance(IUtils.class);
+
+        helper.setupDISystem();
+        IUtils second = DependencyLoaderAccess.requireInstance(IUtils.class);
+
+        assertSame(first, second);
+    }
+
+    @Test
+    void reloadDISystemRefreshesBindingsForTheSamePackageAndClassLoader() throws Throwable {
+        TestableDependencyInjectorHelper helper = new TestableDependencyInjectorHelper();
+        helper.BASE_PACKAGE = FIXTURE_PACKAGE;
+        helper.setupDISystem();
+
+        IUtils original = DependencyLoaderAccess.requireInstance(IUtils.class);
+        IUtils replaced = DependencyLoaderAccess.replaceInstance(IUtils.class, DelegatingUtilsService::new);
+
+        helper.reloadDISystem();
+
+        IUtils reloaded = DependencyLoaderAccess.requireInstance(IUtils.class);
+        assertNotSame(original, replaced);
+        assertNotSame(replaced, reloaded);
     }
 
     @Test

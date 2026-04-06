@@ -40,6 +40,21 @@ public interface IDependencyInjectorHelper<
     void setupDISystem(ClassLoader loader) throws Throwable;
 
     /**
+     * Forces a rescan and re-registration using the helper's own class loader.
+     *
+     * @throws Throwable when startup registration fails
+     */
+    void reloadDISystem() throws Throwable;
+
+    /**
+     * Forces a rescan and re-registration using the supplied class loader.
+     *
+     * @param loader the class loader used for reflective package scanning
+     * @throws Throwable when startup registration fails
+     */
+    void reloadDISystem(ClassLoader loader) throws Throwable;
+
+    /**
      * Scans and registers dependencies using the supplied type's class loader.
      *
      * @param type the type whose class loader should be used for scanning
@@ -63,5 +78,31 @@ public interface IDependencyInjectorHelper<
             throw new IllegalArgumentException("entryPoint is required");
         }
         setupDISystem(entryPoint.getClass());
+    }
+
+    /**
+     * Forces a rescan and re-registration using the supplied type's class loader.
+     *
+     * @param type the type whose class loader should be used for scanning
+     * @throws Throwable when startup registration fails
+     */
+    default void reloadDISystem(Class<?> type) throws Throwable {
+        if (type == null) {
+            throw new IllegalArgumentException("type is required");
+        }
+        reloadDISystem(type.getClassLoader());
+    }
+
+    /**
+     * Forces a rescan and re-registration using the supplied DI entrypoint.
+     *
+     * @param entryPoint the object whose class loader should be used for scanning
+     * @throws Throwable when startup registration fails
+     */
+    default void reloadDISystem(Object entryPoint) throws Throwable {
+        if (entryPoint == null) {
+            throw new IllegalArgumentException("entryPoint is required");
+        }
+        reloadDISystem(entryPoint.getClass());
     }
 }

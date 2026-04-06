@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.dependency;
 
+import com.tjxjnoobie.api.dependency.fixtures.ConstructorBoundUtilsService;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingUtilsService;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -23,6 +25,7 @@ class DependencyLoaderAccessTest {
     @AfterEach
     void clearDependencyMap() {
         DependencyMap.getDependencyMap().clear();
+        DependencyLoader.clearNamedLoaders();
     }
 
     @Test
@@ -78,5 +81,30 @@ class DependencyLoaderAccessTest {
     void rejectsReplacementWhenTokenIsMissing() {
         assertThrows(IllegalStateException.class,
                 () -> DependencyLoaderAccess.replaceInstance(IUtils.class, DelegatingUtilsService::new));
+    }
+
+    @Test
+    void registersExistingInstanceWithoutReflectiveConstruction() {
+        ConstructorBoundUtilsService registered =
+                new ConstructorBoundUtilsService("constructor-bound-server");
+
+        IUtils utils = DependencyLoaderAccess.registerInstance(IUtils.class, registered);
+
+        assertSame(registered, utils);
+        assertSame(registered, DependencyLoaderAccess.findInstance(IUtils.class));
+        assertEquals("constructor-bound-server", utils.getServerID());
+    }
+
+    @Test
+    void isolatesNamedLoaderScopesFromTheDefaultScope() {
+        ConstructorBoundUtilsService scoped =
+                new ConstructorBoundUtilsService("scoped-server");
+
+        DependencyLoaderAccess.registerInstance("velocity-test", IUtils.class, scoped);
+
+        assertNull(DependencyLoaderAccess.findInstance(IUtils.class));
+        assertSame(scoped, DependencyLoaderAccess.findInstance("velocity-test", IUtils.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered("velocity-test", IUtils.class));
+        assertFalse(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
     }
 }

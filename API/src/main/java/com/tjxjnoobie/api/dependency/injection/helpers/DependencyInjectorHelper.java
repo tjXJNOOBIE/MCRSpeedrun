@@ -50,6 +50,8 @@ public class DependencyInjectorHelper<
         INTERFACE extends IDependencyInjectableInterface,
         INSTANCE extends IDependencyInjectableConcrete>
         implements IDependencyInjectorHelper<INTERFACE, INSTANCE> {
+    private static final Set<BootstrapKey> BOOTSTRAPPED = ConcurrentHashMap.newKeySet();
+    private static final ConcurrentHashMap<BootstrapKey, Set<Class<?>>> REGISTERED_BINDINGS = new ConcurrentHashMap<>();
 
     private final Set<Class<? extends INTERFACE>> loadedInterfaces = ConcurrentHashMap.newKeySet();
     private final Set<Class<? extends INSTANCE>> loadedConcretes = ConcurrentHashMap.newKeySet();
@@ -74,15 +76,63 @@ public class DependencyInjectorHelper<
     @Override
     public void setupDISystem(ClassLoader loader) {
         ClassLoader resolvedLoader = resolveClassLoader(loader);
+        BootstrapKey bootstrapKey = bootstrapKey(resolvedLoader);
 
-        Log.warn("[DI] ===== DI System Initialization Started =====");
+        if (BOOTSTRAPPED.contains(bootstrapKey) && isBootstrapCurrent(bootstrapKey)) {
+            Log.info("[DI] Bootstrap already completed for " + BASE_PACKAGE + " using " + resolvedLoader + ", skipping");
+            return;
+        }
+
+        BOOTSTRAPPED.add(bootstrapKey);
+
+        try {
+            runBootstrap(bootstrapKey, resolvedLoader, false);
+        } catch (RuntimeException | Error e) {
+            BOOTSTRAPPED.remove(bootstrapKey);
+            REGISTERED_BINDINGS.remove(bootstrapKey);
+            throw e;
+        }
+    }
+
+    @Override
+    public void reloadDISystem() {
+        reloadDISystem(getClass().getClassLoader());
+    }
+
+    @Override
+    public void reloadDISystem(ClassLoader loader) {
+        ClassLoader resolvedLoader = resolveClassLoader(loader);
+        BootstrapKey bootstrapKey = bootstrapKey(resolvedLoader);
+        BOOTSTRAPPED.remove(bootstrapKey);
+        REGISTERED_BINDINGS.remove(bootstrapKey);
+        runBootstrap(bootstrapKey, resolvedLoader, true);
+        BOOTSTRAPPED.add(bootstrapKey);
+    }
+
+    private void runBootstrap(BootstrapKey bootstrapKey, ClassLoader resolvedLoader, boolean reload) {
+        if (reload) {
+            Log.warn("[DI] ===== DI System Reload Started =====");
+        } else {
+            Log.warn("[DI] ===== DI System Initialization Started =====");
+        }
+
         Log.info(" %YELLOW% [DI] --- Phase 1: Class Scanning ");
         loadedInterfaces.clear();
         loadedConcretes.clear();
         scanPackage(BASE_PACKAGE, resolvedLoader);
+        if (reload) {
+            Log.info("[DI] --- Phase 1b: Removing Existing Package Bindings ");
+            unregisterLoadedBindings();
+        }
         Log.info("[DI] --- Phase 2: Annotation Scanning & Map Registration ");
         registerDependenciesViaAnnotation();
-        Log.warn("[DI] ===== DI System Initialization Ended =====");
+        REGISTERED_BINDINGS.put(bootstrapKey, registeredInterfaceKeys());
+
+        if (reload) {
+            Log.warn("[DI] ===== DI System Reload Ended =====");
+        } else {
+            Log.warn("[DI] ===== DI System Initialization Ended =====");
+        }
     }
 
     /**
@@ -127,6 +177,24 @@ public class DependencyInjectorHelper<
         }
 
         throw new IllegalStateException("[DI] Unable to resolve a class loader for DI scanning");
+    }
+
+    private BootstrapKey bootstrapKey(ClassLoader loader) {
+        return new BootstrapKey(BASE_PACKAGE, System.identityHashCode(loader));
+    }
+
+    private boolean isBootstrapCurrent(BootstrapKey bootstrapKey) {
+        Set<Class<?>> expectedBindings = REGISTERED_BINDINGS.get(bootstrapKey);
+        if (expectedBindings == null || expectedBindings.isEmpty()) {
+            return false;
+        }
+
+        for (Class<?> binding : expectedBindings) {
+            if (!DependencyMap.getDependencyMap().isInstanceRegistered(binding)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -195,6 +263,34 @@ public class DependencyInjectorHelper<
 
         Log.warn("[DI-Helper] Finished annotation DI registration, skipped classes: " + skipped
                 + ", registered interface bindings: " + registeredBindings);
+    }
+
+    private void unregisterLoadedBindings() {
+        for (Class<? extends INSTANCE> rawScannedConcrete : loadedConcretes) {
+            DelegatesToInterface concreteAnnotation = rawScannedConcrete.getAnnotation(DelegatesToInterface.class);
+            if (concreteAnnotation == null) {
+                continue;
+            }
+
+            for (Class<?> linkedInterface : resolveLinkedInterfaces(concreteAnnotation)) {
+                if (linkedInterface == null || !linkedInterface.isInterface()) {
+                    continue;
+                }
+                DependencyMap.getDependencyMap().removeDependency(linkedInterface);
+            }
+        }
+    }
+
+    private Set<Class<?>> registeredInterfaceKeys() {
+        Set<Class<?>> bindings = new LinkedHashSet<>();
+        for (Class<? extends INSTANCE> rawScannedConcrete : loadedConcretes) {
+            DelegatesToInterface concreteAnnotation = rawScannedConcrete.getAnnotation(DelegatesToInterface.class);
+            if (concreteAnnotation == null) {
+                continue;
+            }
+            bindings.addAll(resolveLinkedInterfaces(concreteAnnotation));
+        }
+        return bindings;
     }
 
     private Set<Class<?>> resolveLinkedInterfaces(DelegatesToInterface concreteAnnotation) {
@@ -488,5 +584,8 @@ public class DependencyInjectorHelper<
             Log.exception(e);
             return null;
         }
+    }
+
+    private record BootstrapKey(String basePackage, int classLoaderIdentity) {
     }
 }

@@ -38,6 +38,26 @@ public interface IDependencyMap {
             IDependencyMetaData<?, ?> dependencyMetaData);
 
     /**
+     * Registers an already-constructed dependency instance without reflective instantiation.
+     *
+     * @param dependencyInterface the interface token to register
+     * @param dependencyInstance the concrete instance to bind
+     * @param <T> the token type
+     * @return the registered instance
+     */
+    <T> T registerInstance(Class<T> dependencyInterface, T dependencyInstance);
+
+    /**
+     * Registers a dependency instance using the supplied factory without reflective instantiation.
+     *
+     * @param dependencyInterface the interface token to register
+     * @param supplier the supplier that creates the instance to bind
+     * @param <T> the token type
+     * @return the registered instance
+     */
+    <T> T registerInstance(Class<T> dependencyInterface, Supplier<? extends T> supplier);
+
+    /**
      * Returns metadata for the supplied interface token.
      *
      * @param dependencyInterface the token to inspect

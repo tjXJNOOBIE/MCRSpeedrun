@@ -91,6 +91,49 @@ public class DependencyMetaData<
             Class<? extends INSTANCE> rawDependencyConcrete,
             IDependencyInterface<INTERFACE> wrappedInterface,
             IDependencyInstance<INSTANCE> wrappedInstance) {
+        assignBinding(rawDependencyInterface, rawDependencyConcrete, wrappedInterface, wrappedInstance);
+        createDependencyInstance(rawDependencyConcrete);
+    }
+
+    @Override
+    public void bindDependencyInstance(
+            Class<? extends INTERFACE> rawDependencyInterface,
+            Class<? extends INSTANCE> rawDependencyConcrete,
+            IDependencyInterface<INTERFACE> wrappedInterface,
+            IDependencyInstance<INSTANCE> wrappedInstance,
+            INSTANCE dependencyInstance,
+            Supplier<? extends INSTANCE> dependencySupplier) {
+        if (dependencyInstance == null) {
+            throw new IllegalArgumentException("[DependencyMetaData] dependency instance is required");
+        }
+
+        assignBinding(rawDependencyInterface, rawDependencyConcrete, wrappedInterface, wrappedInstance);
+        if (!rawDependencyConcrete.isInstance(dependencyInstance)) {
+            throw new IllegalArgumentException("[DependencyMetaData] dependency instance must match concrete token: "
+                    + rawDependencyConcrete.getName());
+        }
+
+        @SuppressWarnings("unchecked")
+        Supplier<INSTANCE> castSupplier = dependencySupplier == null
+                ? () -> dependencyInstance
+                : () -> (INSTANCE) dependencySupplier.get();
+        setDependencySupplier(castSupplier);
+        this.dependencyInstance = dependencyInstance;
+
+        if (this.wrappedInstance != null) {
+            this.wrappedInstance.setWrappedDependencyInstance(dependencyInstance);
+        }
+
+        if (this.wrappedInterface != null) {
+            this.wrappedInterface.setDependencyInterface(getDependencyInterface());
+        }
+    }
+
+    private void assignBinding(
+            Class<? extends INTERFACE> rawDependencyInterface,
+            Class<? extends INSTANCE> rawDependencyConcrete,
+            IDependencyInterface<INTERFACE> wrappedInterface,
+            IDependencyInstance<INSTANCE> wrappedInstance) {
         validateInterfaceType(rawDependencyInterface);
         validateConcreteType(rawDependencyConcrete, true);
 
@@ -105,8 +148,6 @@ public class DependencyMetaData<
         if (this.wrappedInstance != null) {
             this.wrappedInstance.setWrappedRawInstanceClass(rawDependencyConcrete);
         }
-
-        createDependencyInstance(rawDependencyConcrete);
     }
 
     @Override

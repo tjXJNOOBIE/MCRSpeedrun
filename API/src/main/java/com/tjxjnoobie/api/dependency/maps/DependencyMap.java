@@ -9,9 +9,13 @@
 
 package com.tjxjnoobie.api.dependency.maps;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
 import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
+import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.DependencyInstance;
+import com.tjxjnoobie.api.dependency.metadata.wrappers.DependencyInterface;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +48,86 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
                     + rawDependencyInterface.getName());
         }
 
+        IDependencyMetaData<?, ?> existing = get(rawDependencyInterface);
+        if (existing != null && existing != dependencyMetaData) {
+            throw new IllegalStateException("[DependencyMap] duplicate registration for "
+                    + rawDependencyInterface.getName()
+                    + "; use replaceInstance(...) to swap an existing binding");
+        }
+
         put(rawDependencyInterface, dependencyMetaData);
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> T registerInstance(Class<T> dependencyInterface, T dependencyInstance) {
+        if (dependencyInterface == null) {
+            throw new IllegalArgumentException("[DependencyMap] dependency key is required");
+        }
+        if (dependencyInstance == null) {
+            throw new IllegalArgumentException("[DependencyMap] dependency instance is required");
+        }
+        if (!dependencyInterface.isInterface()) {
+            throw new IllegalArgumentException("[DependencyMap] dependency key must be an interface: "
+                    + dependencyInterface.getName());
+        }
+        if (!(dependencyInstance instanceof IDependencyInjectableConcrete concreteInstance)) {
+            throw new IllegalArgumentException("[DependencyMap] dependency instance must implement IDependencyInjectableConcrete: "
+                    + dependencyInstance.getClass().getName());
+        }
+        if (!dependencyInterface.isInstance(dependencyInstance)) {
+            throw new IllegalArgumentException("[DependencyMap] dependency instance must implement "
+                    + dependencyInterface.getName());
+        }
+
+        Class concreteType = dependencyInstance.getClass();
+        DependencyMetaData metaData = new DependencyMetaData();
+        metaData.bindDependencyInstance(
+                dependencyInterface.asSubclass(IDependencyInjectableInterface.class),
+                concreteType.asSubclass(IDependencyInjectableConcrete.class),
+                new DependencyInterface(dependencyInterface.asSubclass(IDependencyInjectableInterface.class)),
+                new DependencyInstance(concreteType.asSubclass(IDependencyInjectableConcrete.class)),
+                concreteInstance,
+                () -> concreteInstance);
+        registerDependency(dependencyInterface.asSubclass(IDependencyInjectableInterface.class), metaData);
+        return dependencyInterface.cast(dependencyInstance);
+    }
+
+    @Override
+    public <T> T registerInstance(Class<T> dependencyInterface, Supplier<? extends T> supplier) {
+        if (supplier == null) {
+            throw new IllegalArgumentException("[DependencyMap] supplier is required");
+        }
+        T instance = supplier.get();
+        if (instance == null) {
+            throw new IllegalStateException("[DependencyMap] supplier returned null for " + dependencyInterface.getName());
+        }
+        if (!(instance instanceof IDependencyInjectableConcrete concreteInstance)) {
+            throw new IllegalArgumentException("[DependencyMap] dependency instance must implement IDependencyInjectableConcrete: "
+                    + instance.getClass().getName());
+        }
+        if (!dependencyInterface.isInterface()) {
+            throw new IllegalArgumentException("[DependencyMap] dependency key must be an interface: "
+                    + dependencyInterface.getName());
+        }
+        if (!dependencyInterface.isInstance(instance)) {
+            throw new IllegalArgumentException("[DependencyMap] dependency instance must implement "
+                    + dependencyInterface.getName());
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Class concreteType = instance.getClass();
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        DependencyMetaData metaData = new DependencyMetaData();
+        metaData.bindDependencyInstance(
+                dependencyInterface.asSubclass(IDependencyInjectableInterface.class),
+                concreteType.asSubclass(IDependencyInjectableConcrete.class),
+                new DependencyInterface(dependencyInterface.asSubclass(IDependencyInjectableInterface.class)),
+                new DependencyInstance(concreteType.asSubclass(IDependencyInjectableConcrete.class)),
+                concreteInstance,
+                (Supplier) supplier);
+        registerDependency(dependencyInterface.asSubclass(IDependencyInjectableInterface.class), metaData);
+        return dependencyInterface.cast(instance);
     }
 
     @Override
