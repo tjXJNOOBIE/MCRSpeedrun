@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class StoreIdempotencyPersistenceIntegrationTest extends StorePersistenceIntegrationTestSupport {
+class StoreIdempotencyPersistenceTest extends StorePersistenceIntegrationTestSupport {
 
     @Autowired
     private PlayerAccountRepository playerAccountRepository;

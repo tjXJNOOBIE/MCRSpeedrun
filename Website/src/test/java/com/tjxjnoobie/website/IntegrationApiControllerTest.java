@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class IntegrationApiControllerIntegrationTest extends WebsiteIntegrationTestSupport {
+class IntegrationApiControllerTest extends WebsiteIntegrationTestSupport {
 
     @Autowired
     private StoreOrderRepository storeOrderRepository;

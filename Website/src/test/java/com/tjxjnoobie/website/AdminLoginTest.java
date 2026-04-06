@@ -12,7 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class AdminLoginIntegrationTest extends WebsiteIntegrationTestSupport {
+class AdminLoginTest extends WebsiteIntegrationTestSupport {
 
     @Test
     void loginPageRendersCsrfBackedLocalAdminForm() throws Exception {
