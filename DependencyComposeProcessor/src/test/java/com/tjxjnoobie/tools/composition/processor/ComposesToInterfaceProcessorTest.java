@@ -66,11 +66,19 @@ class ComposesToInterfaceProcessorTest {
         assertThat(compilation)
                 .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
                 .contentsAsUtf8String()
+                .contains("DependencyLoaderAccess.findInstance(com.example.dep.IRedis.class)");
+        assertThat(compilation)
+                .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
+                .contentsAsUtf8String()
                 .contains("default void connectToRedis()");
         assertThat(compilation)
                 .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
                 .contentsAsUtf8String()
                 .contains("default java.lang.String createServerID()");
+        assertThat(compilation)
+                .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
+                .contentsAsUtf8String()
+                .doesNotContain("requireDependency(");
     }
 
     @Test

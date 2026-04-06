@@ -59,7 +59,9 @@ public class NovusComposePluginTest extends BasePlatformTestCase {
         assertTrue(Files.exists(generatedFile));
         String contents = Files.readString(generatedFile);
         assertTrue(contents.contains("default example.dep.IRedis getRedis()"));
+        assertTrue(contents.contains("DependencyLoaderAccess.findInstance(example.dep.IRedis.class)"));
         assertTrue(contents.contains("default void connectToRedis()"));
+        assertFalse(contents.contains("requireDependency("));
     }
 
     public void testRemovesGeneratedFileWhenAnnotationIsRemoved() throws Exception {
