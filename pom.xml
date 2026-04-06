@@ -82,6 +82,8 @@
         <module>API</module>
         <module>Core</module>
         <module>VelocityCore</module>
+        <module>StoreDomain</module>
+        <module>StorePersistence</module>
         <module>KingdomFactions</module>
         <module>SpeedRun</module>
         <module>Website</module>
