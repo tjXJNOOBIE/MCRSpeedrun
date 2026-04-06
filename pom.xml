@@ -114,12 +114,12 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages - Novus</name>
-            <url>https://maven.pkg.github.com/tjXJNOOBIE/PROJECT-NOVUS</url>
+            <url>https://maven.pkg.github.com/Tavall/PROJECT-NOVUS</url>
         </repository>
         <snapshotRepository>
             <id>github</id>
             <name>GitHub Packages - Novus Snapshots</name>
-            <url>https://maven.pkg.github.com/tjXJNOOBIE/PROJECT-NOVUS</url>
+            <url>https://maven.pkg.github.com/Tavall/PROJECT-NOVUS</url>
         </snapshotRepository>
     </distributionManagement>
 
