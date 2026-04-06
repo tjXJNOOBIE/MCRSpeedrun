@@ -17,6 +17,7 @@ class ComposesToInterfaceProcessorTest {
                         package com.tjxjnoobie.api.dependency.annotations;
                         public @interface ComposesToInterface {
                             Class<?>[] value();
+                            String methodPrefix() default "";
                         }
                         """),
                 JavaFileObjects.forSourceString(
@@ -57,11 +58,11 @@ class ComposesToInterfaceProcessorTest {
         assertThat(compilation)
                 .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
                 .contentsAsUtf8String()
-                .contains("default com.example.dep.IRedis redisDependency()");
+                .contains("default com.example.dep.IRedis getRedis()");
         assertThat(compilation)
                 .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
                 .contentsAsUtf8String()
-                .contains("default com.example.dep.IUtils utilsDependency()");
+                .contains("default com.example.dep.IUtils getUtils()");
         assertThat(compilation)
                 .generatedSourceFile("com.example.domain.IDataBaseDomainGenerated")
                 .contentsAsUtf8String()
@@ -115,6 +116,51 @@ class ComposesToInterfaceProcessorTest {
     }
 
     @Test
+    void generatesPrefixedMethodNamesWhenConfigured() {
+        Compilation compilation = compile(
+                annotationSource(),
+                JavaFileObjects.forSourceString(
+                        "com.example.domain.ISharedDomain",
+                        """
+                        package com.example.domain;
+                        public interface ISharedDomain extends ISharedDomainGenerated {
+                        }
+                        """),
+                JavaFileObjects.forSourceString(
+                        "com.example.dep.IFirst",
+                        """
+                        package com.example.dep;
+                        import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
+                        import com.example.domain.ISharedDomain;
+                        @ComposesToInterface(value = ISharedDomain.class, methodPrefix = "first")
+                        public interface IFirst {
+                            default void shared() {}
+                        }
+                        """),
+                JavaFileObjects.forSourceString(
+                        "com.example.dep.ISecond",
+                        """
+                        package com.example.dep;
+                        import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
+                        import com.example.domain.ISharedDomain;
+                        @ComposesToInterface(ISharedDomain.class)
+                        public interface ISecond {
+                            default void shared() {}
+                        }
+                        """));
+
+        assertThat(compilation).succeeded();
+        assertThat(compilation)
+                .generatedSourceFile("com.example.domain.ISharedDomainGenerated")
+                .contentsAsUtf8String()
+                .contains("default void firstShared()");
+        assertThat(compilation)
+                .generatedSourceFile("com.example.domain.ISharedDomainGenerated")
+                .contentsAsUtf8String()
+                .contains("default void shared()");
+    }
+
+    @Test
     void failsOnCompositionCycles() {
         Compilation compilation = compile(
                 annotationSource(),
@@ -142,9 +188,24 @@ class ComposesToInterfaceProcessorTest {
     }
 
     private Compilation compile(javax.tools.JavaFileObject... sources) {
+        javax.tools.JavaFileObject dependencyLoaderAccess = JavaFileObjects.forSourceString(
+                "com.tjxjnoobie.api.dependency.DependencyLoaderAccess",
+                """
+                package com.tjxjnoobie.api.dependency;
+                public final class DependencyLoaderAccess {
+                    private DependencyLoaderAccess() {
+                    }
+                    public static <T> T findInstance(Class<T> dependencyType) {
+                        return null;
+                    }
+                }
+                """);
+        javax.tools.JavaFileObject[] compilationSources = new javax.tools.JavaFileObject[sources.length + 1];
+        compilationSources[0] = dependencyLoaderAccess;
+        System.arraycopy(sources, 0, compilationSources, 1, sources.length);
         return com.google.testing.compile.Compiler.javac()
                 .withProcessors(new ComposesToInterfaceProcessor())
-                .compile(sources);
+                .compile(compilationSources);
     }
 
     private javax.tools.JavaFileObject annotationSource() {
@@ -154,6 +215,7 @@ class ComposesToInterfaceProcessorTest {
                 package com.tjxjnoobie.api.dependency.annotations;
                 public @interface ComposesToInterface {
                     Class<?>[] value();
+                    String methodPrefix() default "";
                 }
                 """);
     }

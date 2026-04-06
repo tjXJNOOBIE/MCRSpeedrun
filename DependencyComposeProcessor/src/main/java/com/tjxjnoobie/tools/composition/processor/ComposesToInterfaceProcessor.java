@@ -135,7 +135,16 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
     }
 
     private List<TypeElement> getTargetInterfaces(TypeElement sourceInterface) {
+        return readAnnotationConfig(sourceInterface).targets();
+    }
+
+    private String getMethodPrefix(TypeElement sourceInterface) {
+        return readAnnotationConfig(sourceInterface).methodPrefix();
+    }
+
+    private AnnotationConfig readAnnotationConfig(TypeElement sourceInterface) {
         List<TypeElement> targets = new ArrayList<>();
+        String methodPrefix = "";
         for (AnnotationMirror annotationMirror : sourceInterface.getAnnotationMirrors()) {
             Element annotationElement = annotationMirror.getAnnotationType().asElement();
             if (!(annotationElement instanceof TypeElement annotationType)
@@ -147,31 +156,34 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
                     processingEnv.getElementUtils().getElementValuesWithDefaults(annotationMirror);
 
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : values.entrySet()) {
-                if (!"value".contentEquals(entry.getKey().getSimpleName())) {
-                    continue;
-                }
-
-                Object rawValue = entry.getValue().getValue();
-                if (!(rawValue instanceof Collection<?> collection)) {
-                    continue;
-                }
-
-                for (Object value : collection) {
-                    if (!(value instanceof AnnotationValue annotationValue)) {
+                if ("value".contentEquals(entry.getKey().getSimpleName())) {
+                    Object rawValue = entry.getValue().getValue();
+                    if (!(rawValue instanceof Collection<?> collection)) {
                         continue;
                     }
 
-                    Object memberValue = annotationValue.getValue();
-                    if (!(memberValue instanceof DeclaredType declaredType)
-                            || !(declaredType.asElement() instanceof TypeElement targetType)) {
-                        continue;
-                    }
+                    for (Object value : collection) {
+                        if (!(value instanceof AnnotationValue annotationValue)) {
+                            continue;
+                        }
 
-                    targets.add(targetType);
+                        Object memberValue = annotationValue.getValue();
+                        if (!(memberValue instanceof DeclaredType declaredType)
+                                || !(declaredType.asElement() instanceof TypeElement targetType)) {
+                            continue;
+                        }
+
+                        targets.add(targetType);
+                    }
+                } else if ("methodPrefix".contentEquals(entry.getKey().getSimpleName())) {
+                    Object rawValue = entry.getValue().getValue();
+                    if (rawValue instanceof String prefix) {
+                        methodPrefix = prefix;
+                    }
                 }
             }
         }
-        return targets;
+        return new AnnotationConfig(targets, methodPrefix);
     }
 
     private void validateCycles(CompositionIndex index) {
@@ -196,7 +208,10 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
         List<SourceInterface> sourceInterfaces = new ArrayList<>();
         for (TypeElement sourceInterfaceElement : targetDomain.sourceInterfaces()) {
             String resolverName = resolverNameFor(sourceInterfaceElement, resolverNameCounts);
-            sourceInterfaces.add(new SourceInterface(sourceInterfaceElement, resolverName));
+            sourceInterfaces.add(new SourceInterface(
+                    sourceInterfaceElement,
+                    resolverName,
+                    normalizeMethodPrefix(getMethodPrefix(sourceInterfaceElement))));
         }
 
         Map<MethodSignature, List<SourceMethod>> methodsBySignature = new LinkedHashMap<>();
@@ -204,9 +219,12 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
 
         for (SourceInterface sourceInterface : sourceInterfaces) {
             for (ExecutableElement method : composeableMethods(sourceInterface.type())) {
-                SourceMethod sourceMethod = new SourceMethod(sourceInterface, method);
-                methodsBySignature.computeIfAbsent(MethodSignature.from(method), ignored -> new ArrayList<>()).add(sourceMethod);
-                methodsByName.computeIfAbsent(method.getSimpleName().toString(), ignored -> new ArrayList<>()).add(sourceMethod);
+                SourceMethod sourceMethod = new SourceMethod(
+                        sourceInterface,
+                        method,
+                        generatedMethodName(sourceInterface.methodPrefix(), method.getSimpleName().toString()));
+                methodsBySignature.computeIfAbsent(MethodSignature.from(sourceMethod), ignored -> new ArrayList<>()).add(sourceMethod);
+                methodsByName.computeIfAbsent(sourceMethod.generatedMethodName(), ignored -> new ArrayList<>()).add(sourceMethod);
             }
         }
 
@@ -232,12 +250,12 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
 
             writer.write("// Generated by ComposesToInterfaceProcessor. Do not edit.\n");
             writer.write("public interface " + targetDomain.generatedSimpleName() + " {\n");
-            writer.write("    <T> T requireDependency(Class<T> dependencyType);\n\n");
 
             for (SourceInterface sourceInterface : sourceInterfaces) {
                 writer.write("    default " + sourceInterface.type().getQualifiedName() + " "
                         + sourceInterface.resolverName() + "() {\n");
-                writer.write("        return requireDependency(" + sourceInterface.type().getQualifiedName() + ".class);\n");
+                writer.write("        return com.tjxjnoobie.api.dependency.DependencyLoaderAccess.findInstance("
+                        + sourceInterface.type().getQualifiedName() + ".class);\n");
                 writer.write("    }\n\n");
             }
 
@@ -247,7 +265,7 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
                     writer.write("    // Multiple generated methods share the name '" + entry.getKey() + "': ");
                     writer.write(sameNamedMethods.stream()
                             .map(sourceMethod -> sourceMethod.sourceInterface().type().getQualifiedName().toString()
-                                    + "#" + MethodSignature.from(sourceMethod.method()).displayName())
+                                    + "#" + MethodSignature.from(sourceMethod).displayName())
                             .collect(Collectors.joining("; ")));
                     writer.write("\n");
                 }
@@ -270,13 +288,14 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
     private void writeForwardingMethod(Writer writer, SourceMethod sourceMethod) throws IOException {
         ExecutableElement method = sourceMethod.method();
         String returnType = method.getReturnType().toString();
-        String methodName = method.getSimpleName().toString();
+        String methodName = sourceMethod.generatedMethodName();
         String parameters = parameterDeclaration(method);
         String arguments = argumentList(method);
         String throwsClause = throwsClause(method);
 
         writer.write("    default " + returnType + " " + methodName + "(" + parameters + ")" + throwsClause + " {\n");
-        String targetInvocation = sourceMethod.sourceInterface().resolverName() + "()." + methodName + "(" + arguments + ")";
+        String targetInvocation = sourceMethod.sourceInterface().resolverName() + "()."
+                + sourceMethod.method().getSimpleName() + "(" + arguments + ")";
         if (method.getReturnType().getKind() == TypeKind.VOID) {
             writer.write("        " + targetInvocation + ";\n");
             writer.write("    }\n\n");
@@ -303,7 +322,12 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
                 continue;
             }
 
-            MethodSignature signature = MethodSignature.from(method);
+            MethodSignature signature = new MethodSignature(
+                    method.getSimpleName().toString(),
+                    method.getParameters().stream()
+                            .map(parameter -> parameter.asType().toString())
+                            .toList(),
+                    method.getReturnType().toString());
             if (seen.add(signature)) {
                 methods.add(method);
             }
@@ -322,7 +346,8 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
 
     private String resolverNameFor(TypeElement sourceInterface, Map<String, Integer> resolverNameCounts) {
         String simpleName = sourceInterface.getSimpleName().toString();
-        String baseName = lowerCamel(stripInterfacePrefix(simpleName)) + "Dependency";
+        String strippedName = stripInterfacePrefix(simpleName);
+        String baseName = "get" + strippedName;
         int count = resolverNameCounts.merge(baseName, 1, Integer::sum);
         return count == 1 ? baseName : baseName + count;
     }
@@ -342,6 +367,17 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
             return name.toLowerCase(Locale.ROOT);
         }
         return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+    }
+
+    private String normalizeMethodPrefix(String methodPrefix) {
+        return methodPrefix == null ? "" : methodPrefix.trim();
+    }
+
+    private String generatedMethodName(String methodPrefix, String declaredMethodName) {
+        if (methodPrefix.isBlank()) {
+            return declaredMethodName;
+        }
+        return lowerCamel(methodPrefix) + Character.toUpperCase(declaredMethodName.charAt(0)) + declaredMethodName.substring(1);
     }
 
     private String parameterDeclaration(ExecutableElement method) {
@@ -378,6 +414,9 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
         }
     }
 
+    private record AnnotationConfig(List<TypeElement> targets, String methodPrefix) {
+    }
+
     private static final class TargetDomain {
         private final TypeElement targetInterface;
         private final Set<TypeElement> sourceInterfaces = new LinkedHashSet<>();
@@ -407,20 +446,20 @@ public class ComposesToInterfaceProcessor extends AbstractProcessor {
         }
     }
 
-    private record SourceInterface(TypeElement type, String resolverName) {
+    private record SourceInterface(TypeElement type, String resolverName, String methodPrefix) {
     }
 
-    private record SourceMethod(SourceInterface sourceInterface, ExecutableElement method) {
+    private record SourceMethod(SourceInterface sourceInterface, ExecutableElement method, String generatedMethodName) {
     }
 
     private record MethodSignature(String name, List<String> parameters, String returnType) {
-        static MethodSignature from(ExecutableElement method) {
+        static MethodSignature from(SourceMethod sourceMethod) {
             return new MethodSignature(
-                    method.getSimpleName().toString(),
-                    method.getParameters().stream()
+                    sourceMethod.generatedMethodName(),
+                    sourceMethod.method().getParameters().stream()
                             .map(parameter -> parameter.asType().toString())
                             .toList(),
-                    method.getReturnType().toString());
+                    sourceMethod.method().getReturnType().toString());
         }
 
         String displayName() {
