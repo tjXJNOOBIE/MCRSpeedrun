@@ -1,0 +1,6 @@
+{
+  "id": "velocitycore",
+  "name": "VelocityCore",
+  "version": "1.0",
+  "main": "com.tjxjnoobie.proxy.VelocityMain"
+}

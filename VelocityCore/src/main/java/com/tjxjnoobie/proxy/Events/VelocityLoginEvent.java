@@ -57,8 +57,8 @@ public class VelocityLoginEvent implements IPunishManager, IPlayerProfile, IProx
                     "&cYou may appeal on Discord @ " +getDiscordString()+ " or on the website @ " + getWebsiteString()));
             return;
         }
-        addRankCache(uuid);
         createProfile(uuid,name);
+        addRankCache(uuid);
 
     }
 }
