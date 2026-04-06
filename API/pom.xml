@@ -37,8 +37,8 @@
                   <annotationProcessorPaths>
                       <path>
                           <groupId>com.tjxjnoobie</groupId>
-                          <artifactId>dependency-compose-processor</artifactId>
-                          <version>${project.version}</version>
+                          <artifactId>tavall-di</artifactId>
+                          <version>1.0.0</version>
                       </path>
                   </annotationProcessorPaths>
               </configuration>
@@ -47,6 +47,21 @@
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-di</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-eventbus</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-logging</artifactId>
+      <version>1.0.0</version>
+    </dependency>
     <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>

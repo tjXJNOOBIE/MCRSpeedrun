@@ -78,7 +78,6 @@
         </pluginManagement>
     </build>
     <modules>
-        <module>DependencyComposeProcessor</module>
         <module>API</module>
         <module>Core</module>
         <module>MinecraftIntegration</module>
