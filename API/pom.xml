@@ -63,6 +63,21 @@
       <version>1.0.0</version>
     </dependency>
     <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-concurrency</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-reflection</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.tjxjnoobie</groupId>
+      <artifactId>tavall-scheduler</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>io.papermc.paper</groupId>
       <artifactId>paper-api</artifactId>
     </dependency>

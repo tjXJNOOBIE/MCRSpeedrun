@@ -31,6 +31,11 @@
             <groupId>com.tjxjnoobie</groupId>
             <artifactId>api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.tjxjnoobie</groupId>
+            <artifactId>tavall-reflection</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
 

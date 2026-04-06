@@ -163,6 +163,11 @@
       </dependency>
       <dependency>
           <groupId>com.tjxjnoobie</groupId>
+          <artifactId>tavall-rating-glicko2</artifactId>
+          <version>1.0.0</version>
+      </dependency>
+      <dependency>
+          <groupId>com.tjxjnoobie</groupId>
           <artifactId>minecraft-integration</artifactId>
           <version>${project.version}</version>
       </dependency>
