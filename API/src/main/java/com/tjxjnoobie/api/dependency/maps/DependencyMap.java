@@ -9,30 +9,46 @@
 
 package com.tjxjnoobie.api.dependency.maps;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.maps.interfaces.IDependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
+/**
+ * Global registry that maps interface tokens to dependency metadata.
+ */
 public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaData<?, ?>> implements IDependencyMap {
     private static final DependencyMap DEPENDENCY_MAP = new DependencyMap();
 
+    /**
+     * Returns the singleton dependency map used by the API module.
+     *
+     * @return the shared dependency map
+     */
     public static DependencyMap getDependencyMap() {
         return DEPENDENCY_MAP;
     }
 
     @Override
-    public void registerDependency(Class<?> rawDependencyInterface, IDependencyMetaData<?, ?> dependencyMetaData) {
+    public void registerDependency(
+            Class<? extends IDependencyInjectableInterface> rawDependencyInterface,
+            IDependencyMetaData<?, ?> dependencyMetaData) {
         if (rawDependencyInterface == null || dependencyMetaData == null) {
-            Log.critical("[DependencyMap] Dependency registration failed because interface key or metadata was null");
-            return;
+            throw new IllegalArgumentException("[DependencyMap] interface key and metadata are required");
         }
+        if (!rawDependencyInterface.isInterface()) {
+            throw new IllegalArgumentException("[DependencyMap] dependency key must be an interface: "
+                    + rawDependencyInterface.getName());
+        }
+
         put(rawDependencyInterface, dependencyMetaData);
     }
 
     @Override
-    public <T> IDependencyMetaData<?, ?> getMetaData(Class<T> dependencyInterface) {
+    public <T> IDependencyMetaData<?, ?> findMetaData(Class<T> dependencyInterface) {
         if (dependencyInterface == null) {
             return null;
         }
@@ -40,27 +56,51 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     }
 
     @Override
-    public <T> T getInstance(Class<T> dependencyInterface) {
+    public <T> T findInstance(Class<T> dependencyInterface) {
         if (dependencyInterface == null) {
             return null;
         }
 
-        IDependencyMetaData<?, ?> metaData = getMetaData(dependencyInterface);
+        IDependencyMetaData<?, ?> metaData = findMetaData(dependencyInterface);
         if (metaData == null) {
             return null;
         }
 
-        Object dependencyInstance = metaData.getDependencyInstance();
-        if (dependencyInterface.isInstance(dependencyInstance)) {
-            return dependencyInterface.cast(dependencyInstance);
-        }
-
-        Object dependencyInterfaceView = metaData.getDependencyInterface();
-        if (dependencyInterface.isInstance(dependencyInterfaceView)) {
-            return dependencyInterface.cast(dependencyInterfaceView);
+        Object resolvedDependency = metaData.resolveLocalInstance(dependencyInterface);
+        if (dependencyInterface.isInstance(resolvedDependency)) {
+            return dependencyInterface.cast(resolvedDependency);
         }
 
         return null;
+    }
+
+    @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <T> T replaceInstance(Class<T> dependencyInterface, Supplier<? extends T> supplier) {
+        if (dependencyInterface == null) {
+            throw new IllegalArgumentException("[DependencyMap] dependency key is required");
+        }
+        if (supplier == null) {
+            throw new IllegalArgumentException("[DependencyMap] replacement supplier is required");
+        }
+
+        IDependencyMetaData<?, ?> metaData = findMetaData(dependencyInterface);
+        if (metaData == null) {
+            throw new IllegalStateException("replaceInstance: instance not registered: " + dependencyInterface.getName());
+        }
+
+        Object existing = metaData.resolveLocalInstance(dependencyInterface);
+        if (!dependencyInterface.isInstance(existing)) {
+            throw new IllegalStateException("replaceInstance: instance not registered: " + dependencyInterface.getName());
+        }
+
+        ((IDependencyMetaData) metaData).replaceDependencyInstance((Supplier) supplier);
+        Object replacement = metaData.resolveLocalInstance(dependencyInterface);
+        if (!dependencyInterface.isInstance(replacement)) {
+            throw new IllegalStateException("replaceInstance: replacement type mismatch for " + dependencyInterface.getName());
+        }
+
+        return dependencyInterface.cast(replacement);
     }
 
     @Override
@@ -72,7 +112,7 @@ public class DependencyMap extends ConcurrentHashMap<Class<?>, IDependencyMetaDa
     }
 
     @Override
-    public boolean isRegistered(Class<?> dependencyInterface) {
+    public boolean isInstanceRegistered(Class<?> dependencyInterface) {
         return dependencyInterface != null && containsKey(dependencyInterface);
     }
 

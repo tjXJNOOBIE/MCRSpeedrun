@@ -5,7 +5,7 @@ import com.tjxjnoobie.api.enums.GameModeEnum;
 /**
  * Interface for game mode management
  */
-public interface IGameMode {
+public interface IGameMode extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     
     /**
      * Gets the current game mode

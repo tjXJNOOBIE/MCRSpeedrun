@@ -7,7 +7,10 @@
  * SEE LICENSE.TXT
  */
 
-package com.tjxjnoobie.api.dependency.injection.interfaces;
+package com.tjxjnoobie.api.dependency;
 
-public interface IInjectionMetaData {
+/**
+ * Marker interface for API contracts that may be used as DI registration tokens.
+ */
+public interface IDependencyInjectableInterface {
 }

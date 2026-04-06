@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
+import com.tjxjnoobie.api.dependency.DependencyLoaderAccess;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingRedisService;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingUtilsService;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingVelocityMainService;
@@ -43,13 +44,13 @@ class DependencyInjectorHelperIntegrationTest {
         helper.scanPackage(FIXTURE_PACKAGE, getClass().getClassLoader());
         helper.registerDependenciesViaAnnotation();
 
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(IRedis.class));
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(IUtils.class));
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(IVelocityMain.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IVelocityMain.class));
 
-        IRedis redis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
-        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
-        IVelocityMain velocityMain = DependencyMap.getDependencyMap().getInstance(IVelocityMain.class);
+        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
+        IVelocityMain velocityMain = DependencyLoaderAccess.findInstance(IVelocityMain.class);
 
         assertNotNull(redis);
         assertNotNull(utils);
@@ -81,13 +82,13 @@ class DependencyInjectorHelperIntegrationTest {
         helper.scanPackage(MULTI_FIXTURE_PACKAGE, getClass().getClassLoader());
         helper.registerDependenciesViaAnnotation();
 
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(IRedis.class));
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(IUtils.class));
-        assertTrue(DependencyMap.getDependencyMap().isRegistered(ILocalServerMetaData.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IRedis.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(IUtils.class));
+        assertTrue(DependencyLoaderAccess.isInstanceRegistered(ILocalServerMetaData.class));
 
-        IRedis redis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
-        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
-        ILocalServerMetaData localServerMetaData = DependencyMap.getDependencyMap().getInstance(ILocalServerMetaData.class);
+        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = DependencyLoaderAccess.findInstance(ILocalServerMetaData.class);
 
         assertNotNull(redis);
         assertNotNull(utils);
@@ -109,6 +110,8 @@ class DependencyInjectorHelperIntegrationTest {
         assertEquals("annotated-multi-4", utils.generateRandomID(4));
     }
 
-    private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<Object, Object> {
+    private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<
+            com.tjxjnoobie.api.dependency.IDependencyInjectableInterface,
+            com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete> {
     }
 }

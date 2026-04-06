@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @DelegatesToInterface(getLinkedInterface = IUtils.class)
-public class DelegatingUtilsService implements IUtils {
+public class DelegatingUtilsService implements IUtils, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private final Map<String, Object> configValues = new HashMap<>();
     private String serverId = "";
     private String gameId = "";

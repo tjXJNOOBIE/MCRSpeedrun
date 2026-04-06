@@ -7,7 +7,7 @@ import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
  * Interface for Redis operations
  */
 @ComposesToInterface(IInfrastructureDomain.class)
-public interface IRedis {
+public interface IRedis extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     
 
 

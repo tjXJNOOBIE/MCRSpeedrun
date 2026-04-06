@@ -9,15 +9,30 @@
 
 package com.tjxjnoobie.api.dependency.metadata.interfaces;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 
-public interface IDependencyMetaDataHelper<INTERFACE, INSTANCE> {
+/**
+ * Helper contract for populating metadata from wrapper state.
+ *
+ * @param <INTERFACE> the injectable interface token type
+ * @param <INSTANCE> the injectable concrete instance type
+ */
+public interface IDependencyMetaDataHelper<
+        INTERFACE extends IDependencyInjectableInterface,
+        INSTANCE extends IDependencyInjectableConcrete> {
 
-
-    default void populateMetaData(IDependencyMetaData<INTERFACE, INSTANCE> dependencyMetaData,
-                          IDependencyInterface<INTERFACE> wrappedInterface,
-                          IDependencyInstance<INSTANCE> wrappedInstance){
-
-    }
+    /**
+     * Populates metadata using interface and instance wrapper state.
+     *
+     * @param dependencyMetaData the metadata being populated
+     * @param wrappedInterface the interface wrapper that owns the interface token
+     * @param wrappedInstance the concrete wrapper that owns the concrete token
+     */
+    void populateMetaData(
+            IDependencyMetaData<INTERFACE, INSTANCE> dependencyMetaData,
+            IDependencyInterface<INTERFACE> wrappedInterface,
+            IDependencyInstance<INSTANCE> wrappedInstance);
 }

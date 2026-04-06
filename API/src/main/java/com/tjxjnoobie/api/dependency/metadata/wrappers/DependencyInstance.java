@@ -9,41 +9,25 @@
 
 package com.tjxjnoobie.api.dependency.metadata.wrappers;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
-import com.tjxjnoobie.api.platform.global.console.Log;
 
-public class DependencyInstance<INSTANCE> implements IDependencyInstance<INSTANCE> {
-    private INSTANCE dependencyInstance;
-    private Class<? extends INSTANCE> dependencyInstanceRawClass;
+/**
+ * Default wrapper implementation for concrete-instance DI state.
+ *
+ * @param <INSTANCE> the injectable concrete instance type
+ */
+public class DependencyInstance<INSTANCE extends IDependencyInjectableConcrete> implements IDependencyInstance<INSTANCE> {
 
     public DependencyInstance() {
     }
 
+    /**
+     * Creates a wrapper that immediately stores the supplied concrete token.
+     *
+     * @param rawDependencyInstanceClass the concrete token to store
+     */
     public DependencyInstance(Class<? extends INSTANCE> rawDependencyInstanceClass) {
         setWrappedRawInstanceClass(rawDependencyInstanceClass);
-    }
-
-    @Override
-    public INSTANCE getWrappedDependencyInstance() {
-        return dependencyInstance;
-    }
-
-    @Override
-    public Class<? extends INSTANCE> getDependencyInstanceClass() {
-        return dependencyInstanceRawClass;
-    }
-
-    @Override
-    public void setWrappedDependencyInstance(INSTANCE dependencyInstance) {
-        this.dependencyInstance = dependencyInstance;
-    }
-
-    @Override
-    public void setWrappedRawInstanceClass(Class<? extends INSTANCE> rawDependencyInstanceClass) {
-        if (rawDependencyInstanceClass == null) {
-            Log.error("[DependencyInstance] rawDependencyInstanceClass is null during setWrappedRawInstanceClass()");
-            return;
-        }
-        this.dependencyInstanceRawClass = rawDependencyInstanceClass;
     }
 }

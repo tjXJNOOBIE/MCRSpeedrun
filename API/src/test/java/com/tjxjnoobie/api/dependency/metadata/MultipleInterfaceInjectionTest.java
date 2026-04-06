@@ -30,8 +30,8 @@ class MultipleInterfaceInjectionTest {
 
         IRedis redis = metaData.getDependencyInterface();
         RealProjectMultiInterfaceService concrete = metaData.getDependencyInstance();
-        IUtils utils = metaData.getDependency(IUtils.class);
-        ILocalServerMetaData localServerMetaData = metaData.getDependency(ILocalServerMetaData.class);
+        IUtils utils = metaData.findInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = metaData.findInstance(ILocalServerMetaData.class);
 
         redis.connectToRedis();
         utils.createServerID();

@@ -6,7 +6,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 /**
  * Interface for quit event handling
  */
-public interface IQuitEvent {
+public interface IQuitEvent extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     
 
 }

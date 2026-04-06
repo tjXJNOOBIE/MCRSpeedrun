@@ -14,7 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 /**
  * Interface for Minecraft utility functions
  */
-public interface IMCUtils extends ILocalServerMetaData, IDebugger, IBossBarManager {
+public interface IMCUtils extends ILocalServerMetaData, IDebugger, IBossBarManager, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
     //TODO: Replace class methods parameters for custom DI system

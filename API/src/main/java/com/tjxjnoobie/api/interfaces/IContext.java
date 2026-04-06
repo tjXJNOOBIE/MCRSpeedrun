@@ -7,7 +7,7 @@ import java.util.List;
  *
  * @param <T> The type of context implementation
  */
-public interface IContext<T> {
+public interface IContext<T> extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
     /**

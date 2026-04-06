@@ -5,7 +5,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public interface BlockPlaceHandler {
+public interface BlockPlaceHandler extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     /**
      * Handles block placement events.
      *

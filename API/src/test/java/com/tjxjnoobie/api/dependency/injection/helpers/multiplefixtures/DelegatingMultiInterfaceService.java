@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         getLinkedInterface = IRedis.class,
         getLinkedInterfaces = {IUtils.class, ILocalServerMetaData.class}
 )
-public class DelegatingMultiInterfaceService implements IRedis, IUtils {
+public class DelegatingMultiInterfaceService implements IRedis, IUtils, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private static final AtomicInteger CONNECT_CALLS = new AtomicInteger();
 
     private final Map<String, Object> configValues = new HashMap<>();

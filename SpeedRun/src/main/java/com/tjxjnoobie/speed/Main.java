@@ -2,7 +2,6 @@ package com.tjxjnoobie.speed;
 
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
@@ -34,7 +33,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils, IDependencyInterface<IRedis> {
+public class Main extends JavaPlugin implements PluginMessageListener, Listener, IUtils {
 
 
 

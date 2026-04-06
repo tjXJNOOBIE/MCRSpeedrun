@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Interface for voting system operations
  */
-public interface IVoting {
+public interface IVoting extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
     default void calculateAndAnnounceWinner() {
         // no-op

@@ -9,6 +9,9 @@
 
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
+import com.tjxjnoobie.api.dependency.DependencyLoaderAccess;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.maps.DependencyMap;
@@ -38,65 +41,31 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
 
-
 /**
- * DependencyInjectorHelper – TODO: implement class functionality
- * Auto-generated skeleton by MondayGPT-style template
+ * Scans packages for annotated DI concretes and registers them against interface tokens.
  *
- * @param <INTERFACE>    the type parameter
- * @param <INSTANCE>> the type parameter
- * @author TJ
- * @since 10/12/2025
+ * @param <INTERFACE> the injectable interface token type
+ * @param <INSTANCE> the injectable concrete instance type
  */
-public class DependencyInjectorHelper<INTERFACE, INSTANCE>
+public class DependencyInjectorHelper<
+        INTERFACE extends IDependencyInjectableInterface,
+        INSTANCE extends IDependencyInjectableConcrete>
         implements IDependencyInjectorHelper<INTERFACE, INSTANCE> {
 
-    //TODO: Extract file helper methods to a concerned domain
-    private final Set<Class<? extends INTERFACE>> LOADED_INTERFACES = ConcurrentHashMap.newKeySet();
-
-    private final Set<Class<? extends  INSTANCE>> LOADED_CONCRETES = ConcurrentHashMap.newKeySet();
-    private final IDependencyMetaDataHelper<INTERFACE,INSTANCE> dependencyMetaDataHelper = new DependencyMetaDataHelper<INTERFACE,INSTANCE>();
-//    private DependencyMap<INTERFACE,INSTANCE> dependencyMap = new DependencyMap<>();
-
+    private final Set<Class<? extends INTERFACE>> loadedInterfaces = ConcurrentHashMap.newKeySet();
+    private final Set<Class<? extends INSTANCE>> loadedConcretes = ConcurrentHashMap.newKeySet();
+    private final IDependencyMetaDataHelper<INTERFACE, INSTANCE> dependencyMetaDataHelper =
+            new DependencyMetaDataHelper<>();
 
     String BASE_PACKAGE = "com.tjxjnoobie";
 
-    //TODO: Determine method relevance
-//    @Override
-//    public void propagateInstancesAcrossHierarchy() {
-//        for (CLASS propagateCandidate : getDependencyMap().getSubDependenciesForBase()) {
-//            Log.info("[DI-Propagate] Propagating instances across hierarchy");
-//
-//            Object instance = getDependencyInstance(propagateCandidate);
-//
-//            if (instance == null) Log.error("[DI-Propagate] " + LogColor.YELLOW + "NULL INSTANCE" + LogColor.RESET);
-//
-//            // Share instance with any class that implements or extends this interface
-//            for (Class<?> candidate : getDependencyMap().getSubDependenciesForBase()) {
-//                if (candidate == null || candidate.isInterface() || Modifier.isAbstract(candidate.getModifiers()))
-//                    Log.error("[DI-Propagate] " + LogColor.YELLOW + "SKIP" + LogColor.RESET + " Invalid candidate: " + candidate.getName());
-//
-//                // Candidate implements or extends the same hierarchy as the interface’s impl
-//                if (propagateCandidate.isAssignableFrom(candidate) || candidate.isAssignableFrom(propagateCandidate)) {
-//                    Log.info("[DI-Propagate] " + LogColor.YELLOW + "Propagating " + propagateCandidate.getSimpleName() + " to " + candidate.getSimpleName());
-//                    // Avoid overwriting an existing meta
-//                    setInstance(instance);
-//                    getDependencyMap().registerDependency(candidate, sharedMeta);
-//
-//                    Log.success("[DI-Propagate] Shared instance of "
-//                            + propagateCandidate.getSimpleName() + " to " + candidate.getSimpleName());
-//                }
-//            }
-//        }
-//    }
     @Override
-    public void setupDISystem(IDependencyInterface<?> entryPoint) {
+    public void setupDISystem(Object entryPoint) {
         Log.warn("[DI] ===== DI System Initialization Started =====");
         Log.info(" %YELLOW% [DI] --- Phase 1: Class Scanning ");
-        scanPackage(BASE_PACKAGE,entryPoint.getClass().getClassLoader());
+        scanPackage(BASE_PACKAGE, entryPoint.getClass().getClassLoader());
         Log.info("[DI] --- Phase 2: Annotation Scanning & Map Registration ");
-        new CustomRunnable(){
-
+        new CustomRunnable() {
             @Override
             public void run() {
                 try {
@@ -106,14 +75,13 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
                 }
             }
         }.runTaskLater(5000L);
-
-
         Log.warn("[DI] ===== DI System Initialization Ended =====");
-
     }
 
-
-
+    /**
+     * Registers annotated concrete classes against their declared interface tokens.
+     */
+    @SuppressWarnings("unchecked")
     public void registerDependenciesViaAnnotation() {
 
         Log.warn("[DI-Helper] ====== Beginning annotation-driven DI registration ======");
@@ -121,17 +89,29 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
         int skipped = 0;
         int registeredBindings = 0;
 
-        for (Class<? extends INSTANCE> rawScannedConcrete : LOADED_CONCRETES) {
-
-            //Grab all concretes with @DelegatesToInterface annotation
+        for (Class<? extends INSTANCE> rawScannedConcrete : loadedConcretes) {
             DelegatesToInterface concreteAnnotation = rawScannedConcrete.getAnnotation(DelegatesToInterface.class);
-            if(concreteAnnotation == null){
-                //Concrete without annotation
+            if (concreteAnnotation == null) {
+                continue;
+            }
+            if (!IDependencyInjectableConcrete.class.isAssignableFrom(rawScannedConcrete)) {
+                Log.warn("[DI-Helper] " + rawScannedConcrete.getSimpleName()
+                        + " is annotated for DI but does not implement IDependencyInjectableConcrete, skipping...");
+                skipped++;
                 continue;
             }
 
             Set<Class<? extends INTERFACE>> validInterfaces = new LinkedHashSet<>();
             for (Class<?> linkedInterface : resolveLinkedInterfaces(concreteAnnotation)) {
+                if (!linkedInterface.isInterface()) {
+                    Log.warn("[DI-Helper] " + linkedInterface.getName() + " is not an interface token, skipping...");
+                    continue;
+                }
+                if (!IDependencyInjectableInterface.class.isAssignableFrom(linkedInterface)) {
+                    Log.warn("[DI-Helper] " + linkedInterface.getName()
+                            + " does not implement IDependencyInjectableInterface, skipping...");
+                    continue;
+                }
                 if (!doesConcreteImplementInterface(rawScannedConcrete, linkedInterface)) {
                     continue;
                 }
@@ -139,31 +119,28 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
             }
 
             if (validInterfaces.isEmpty()) {
-                Log.warn("[DI-Helper] No valid delegated interfaces found for " + rawScannedConcrete.getSimpleName() + ", skipping...");
+                Log.warn("[DI-Helper] No valid delegated interfaces found for "
+                        + rawScannedConcrete.getSimpleName() + ", skipping...");
                 skipped++;
                 continue;
             }
 
             Class<? extends INTERFACE> primaryInterface = validInterfaces.iterator().next();
-            IDependencyInterface<INTERFACE> wrappedLinkedInterface =
-                    new DependencyInterface<>(primaryInterface);
+            IDependencyInterface<INTERFACE> wrappedLinkedInterface = new DependencyInterface<>(primaryInterface);
             IDependencyInstance<INSTANCE> wrappedLinkedConcrete = new DependencyInstance<>(rawScannedConcrete);
             IDependencyMetaData<INTERFACE, INSTANCE> dependencyMetaData = new DependencyMetaData<>();
             dependencyMetaDataHelper.populateMetaData(dependencyMetaData, wrappedLinkedInterface, wrappedLinkedConcrete);
 
             for (Class<? extends INTERFACE> linkedInterface : validInterfaces) {
                 DependencyMap.getDependencyMap().registerDependency(linkedInterface, dependencyMetaData);
-                Object registeredInstance = DependencyMap.getDependencyMap().getInstance((Class<Object>) linkedInterface);
+                Object registeredInstance = DependencyLoaderAccess.findInstance(
+                        (Class<IDependencyInjectableInterface>) linkedInterface);
                 if (registeredInstance != null) {
                     Log.critical("" + registeredInstance.getClass().getSimpleName());
                 }
                 registeredBindings++;
             }
-
-            // If we reach here, we failed linkage or wrapping for rawScannedConcrete, skip.
         }
-
-
 
         Log.warn("[DI-Helper] Finished annotation DI registration, skipped classes: " + skipped
                 + ", registered interface bindings: " + registeredBindings);
@@ -188,10 +165,14 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
         linkedInterfaces.add(linkedInterface);
     }
 
-
-
-    public boolean doesConcreteImplementInterface(Class<?> concrete,
-            Class<?> targetInterface) {
+    /**
+     * Checks whether a concrete class implements the supplied interface token.
+     *
+     * @param concrete the concrete class to inspect
+     * @param targetInterface the interface token to verify
+     * @return {@code true} when the concrete implements the token
+     */
+    public boolean doesConcreteImplementInterface(Class<?> concrete, Class<?> targetInterface) {
 
         if (concrete == null || targetInterface == null) {
             Log.error("[DI-Helper] doesConcreteImplementInterface received null parameters");
@@ -211,68 +192,77 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
         return result;
     }
 
-
-
+    /**
+     * Checks whether the supplied class can be loaded safely in the current runtime.
+     *
+     * @param dependencyClass the class to inspect
+     * @return {@code true} when the class can be loaded without missing dependencies
+     */
     public boolean isClassLoadable(Class<?> dependencyClass) {
         if (dependencyClass == null) {
             Log.warn("[DI-Helper] dependencyClass is null");
             return false;
         }
-            try {
-                Class.forName(dependencyClass.getName(), false, dependencyClass.getClassLoader());
-                dependencyClass.getDeclaredMethods(); // will throw NoClassDefFoundError if deps missing
-                return true;
-            } catch (NoClassDefFoundError e) {
-                Log.error("[SCAN] " + dependencyClass.getSimpleName() + " is not a loadable class in the runtime, skipping");
-
-                return false;
-            } catch (ClassNotFoundException e) {
-                Log.exception(e);
-            }
+        try {
+            Class.forName(dependencyClass.getName(), false, dependencyClass.getClassLoader());
+            dependencyClass.getDeclaredMethods();
+            return true;
+        } catch (NoClassDefFoundError e) {
+            Log.error("[SCAN] " + dependencyClass.getSimpleName() + " is not a loadable class in the runtime, skipping");
             return false;
+        } catch (ClassNotFoundException e) {
+            Log.exception(e);
         }
+        return false;
+    }
+
+    /**
+     * Checks whether the supplied wrapper class can be loaded safely.
+     *
+     * @param dependencyInterface the wrapper to inspect
+     * @return {@code true} when the wrapper class can be loaded
+     */
     public boolean isClassLoadable(IDependencyInterface<INTERFACE> dependencyInterface) {
         return isClassLoadable(dependencyInterface.getClass());
     }
+
+    /**
+     * Checks whether the supplied concrete wrapper class can be loaded safely.
+     *
+     * @param dependencyInstance the wrapper to inspect
+     * @return {@code true} when the wrapper class can be loaded
+     */
     public boolean isClassLoadable(IDependencyInstance<INSTANCE> dependencyInstance) {
         return isClassLoadable(dependencyInstance.getClass());
     }
-
-
-
 
     private void processDependencyClasses(String className, ClassLoader loader) {
         try {
             Class<?> rawClass = Class.forName(className, false, loader);
 
-            if (!isClassLoadable(rawClass)) return;
+            if (!isClassLoadable(rawClass)) {
+                return;
+            }
 
-            if (rawClass.isInterface()) {
-                LOADED_INTERFACES.add((Class<? extends INTERFACE>) rawClass);
-
+            if (rawClass.isInterface() && IDependencyInjectableInterface.class.isAssignableFrom(rawClass)) {
+                loadedInterfaces.add((Class<? extends INTERFACE>) rawClass);
                 Log.success("[DI-Scan] Loaded interface: " + rawClass.getSimpleName());
-            } else if (isConcrete(rawClass)) {
-                LOADED_CONCRETES.add((Class<? extends INSTANCE>) rawClass);
+            } else if (isConcrete(rawClass) && IDependencyInjectableConcrete.class.isAssignableFrom(rawClass)) {
+                loadedConcretes.add((Class<? extends INSTANCE>) rawClass);
                 Log.success("[DI-Scan] Loaded concrete: " + rawClass.getSimpleName());
             }
 
         } catch (Throwable ignored) {
         }
     }
-//    private Supplier<INSTANCE> createFactory(Class<?> concrete) {
-//        return () -> {
-//            try {
-//                Log.warn("[DI-Helper] Creating instance of " + concrete.getSimpleName());
-//                concrete.getDeclaredConstructor().setAccessible(true);
-//                return (INSTANCE) concrete.getDeclaredConstructor().newInstance();
-//            } catch (Exception e) {
-//                //Fallback to UNSAFE if no no-args constructor exists
-//                Log.exception(e);
-//
-//            }
-//            return null;
-//        };
-//    }
+
+    /**
+     * Recursively scans a directory for loadable classes.
+     *
+     * @param pkg the package currently being scanned
+     * @param dir the directory that maps to the package
+     * @param loader the class loader used to resolve classes
+     */
     public void scanDirectory(String pkg, File dir, ClassLoader loader) {
         for (File file : Objects.requireNonNull(dir.listFiles())) {
 
@@ -281,22 +271,30 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
                 continue;
             }
 
-            if (!file.getName().endsWith(".class")) continue;
+            if (!file.getName().endsWith(".class")) {
+                continue;
+            }
 
-            String className =
-                    pkg + (pkg.isEmpty() ? "" : ".") + file.getName().replace(".class", "");
-
+            String className = pkg + (pkg.isEmpty() ? "" : ".") + file.getName().replace(".class", "");
             processDependencyClasses(className, loader);
         }
     }
 
+    /**
+     * Scans a jar file for loadable classes under the supplied base package.
+     *
+     * @param jarFile the jar to scan
+     * @param basePackage the base package to restrict scanning to
+     * @param loader the class loader used to resolve classes
+     */
     public void scanJar(File jarFile, String basePackage, ClassLoader loader) {
-        if (jarFile == null || !jarFile.exists()) return;
+        if (jarFile == null || !jarFile.exists()) {
+            return;
+        }
 
         String prefix = basePackage.replace('.', '/') + "/";
 
         try (JarFile jar = new JarFile(jarFile)) {
-
             jar.stream()
                     .filter(e -> !e.isDirectory())
                     .filter(e -> e.getName().endsWith(".class"))
@@ -314,7 +312,14 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
             Log.exception(e);
         }
     }
-    public  boolean isConcrete(Class<?> clazz) {
+
+    /**
+     * Checks whether the supplied type is a non-abstract concrete class.
+     *
+     * @param clazz the class to inspect
+     * @return {@code true} when the class is concrete
+     */
+    public boolean isConcrete(Class<?> clazz) {
         int mods = clazz.getModifiers();
         return !clazz.isInterface()
                 && !Modifier.isAbstract(mods)
@@ -322,81 +327,83 @@ public class DependencyInjectorHelper<INTERFACE, INSTANCE>
                 && !clazz.isAnnotation();
     }
 
-public void scanPackage(String basePackage, ClassLoader loader) {
+    /**
+     * Scans a package for injectable interfaces and concretes.
+     *
+     * @param basePackage the package prefix to scan
+     * @param loader the class loader used to resolve classes
+     */
+    public void scanPackage(String basePackage, ClassLoader loader) {
 
-    if (basePackage == null || basePackage.isBlank()) return;
-
-    String path = basePackage.replace('.', '/');
-
-    try {
-        Enumeration<URL> resources = loader.getResources(path);
-
-        while (resources.hasMoreElements()) {
-            URL url = resources.nextElement();
-            String protocol = url.getProtocol();
-
-            switch (protocol) {
-
-                case "file": {
-                    File directory = new File(url.toURI());
-                    scanDirectory(basePackage, directory, loader);
-                    break;
-                }
-
-                case "jar": {
-                    File jar = extractJarFile(url);
-                    if (jar != null) scanJar(jar, basePackage, loader);
-                    break;
-                }
-
-                // Zip or war-style archives
-                case "zip":
-                case "wsjar":
-                case "war":
-                case "zipfs":
-                case "vfs":
-                case "vfszip":
-                case "bundleresource":
-                case "bundle": {
-                    File jar = extractJarFile(url);
-                    if (jar != null) scanJar(jar, basePackage, loader);
-                    break;
-                }
-
-                // Java module system (Java 9+)
-                case "jrt": {
-                    scanModulePath(basePackage, loader);
-                    break;
-                }
-
-                default:
-                    Log.warn("[DI-Scan] Unsupported protocol: " + protocol + " @ " + url);
-                    break;
-            }
+        if (basePackage == null || basePackage.isBlank()) {
+            return;
         }
 
-    } catch (Throwable e) {
-        Log.error("[DI-Scan] Failed to scan package " + basePackage);
-        Log.exception(e);
+        String path = basePackage.replace('.', '/');
+
+        try {
+            Enumeration<URL> resources = loader.getResources(path);
+
+            while (resources.hasMoreElements()) {
+                URL url = resources.nextElement();
+                String protocol = url.getProtocol();
+
+                switch (protocol) {
+                    case "file": {
+                        File directory = new File(url.toURI());
+                        scanDirectory(basePackage, directory, loader);
+                        break;
+                    }
+
+                    case "jar":
+                    case "zip":
+                    case "wsjar":
+                    case "war":
+                    case "zipfs":
+                    case "vfs":
+                    case "vfszip":
+                    case "bundleresource":
+                    case "bundle": {
+                        File jar = extractJarFile(url);
+                        if (jar != null) {
+                            scanJar(jar, basePackage, loader);
+                        }
+                        break;
+                    }
+
+                    case "jrt": {
+                        scanModulePath(basePackage, loader);
+                        break;
+                    }
+
+                    default:
+                        Log.warn("[DI-Scan] Unsupported protocol: " + protocol + " @ " + url);
+                        break;
+                }
+            }
+
+        } catch (Throwable e) {
+            Log.error("[DI-Scan] Failed to scan package " + basePackage);
+            Log.exception(e);
+        }
+
+        Log.info("[DI-Scan] " + LogColor.GRAY
+                + "Loaded " + loadedInterfaces.size() + " interfaces and "
+                + loadedConcretes.size() + " concretes for package " + basePackage);
     }
 
-    Log.info("[DI-Scan] " + LogColor.GRAY +
-            "Loaded " + LOADED_INTERFACES.size() + " interfaces and " +
-            LOADED_CONCRETES.size() + " concretes for package " + basePackage);
-}
     private void scanModulePath(String basePackage, ClassLoader loader) {
         try {
             ModuleLayer layer = ModuleLayer.boot();
 
             for (Module module : layer.modules()) {
-                // only scan modules that EXPORT the package you’re looking for
                 if (module.isNamed() && module.getPackages().contains(basePackage)) {
 
                     try (InputStream in = module.getResourceAsStream(basePackage.replace('.', '/') + "/")) {
-                        if (in == null) continue;
+                        if (in == null) {
+                            continue;
+                        }
 
-                        // JRT cannot list directories directly
-                        // you'd need jrtfs for true scanning, we skip detailed module scanning for now
                         Log.warn("[DI-Scan] JRT scanning is not fully implemented for: " + basePackage);
                     }
                 }
@@ -406,16 +413,19 @@ public void scanPackage(String basePackage, ClassLoader loader) {
             Log.exception(e);
         }
     }
+
     private File extractJarFile(URL url) {
         try {
             String external = url.toExternalForm();
 
-            // Handles: jar:file:/..., zip:file:/..., bundle:/..., wsjar:file:/...
-            if (external.startsWith("jar:")) external = external.substring(4);
+            if (external.startsWith("jar:")) {
+                external = external.substring(4);
+            }
 
-            // Extract before "!/"
             int idx = external.indexOf("!/");
-            if (idx != -1) external = external.substring(0, idx);
+            if (idx != -1) {
+                external = external.substring(0, idx);
+            }
 
             if (external.startsWith("file:")) {
                 external = external.substring(5);
@@ -428,8 +438,4 @@ public void scanPackage(String basePackage, ClassLoader loader) {
             return null;
         }
     }
-
-
-
-
 }

@@ -9,7 +9,7 @@
 
 package com.tjxjnoobie.api.interfaces.bukkit;
 
-public interface IBroadcast  {
+public interface IBroadcast extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
     void broadcast(String message);

@@ -10,20 +10,29 @@ import java.util.*;
 
 public class RankCache implements IRankCache {
 
-    public HashMap<UUID, String> rank = new HashMap<>();
-    public HashMap<UUID, Integer> powerLevel = new HashMap<>();
-    public HashMap<UUID, Set<String>> permissions = new HashMap<>();
-    public List<String> allRanks = new ArrayList<>();
+    private static final HashMap<UUID, String> rank = new HashMap<>();
+    private static final HashMap<UUID, Integer> powerLevel = new HashMap<>();
+    private static final HashMap<UUID, Set<String>> permissions = new HashMap<>();
+    private static final List<String> allRanks = new ArrayList<>();
     @Inject private IRank rankClass;
 
     public RankCache() {
-
+        this.rankClass = new com.tjxjnoobie.api.platform.velocity.Rank();
     }
+
+    public RankCache(IRank rankClass) {
+        this.rankClass = rankClass;
+    }
+
     @PostConstruct
     private void init() {
         // This runs AFTER dependency injection
         if (rankClass != null) {
-            allRanks.add(rankClass.getAllRanks());
+            rankClass.getAllRanks();
+            synchronized (allRanks) {
+                allRanks.clear();
+                allRanks.addAll(rankClass.getRanks());
+            }
             System.out.println("[RankCache] Initialized with all ranks from Rank class");
         } else {
             System.err.println("[RankCache] Warning: rankClass is still null after injection!");
@@ -51,6 +60,12 @@ public class RankCache implements IRankCache {
     }
 
     @Override
+    public void refreshRankCache(UUID uuid) throws SQLException {
+        removeRankCache(uuid);
+        addRankCache(uuid);
+    }
+
+    @Override
     public String getCachedRank(UUID uuid) {
 
         return rank.get(uuid);
@@ -59,19 +74,24 @@ public class RankCache implements IRankCache {
     @Override
     public int getCachedPowerLevel(UUID uuid) {
 
-        return powerLevel.get(uuid);
+        return powerLevel.getOrDefault(uuid, 0);
     }
 
     @Override
     public Set<String> getCachedPermissions(UUID uuid) {
 
-        return permissions.get(uuid);
+        return permissions.getOrDefault(uuid, Collections.emptySet());
     }
 
     @Override
     public boolean hasCachedPermission(UUID uuid, String permission) {
         Set<String> userPermissions = permissions.get(uuid);
         return userPermissions != null && userPermissions.contains(permission);
+    }
+
+    @Override
+    public boolean hasCachedRank(UUID uuid) {
+        return rank.containsKey(uuid);
     }
 
     @Override
@@ -91,24 +111,34 @@ public class RankCache implements IRankCache {
 
     @Override
     public boolean rankExists(String rankName) throws SQLException {
-        return rankClass.getRanks().contains(rankName);
+        if (allRanks.isEmpty()) {
+            rankClass.getAllRanks();
+            synchronized (allRanks) {
+                allRanks.clear();
+                allRanks.addAll(rankClass.getRanks());
+            }
+        }
+        return allRanks.contains(rankName);
     }
     @Override
     public boolean isStaff(UUID uuid){
-        return getCachedRank(uuid).equals("Owner") || getCachedRank(uuid).equals("Developer")
-                || getCachedRank(uuid).equals("HeadAdmin") || getCachedRank(uuid).equals("SrMod")
-                || getCachedRank(uuid).equals("Mod") || getCachedRank(uuid).equals("Admin");
+        String cachedRank = getCachedRank(uuid);
+        return "Owner".equals(cachedRank) || "Developer".equals(cachedRank)
+                || "HeadAdmin".equals(cachedRank) || "SrMod".equals(cachedRank)
+                || "Mod".equals(cachedRank) || "Admin".equals(cachedRank);
 
     }
     @Override
     public boolean isAdmin(UUID uuid){
-        return getCachedRank(uuid).equals("Owner") || getCachedRank(uuid).equals("Developer")
-                || getCachedRank(uuid).equals("HeadAdmin") || getCachedRank(uuid).equals("Admin");
+        String cachedRank = getCachedRank(uuid);
+        return "Owner".equals(cachedRank) || "Developer".equals(cachedRank)
+                || "HeadAdmin".equals(cachedRank) || "Admin".equals(cachedRank);
     }
     @Override
     public boolean isDonor(UUID uuid){
-        return getCachedRank(uuid).equals("Partner") || getCachedRank(uuid).equals("Premier")
-                || getCachedRank(uuid).equals("Prime") || getCachedRank(uuid).equals("Premium")
-                || getCachedRank(uuid).equals("Supporter");
+        String cachedRank = getCachedRank(uuid);
+        return "Partner".equals(cachedRank) || "Premier".equals(cachedRank)
+                || "Prime".equals(cachedRank) || "Premium".equals(cachedRank)
+                || "Supporter".equals(cachedRank);
     }
 }

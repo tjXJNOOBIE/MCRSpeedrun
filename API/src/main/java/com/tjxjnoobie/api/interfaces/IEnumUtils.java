@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface IEnumUtils {
+public interface IEnumUtils extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
     default <T extends Enum<T>> T parseOrThrow(Class<T> enumClass, String input) {

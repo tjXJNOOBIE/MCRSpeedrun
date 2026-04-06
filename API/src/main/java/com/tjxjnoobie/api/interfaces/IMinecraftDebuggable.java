@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 /**
  * Interface for classes that need debug messaging capabilities
  */
-public interface IMinecraftDebuggable {
+public interface IMinecraftDebuggable extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
 

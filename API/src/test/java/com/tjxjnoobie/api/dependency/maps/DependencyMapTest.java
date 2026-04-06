@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.dependency.maps;
 
+import com.tjxjnoobie.api.dependency.DependencyLoaderAccess;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingUtilsService;
 import com.tjxjnoobie.api.dependency.metadata.DependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.DependencyInstance;
@@ -9,7 +10,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class DependencyMapTest {
 
@@ -29,11 +34,46 @@ class DependencyMapTest {
 
         DependencyMap.getDependencyMap().registerDependency(IUtils.class, metaData);
 
-        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
+        IUtils utils = DependencyMap.getDependencyMap().findInstance(IUtils.class);
         utils.createServerID();
 
-        assertSame(metaData, DependencyMap.getDependencyMap().getMetaData(IUtils.class));
+        assertSame(metaData, DependencyMap.getDependencyMap().findMetaData(IUtils.class));
         assertSame(metaData.getDependencyInstance(), utils);
         assertEquals("server-generated", utils.getServerID());
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    @Test
+    void rejectsConcreteKeysDuringRegistration() {
+        DependencyMetaData<IUtils, DelegatingUtilsService> metaData = new DependencyMetaData<>();
+        metaData.populateMetaData(
+                IUtils.class,
+                DelegatingUtilsService.class,
+                new DependencyInterface<>(IUtils.class),
+                new DependencyInstance<>(DelegatingUtilsService.class));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> DependencyMap.getDependencyMap().registerDependency((Class) DelegatingUtilsService.class, metaData));
+    }
+
+    @Test
+    void replacesRegisteredInstanceThroughLoaderVocabulary() {
+        DependencyMetaData<IUtils, DelegatingUtilsService> metaData = new DependencyMetaData<>();
+        metaData.populateMetaData(
+                IUtils.class,
+                DelegatingUtilsService.class,
+                new DependencyInterface<>(IUtils.class),
+                new DependencyInstance<>(DelegatingUtilsService.class));
+
+        DependencyMap.getDependencyMap().registerDependency(IUtils.class, metaData);
+
+        IUtils original = DependencyLoaderAccess.findInstance(IUtils.class);
+        IUtils replacement = DependencyMap.getDependencyMap().replaceInstance(IUtils.class, DelegatingUtilsService::new);
+
+        assertTrue(DependencyMap.getDependencyMap().isInstanceRegistered(IUtils.class));
+        assertFalse(DependencyMap.getDependencyMap().isDependencyMapEmpty());
+        assertNotSame(original, replacement);
+        assertSame(replacement, metaData.getDependencyInstance());
+        assertSame(replacement, DependencyLoaderAccess.findInstance(IUtils.class));
     }
 }

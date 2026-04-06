@@ -14,7 +14,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-public interface IVelocityMain {
+public interface IVelocityMain extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
     @Subscribe

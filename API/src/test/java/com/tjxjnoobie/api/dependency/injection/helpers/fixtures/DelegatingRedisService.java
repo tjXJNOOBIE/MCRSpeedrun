@@ -6,7 +6,7 @@ import com.tjxjnoobie.api.interfaces.IRedis;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @DelegatesToInterface(getLinkedInterface = IRedis.class)
-public class DelegatingRedisService implements IRedis {
+public class DelegatingRedisService implements IRedis, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private static final AtomicInteger CONNECT_CALLS = new AtomicInteger();
     private static final AtomicInteger DISCONNECT_CALLS = new AtomicInteger();
     private static volatile String lastPublishedMessage;

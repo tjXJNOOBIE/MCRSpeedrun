@@ -8,12 +8,15 @@ import java.util.UUID;
 /**
  * The interface Rank cache.
  */
-public interface IRankCache {
+public interface IRankCache extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
     default void addRankCache(UUID uuid) throws SQLException {
     }
 
     default void removeRankCache(UUID uuid) {
+    }
+
+    default void refreshRankCache(UUID uuid) throws SQLException {
     }
 
     default String getCachedRank(UUID uuid) {
@@ -29,6 +32,10 @@ public interface IRankCache {
     }
 
     default boolean hasCachedPermission(UUID uuid, String permission) {
+        return false;
+    }
+
+    default boolean hasCachedRank(UUID uuid) {
         return false;
     }
 

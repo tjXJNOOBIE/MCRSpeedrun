@@ -21,8 +21,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DelegatesToInterface {
 
+    /**
+     * Returns the primary interface token that should map to the annotated concrete.
+     *
+     * @return the primary interface token, or {@link Void} when unset
+     */
     Class<?> getLinkedInterface() default Void.class;
 
+    /**
+     * Returns any additional interface tokens that should map to the annotated concrete.
+     *
+     * @return the additional interface tokens
+     */
     Class<?>[] getLinkedInterfaces() default {};
-
 }

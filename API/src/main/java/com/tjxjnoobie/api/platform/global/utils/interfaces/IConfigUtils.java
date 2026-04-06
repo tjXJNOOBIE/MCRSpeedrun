@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public interface IConfigUtils {
+public interface IConfigUtils extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
     Map<IDefaultConfigKey<?>, IConfigValues<?>> configMaps = new HashMap<>();
     Map<IDefaultConfigKey<?>, IConfigValues<?>> configValues = new ConcurrentHashMap<>();

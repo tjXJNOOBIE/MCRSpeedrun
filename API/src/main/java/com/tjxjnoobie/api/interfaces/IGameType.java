@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * Interface for game type management with default implementations
  */
-public interface IGameType {
+public interface IGameType extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     
     /**
      * Gets the game type hash map for tracking game types

@@ -9,7 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @DelegatesToInterface(getLinkedInterface = IVelocityMain.class)
-public class DelegatingVelocityMainService implements IVelocityMain {
+public class DelegatingVelocityMainService implements IVelocityMain, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private static final AtomicInteger INITIALIZATION_CALLS = new AtomicInteger();
     private static volatile String lastCommand;
     private static volatile int lastAliasCount;

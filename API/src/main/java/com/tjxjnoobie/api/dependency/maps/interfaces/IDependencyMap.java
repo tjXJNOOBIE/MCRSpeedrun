@@ -9,33 +9,80 @@
 
 package com.tjxjnoobie.api.dependency.maps.interfaces;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 
+import java.util.function.Supplier;
+
+/**
+ * Contract for the shared DI registration map.
+ */
 public interface IDependencyMap {
 
-    default boolean isRegistered(Class<?> dependencyInterface) {
-        return false;
-    }
+    /**
+     * Checks whether a dependency token is already registered.
+     *
+     * @param dependencyInterface the interface token to inspect
+     * @return {@code true} when the token has metadata in the map
+     */
+    boolean isInstanceRegistered(Class<?> dependencyInterface);
 
-    default void registerDependency(Class<?> rawDependencyInterface, IDependencyMetaData<?, ?> dependencyMetaData) {
-    }
+    /**
+     * Stores metadata under the supplied interface token.
+     *
+     * @param rawDependencyInterface the interface token to register
+     * @param dependencyMetaData the metadata that owns the token binding
+     */
+    void registerDependency(
+            Class<? extends IDependencyInjectableInterface> rawDependencyInterface,
+            IDependencyMetaData<?, ?> dependencyMetaData);
 
-    default <T> IDependencyMetaData<?, ?> getMetaData(Class<T> dependencyInterface) {
-        return null;
-    }
+    /**
+     * Returns metadata for the supplied interface token.
+     *
+     * @param dependencyInterface the token to inspect
+     * @param <T> the token type
+     * @return the stored metadata, or {@code null} when missing
+     */
+    <T> IDependencyMetaData<?, ?> findMetaData(Class<T> dependencyInterface);
 
-    default <T> T getInstance(Class<T> dependencyInterface) {
-        return null;
-    }
+    /**
+     * Resolves an instance for the supplied interface token.
+     *
+     * @param dependencyInterface the token to resolve
+     * @param <T> the token type
+     * @return the resolved dependency, or {@code null} when unavailable
+     */
+    <T> T findInstance(Class<T> dependencyInterface);
 
-    default void removeDependency(Class<?> dependencyInterface) {
-    }
+    /**
+     * Replaces an already-registered instance for the supplied interface token.
+     *
+     * @param dependencyInterface the token to replace
+     * @param supplier the supplier that builds the replacement instance
+     * @param <T> the token type
+     * @return the replacement instance that was stored
+     */
+    <T> T replaceInstance(Class<T> dependencyInterface, Supplier<? extends T> supplier);
 
-    default int getDependencyMapSize() {
-        return 0;
-    }
+    /**
+     * Removes metadata registered for the supplied interface token.
+     *
+     * @param dependencyInterface the token to remove
+     */
+    void removeDependency(Class<?> dependencyInterface);
 
-    default boolean isDependencyMapEmpty() {
-        return false;
-    }
+    /**
+     * Returns the number of registered interface tokens.
+     *
+     * @return the registration count
+     */
+    int getDependencyMapSize();
+
+    /**
+     * Checks whether the DI map is empty.
+     *
+     * @return {@code true} when no tokens are registered
+     */
+    boolean isDependencyMapEmpty();
 }

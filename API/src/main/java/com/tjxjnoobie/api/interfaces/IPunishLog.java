@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 /**
  * Interface for punishment logging operations
  */
-public interface IPunishLog {
+public interface IPunishLog extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
      String getPunishment();
      Timestamp getStartDate();
@@ -14,4 +14,3 @@ public interface IPunishLog {
      String getPunished();
      String getReason();
     }
-

@@ -12,7 +12,7 @@
 
 package com.tjxjnoobie.api.interfaces;
 
-public interface ICacheStats {
+public interface ICacheStats extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     int getTotalEntries();
 
     int getValidEntries();

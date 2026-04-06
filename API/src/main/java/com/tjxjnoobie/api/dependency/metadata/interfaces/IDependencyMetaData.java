@@ -9,6 +9,9 @@
 
 package com.tjxjnoobie.api.dependency.metadata.interfaces;
 
+import com.tjxjnoobie.api.dependency.IDependencyAccess;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
@@ -19,121 +22,235 @@ import java.lang.reflect.Method;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
-public interface IDependencyMetaData<INTERFACE, INSTANCE> {
+/**
+ * Canonical metadata contract for a DI binding between an interface token and a concrete instance.
+ *
+ * @param <INTERFACE> the injectable interface token type
+ * @param <INSTANCE> the injectable concrete instance type
+ */
+public interface IDependencyMetaData<
+        INTERFACE extends IDependencyInjectableInterface,
+        INSTANCE extends IDependencyInjectableConcrete> extends IDependencyAccess {
 
-    default void populateMetaData(
+    /**
+     * Populates metadata using the provided interface token, concrete token, and wrappers.
+     *
+     * @param rawDependencyInterface the interface token used for registration
+     * @param rawDependencyConcrete the concrete class that should be instantiated
+     * @param wrappedInterface the wrapper that holds interface-facing state
+     * @param wrappedInstance the wrapper that holds concrete-facing state
+     */
+    void populateMetaData(
             Class<? extends INTERFACE> rawDependencyInterface,
             Class<? extends INSTANCE> rawDependencyConcrete,
             IDependencyInterface<INTERFACE> wrappedInterface,
-            IDependencyInstance<INSTANCE> wrappedInstance) {
-    }
+            IDependencyInstance<INSTANCE> wrappedInstance);
 
-    default void createDependencyInstance(Class<? extends INSTANCE> dependencyInstance) {
-    }
+    /**
+     * Instantiates and stores the concrete dependency represented by this metadata.
+     *
+     * @param dependencyInstance the concrete class to instantiate
+     */
+    void createDependencyInstance(Class<? extends INSTANCE> dependencyInstance);
 
-    default void setWrappedInterface(IDependencyInterface<INTERFACE> wrappedInterface) {
-    }
+    /**
+     * Stores the interface wrapper associated with this metadata.
+     *
+     * @param wrappedInterface the wrapper to store
+     */
+    void setWrappedInterface(IDependencyInterface<INTERFACE> wrappedInterface);
 
-    default void setWrappedInstance(IDependencyInstance<INSTANCE> wrappedInstance) {
-    }
+    /**
+     * Stores the instance wrapper associated with this metadata.
+     *
+     * @param wrappedInstance the wrapper to store
+     */
+    void setWrappedInstance(IDependencyInstance<INSTANCE> wrappedInstance);
 
-    default IDependencyInterface<INTERFACE> getWrappedInterface() {
-        return null;
-    }
+    /**
+     * Returns the interface wrapper bound to this metadata.
+     *
+     * @return the stored interface wrapper
+     */
+    IDependencyInterface<INTERFACE> getWrappedInterface();
 
-    default IDependencyInstance<INSTANCE> getWrappedInstance() {
-        return null;
-    }
+    /**
+     * Returns the concrete wrapper bound to this metadata.
+     *
+     * @return the stored instance wrapper
+     */
+    IDependencyInstance<INSTANCE> getWrappedInstance();
 
-    default Class<? extends INTERFACE> getPrimaryInterfaceType() {
-        return null;
-    }
+    /**
+     * Returns the primary interface token used for this metadata.
+     *
+     * @return the primary interface token
+     */
+    Class<? extends INTERFACE> getPrimaryInterfaceType();
 
-    default Class<? extends INSTANCE> getConcreteType() {
-        return null;
-    }
+    /**
+     * Returns the concrete class token stored by this metadata.
+     *
+     * @return the concrete class token
+     */
+    Class<? extends INSTANCE> getConcreteType();
 
-    default INTERFACE getDependencyInterface() {
-        return null;
-    }
+    /**
+     * Returns the interface-facing view for the resolved dependency.
+     *
+     * @return the resolved interface view, or {@code null} when unavailable
+     */
+    INTERFACE getDependencyInterface();
 
-    default INSTANCE getDependencyInstance() {
-        return null;
-    }
+    /**
+     * Returns the concrete dependency instance owned by this metadata.
+     *
+     * @return the resolved concrete instance, or {@code null} when unavailable
+     */
+    INSTANCE getDependencyInstance();
 
-    default <T> T getDependency(Class<T> dependencyType) {
-        return null;
-    }
+    /**
+     * Replaces the concrete dependency instance owned by this metadata.
+     *
+     * @param dependencySupplier the factory used to refresh the concrete instance
+     */
+    void replaceDependencyInstance(Supplier<? extends INSTANCE> dependencySupplier);
 
-    default <T> T requireDependency(Class<T> dependencyType) {
-        return null;
-    }
+    /**
+     * Detects lifecycle callback methods on the supplied dependency instance.
+     *
+     * @param dependencyClass the dependency instance to inspect
+     * @return a lifecycle-to-method map for discovered callbacks
+     */
+    EnumMap<LifecycleType, Method> detectLifecycleForClass(INTERFACE dependencyClass);
 
-    default EnumMap<LifecycleType, Method> detectLifecycleForClass(INTERFACE dependencyClass) {
-        return null;
-    }
-
+    /**
+     * Returns the discovered sub-dependencies for this metadata.
+     *
+     * @return the current sub-dependency set
+     */
     default Set<INTERFACE> getSubDependencies() {
         return new HashSet<>();
     }
 
-    default void setSubDependencies(Set<INTERFACE> dependencyClassSet) {
-    }
+    /**
+     * Replaces the discovered sub-dependency set.
+     *
+     * @param dependencyClassSet the sub-dependencies to store
+     */
+    void setSubDependencies(Set<INTERFACE> dependencyClassSet);
 
-    default int getDepth() {
-        return 0;
-    }
+    /**
+     * Returns the current dependency depth.
+     *
+     * @return the stored dependency depth
+     */
+    int getDepth();
 
-    default void setDepth(int depth) {
-    }
+    /**
+     * Stores the dependency depth used during traversal.
+     *
+     * @param depth the traversal depth to store
+     */
+    void setDepth(int depth);
 
+    /**
+     * Returns the dependency role recorded for this metadata.
+     *
+     * @return the stored dependency role
+     */
     default DependencyRole getDependencyRole() {
         return DependencyRole.ISOLATED;
     }
 
-    default void setDependencyRole(DependencyRole dependencyRole) {
-    }
+    /**
+     * Stores the dependency role recorded for this metadata.
+     *
+     * @param dependencyRole the role to store
+     */
+    void setDependencyRole(DependencyRole dependencyRole);
 
-    default Method getPreConstruct() {
-        return null;
-    }
+    /**
+     * Returns the pre-construct lifecycle callback, if one was detected.
+     *
+     * @return the pre-construct method
+     */
+    Method getPreConstruct();
 
-    default Method getPostConstruct() {
-        return null;
-    }
+    /**
+     * Returns the post-construct lifecycle callback, if one was detected.
+     *
+     * @return the post-construct method
+     */
+    Method getPostConstruct();
 
-    default void setPreConstruct(Method preConstruct) {
-    }
+    /**
+     * Stores the pre-construct lifecycle callback.
+     *
+     * @param preConstruct the callback to store
+     */
+    void setPreConstruct(Method preConstruct);
 
-    default void setPostConstruct(Method preConstruct) {
-    }
+    /**
+     * Stores the post-construct lifecycle callback.
+     *
+     * @param preConstruct the callback to store
+     */
+    void setPostConstruct(Method preConstruct);
 
-    default boolean isPreConstructSuccess() {
-        return false;
-    }
+    /**
+     * Returns whether the pre-construct callback has already completed successfully.
+     *
+     * @return {@code true} when pre-construct has succeeded
+     */
+    boolean isPreConstructSuccess();
 
-    default void setPreConstructSuccess(boolean success) {
-    }
+    /**
+     * Stores the pre-construct callback status.
+     *
+     * @param success the callback status to store
+     */
+    void setPreConstructSuccess(boolean success);
 
-    default int getRetryCount() {
-        return 0;
-    }
+    /**
+     * Returns the number of retry attempts recorded for this metadata.
+     *
+     * @return the retry count
+     */
+    int getRetryCount();
 
-    default void incrementRetryCount() {
-    }
+    /**
+     * Increments the retry counter for this metadata.
+     */
+    void incrementRetryCount();
 
-    default IContext<INTERFACE> getSourceContext() {
-        return null;
-    }
+    /**
+     * Returns the source context that produced this metadata.
+     *
+     * @return the source context, or {@code null} when unset
+     */
+    IContext<INTERFACE> getSourceContext();
 
-    default void setSourceContext(IContext<INTERFACE> ctx) {
-    }
+    /**
+     * Stores the source context that produced this metadata.
+     *
+     * @param ctx the context to store
+     */
+    void setSourceContext(IContext<INTERFACE> ctx);
 
-    default int getPriority() {
-        return 0;
-    }
+    /**
+     * Returns the metadata priority used during ordering.
+     *
+     * @return the stored priority
+     */
+    int getPriority();
 
-    default void setPriority(int priority) {
-    }
+    /**
+     * Stores the metadata priority used during ordering.
+     *
+     * @param priority the priority to store
+     */
+    void setPriority(int priority);
 }

@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.utils;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.IDebugger;
 import com.tjxjnoobie.api.interfaces.IRankCache;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 @DelegatesToInterface(getLinkedInterface = IMCUtils.class)
-public class MCUtils implements IMCUtils, IDebugger, IRankCache {
+public class MCUtils implements IMCUtils, IDebugger, IRankCache, IDependencyInjectableConcrete {
     //TODO: First test candidate for our new injection system
     private Plugin plugin;
     public ArrayList<String> debuggers = new ArrayList<>();

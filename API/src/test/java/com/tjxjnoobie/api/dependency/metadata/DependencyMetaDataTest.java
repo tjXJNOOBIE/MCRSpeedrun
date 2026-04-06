@@ -40,7 +40,7 @@ class DependencyMetaDataTest {
 
         IUtils dependencyInterface = metaData.getDependencyInterface();
         DelegatingUtilsService dependencyInstance = metaData.getDependencyInstance();
-        IUtils dependencyViaToken = metaData.getDependency(IUtils.class);
+        IUtils dependencyViaToken = metaData.findInstance(IUtils.class);
 
         assertSame(dependencyInstance, dependencyInterface);
         assertSame(dependencyInstance, dependencyViaToken);
@@ -51,7 +51,7 @@ class DependencyMetaDataTest {
     void returnsNullForMissingBindingsAndThrowsForRequiredLookup() {
         DependencyMetaData<IUtils, DelegatingUtilsService> metaData = new DependencyMetaData<>();
 
-        assertNull(metaData.getDependency(IRank.class));
-        assertThrows(IllegalStateException.class, () -> metaData.requireDependency(IRank.class));
+        assertNull(metaData.findInstance(IRank.class));
+        assertThrows(IllegalStateException.class, () -> metaData.requireInstance(IRank.class));
     }
 }

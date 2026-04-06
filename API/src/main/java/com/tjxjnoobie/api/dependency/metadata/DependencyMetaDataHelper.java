@@ -9,13 +9,23 @@
 
 package com.tjxjnoobie.api.dependency.metadata;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaDataHelper;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.platform.global.console.Log;
 
-public class DependencyMetaDataHelper<INTERFACE, INSTANCE> implements IDependencyMetaDataHelper<INTERFACE, INSTANCE> {
+/**
+ * Default helper that transfers interface and instance wrapper state into metadata.
+ *
+ * @param <INTERFACE> the injectable interface token type
+ * @param <INSTANCE> the injectable concrete instance type
+ */
+public class DependencyMetaDataHelper<
+        INTERFACE extends IDependencyInjectableInterface,
+        INSTANCE extends IDependencyInjectableConcrete> implements IDependencyMetaDataHelper<INTERFACE, INSTANCE> {
 
     @Override
     public void populateMetaData(

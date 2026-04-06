@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.platform.velocity;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.platform.global.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRank;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 @DelegatesToInterface(getLinkedInterface = IRank.class)
-public class Rank implements IRank {
+public class Rank implements IRank, IDependencyInjectableConcrete {
 
     @Inject private PlayerProfile playerProfile;
     public List<String> ranks = new ArrayList<>();
@@ -20,19 +21,30 @@ public class Rank implements IRank {
 
 
     public void setRank(UUID uuid,String name, String rank) throws SQLException {
-            MySQL.executePreparedStatement( "UPDATE player_profile SET RANK = ? WHERE UUID= ?", rank, uuid);
+            setRank(uuid, rank);
         }
 
     @Override
     public void setRankFromUsername(String username, String rank) throws SQLException {
 
-        MySQL.executePreparedStatement("UPDATE player_profile SET RANK = ? WHERE NAME= ?",rank,username);
+        MySQL.executePreparedStatement("UPDATE player_profile SET `RANK` = ? WHERE `NAME` = ?", rank, username);
 
+    }
+
+    @Override
+    public void setRank(UUID uuid, String rank) throws SQLException {
+        MySQL.executePreparedStatement("UPDATE player_profile SET `RANK` = ? WHERE `UUID` = ?", rank, uuid.toString());
+    }
+
+    @Override
+    public void revokeRank(UUID uuid, String fallbackRankName) throws SQLException {
+        String fallback = (fallbackRankName == null || fallbackRankName.isBlank()) ? "Member" : fallbackRankName;
+        setRank(uuid, fallback);
     }
     @Override
     public String getRank(UUID uuid) throws SQLException {
-        ResultSet rs = MySQL.getResult("SELECT RANK FROM player_profile WHERE UUID= ?",uuid.toString());
-        if(rs.next()){
+        ResultSet rs = MySQL.getResult("SELECT `RANK` FROM player_profile WHERE `UUID` = ?", uuid.toString());
+        if(rs != null && rs.next()){
             return rs.getString("RANK");
         }else {
             return "Couldn't get rank";
@@ -40,8 +52,8 @@ public class Rank implements IRank {
     }
     @Override
     public int getPowerLevel(UUID uuid) throws SQLException {
-        ResultSet rs = MySQL.getResult("SELECT POWERLEVEL FROM player_profile WHERE UUID= ?",uuid.toString());
-        if(rs.next()){
+        ResultSet rs = MySQL.getResult("SELECT `POWERLEVEL` FROM player_profile WHERE `UUID` = ?", uuid.toString());
+        if(rs != null && rs.next()){
             return rs.getInt("POWERLEVEL");
         }else{
             return 1;
@@ -49,12 +61,15 @@ public class Rank implements IRank {
     }
     @Override
     public Set<String> getPermissions(UUID uuid) throws SQLException {
-        String query = "SELECT PERMISSIONS FROM player_profile WHERE UUID = ?";
+        String query = "SELECT `PERMISSIONS` FROM player_profile WHERE `UUID` = ?";
         ResultSet rs = null;
         try {
             rs = MySQL.getResult(query, uuid.toString());
             if (rs != null && rs.next()) {
                 String json = rs.getString("PERMISSIONS");
+                if (json == null || json.isBlank() || json.equals("[]")) {
+                    return Collections.emptySet();
+                }
                 // Assuming the JSON is a simple array of strings
                 return new HashSet<>(Arrays.asList(json.substring(1, json.length() - 1).replace("\"", "").split(",")));
             }
@@ -68,7 +83,7 @@ public class Rank implements IRank {
 
     // Sets or updates the permissions for a given player UUID
     public void setPermissions(UUID uuid, Set<String> permissions) throws SQLException {
-        String query = "REPLACE INTO player_profile (UUID, PERMISSIONS) VALUES (?, ?)";
+        String query = "REPLACE INTO player_profile (`UUID`, `PERMISSIONS`) VALUES (?, ?)";
         String json = permissions.stream()
                 .map(perm -> "\"" + perm + "\"")
                 .collect(Collectors.joining(",", "[", "]"));
@@ -93,7 +108,7 @@ public class Rank implements IRank {
 
     public static List<Object> getAllRanks(Object value) throws SQLException {
         List<Object> rowData = new ArrayList<>();
-        String query = "SELECT * FROM ranks WHERE RANK = ?";
+        String query = "SELECT * FROM ranks WHERE `RANK` = ?";
 
         ResultSet rs = MySQL.getResult(query, value);
         if (rs != null && rs.next()) {
@@ -109,11 +124,12 @@ public class Rank implements IRank {
     }
 
     public String getAllRanks() {
-        String query = "SELECT * FROM ranks WHERE RANK IS NOT NULL";
+        String query = "SELECT * FROM ranks WHERE `RANK` IS NOT NULL";
         try {
             ResultSet rs = MySQL.getResult(query);
+            ranks.clear();
             String rank = "";
-            while (rs.next()) {
+            while (rs != null && rs.next()) {
                 rank = rs.getString("RANK");
                 ranks.add(rank);
             }

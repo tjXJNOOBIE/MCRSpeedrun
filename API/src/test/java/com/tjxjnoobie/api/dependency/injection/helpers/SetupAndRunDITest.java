@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.dependency.injection.helpers;
 
+import com.tjxjnoobie.api.dependency.DependencyLoaderAccess;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingRedisService;
 import com.tjxjnoobie.api.dependency.injection.helpers.fixtures.DelegatingVelocityMainService;
 import com.tjxjnoobie.api.dependency.injection.helpers.multiplefixtures.DelegatingMultiInterfaceService;
@@ -46,9 +47,9 @@ class SetupAndRunDITest {
         helper.scanPackage(FIXTURE_PACKAGE, getClass().getClassLoader());
         helper.registerDependenciesViaAnnotation();
 
-        IRedis redis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
-        IUtils utils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
-        IVelocityMain velocityMain = DependencyMap.getDependencyMap().getInstance(IVelocityMain.class);
+        IRedis redis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils utils = DependencyLoaderAccess.findInstance(IUtils.class);
+        IVelocityMain velocityMain = DependencyLoaderAccess.findInstance(IVelocityMain.class);
 
         assertNotNull(redis);
         assertNotNull(utils);
@@ -69,9 +70,9 @@ class SetupAndRunDITest {
         multiHelper.scanPackage(MULTI_FIXTURE_PACKAGE, getClass().getClassLoader());
         multiHelper.registerDependenciesViaAnnotation();
 
-        IRedis annotationRedis = DependencyMap.getDependencyMap().getInstance(IRedis.class);
-        IUtils annotationUtils = DependencyMap.getDependencyMap().getInstance(IUtils.class);
-        ILocalServerMetaData annotationLocalMetaData = DependencyMap.getDependencyMap().getInstance(ILocalServerMetaData.class);
+        IRedis annotationRedis = DependencyLoaderAccess.findInstance(IRedis.class);
+        IUtils annotationUtils = DependencyLoaderAccess.findInstance(IUtils.class);
+        ILocalServerMetaData annotationLocalMetaData = DependencyLoaderAccess.findInstance(ILocalServerMetaData.class);
 
         assertNotNull(annotationRedis);
         assertNotNull(annotationUtils);
@@ -97,8 +98,8 @@ class SetupAndRunDITest {
                 new DependencyInstance<>(RealProjectMultiInterfaceService.class));
 
         IRedis multiRedis = multiInterfaceMetaData.getDependencyInterface();
-        IUtils multiUtils = multiInterfaceMetaData.getDependency(IUtils.class);
-        ILocalServerMetaData localServerMetaData = multiInterfaceMetaData.getDependency(ILocalServerMetaData.class);
+        IUtils multiUtils = multiInterfaceMetaData.findInstance(IUtils.class);
+        ILocalServerMetaData localServerMetaData = multiInterfaceMetaData.findInstance(ILocalServerMetaData.class);
 
         multiRedis.connectToRedis();
         multiUtils.createServerID();
@@ -113,7 +114,9 @@ class SetupAndRunDITest {
         assertEquals("multi-game", multiUtils.getGameID());
     }
 
-    private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<Object, Object> {
+    private static class TestableDependencyInjectorHelper extends DependencyInjectorHelper<
+            com.tjxjnoobie.api.dependency.IDependencyInjectableInterface,
+            com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete> {
     }
 
     private static class MultiInterfaceOnEnableMetaData extends DependencyMetaData<IRedis, RealProjectMultiInterfaceService> {

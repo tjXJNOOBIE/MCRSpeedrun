@@ -15,7 +15,7 @@ import java.util.HashMap;
  * Interface for game state management
  */
 @Injectable("Manages game state transitions and persistence")
-public interface IGameState {
+public interface IGameState extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
     // Backing fields
     HashMap<String, Boolean> gamestate = new HashMap<>();

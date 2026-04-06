@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @DelegatesToInterface(getLinkedInterfaces = {IRedis.class, IUtils.class, ILocalServerMetaData.class})
-public class ArrayOnlyDelegatingService implements IRedis, IUtils {
+public class ArrayOnlyDelegatingService implements IRedis, IUtils, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private static final AtomicInteger CONNECT_CALLS = new AtomicInteger();
 
     private final Map<String, Object> configValues = new HashMap<>();

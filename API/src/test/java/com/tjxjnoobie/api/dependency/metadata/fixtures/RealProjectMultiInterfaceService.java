@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RealProjectMultiInterfaceService implements IRedis, IUtils {
+public class RealProjectMultiInterfaceService implements IRedis, IUtils, com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete {
     private static final AtomicInteger REDIS_CONNECT_CALLS = new AtomicInteger();
 
     private final Map<String, Object> configValues = new HashMap<>();

@@ -3,7 +3,6 @@ package com.tjxjnoobie.proxy;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
 import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
 import com.tjxjnoobie.api.managers.PlayerProfile;
 import com.tjxjnoobie.api.platform.cache.RankCache;
 import com.tjxjnoobie.api.platform.velocity.Rank;
@@ -33,11 +32,11 @@ import java.time.Duration;
     version = "1.0"
 )
 @DelegatesToInterface(getLinkedInterface = IVelocityMain.class)
-public class VelocityMain implements IDependencyInterface<IVelocityMain>, IVelocityMain{
+public class VelocityMain implements IVelocityMain{
 
     @com.google.inject.Inject private Logger logger;
     @com.google.inject.Inject private ProxyServer proxyServer;
-    IDependencyInjectorHelper<?,?> injectionHelper = new DependencyInjectorHelper<>();
+    private final IDependencyInjectorHelper<?, ?> injectionHelper = new DependencyInjectorHelper<>();
     IVelocityEnabler velocityEnabler = new VelocityEnabler();
     //TODO: Testing custom injection on a isolated redis instance to check of @PostConstruct can run
     @Subscribe

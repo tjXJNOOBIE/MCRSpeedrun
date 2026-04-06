@@ -18,7 +18,7 @@ import java.util.Map;
  * 
  */
 @ComposesToInterface(IInfrastructureDomain.class)
-public interface IUtils extends ILocalServerMetaData {
+public interface IUtils extends ILocalServerMetaData, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
 
 

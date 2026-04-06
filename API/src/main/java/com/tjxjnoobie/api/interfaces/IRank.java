@@ -1,5 +1,8 @@
 package com.tjxjnoobie.api.interfaces;
 
+import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
+import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
+
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +12,8 @@ import java.util.UUID;
 /**
  * Interface for rank management operations
  */
-public interface IRank extends IRankCache  {
+@ComposesToInterface(IInfrastructureDomain.class)
+public interface IRank extends IRankCache, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 
     default String getRank(UUID uuid) throws SQLException {
         return null;
@@ -37,6 +41,14 @@ public interface IRank extends IRankCache  {
     }
 
     default void setRankFromUsername(String userName, String rankName) throws SQLException {
+        // no-op
+    }
+
+    default void setRank(UUID uuid, String rankName) throws SQLException {
+        // no-op
+    }
+
+    default void revokeRank(UUID uuid, String fallbackRankName) throws SQLException {
         // no-op
     }
 

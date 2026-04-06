@@ -9,5 +9,5 @@
 
 package com.tjxjnoobie.api.platform.velocity.commands.interfaces;
 
-public interface ISim {
+public interface ISim extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
 }

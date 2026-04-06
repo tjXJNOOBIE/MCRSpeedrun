@@ -12,7 +12,7 @@
     <name>Novus</name>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>25</java.version>
         <spring-boot.version>3.3.4</spring-boot.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -26,8 +26,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <parameters>true</parameters>
+                    <release>${java.version}</release>
                 </configuration>
             </plugin>
         </plugins>
@@ -45,8 +45,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <parameters>true</parameters>
+                        <release>${java.version}</release>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -81,10 +81,10 @@
         <module>DependencyComposeProcessor</module>
         <module>API</module>
         <module>Core</module>
-        <module>VelocityCore</module>
         <module>MinecraftIntegration</module>
         <module>StoreDomain</module>
         <module>StorePersistence</module>
+        <module>VelocityCore</module>
         <module>KingdomFactions</module>
         <module>SpeedRun</module>
         <module>Website</module>

@@ -9,8 +9,9 @@
 
 package com.tjxjnoobie.api.dependency.metadata;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
+import com.tjxjnoobie.api.dependency.IDependencyInjectableInterface;
 import com.tjxjnoobie.api.dependency.injection.enums.LifecycleType;
-import com.tjxjnoobie.api.dependency.maps.DependencyMap;
 import com.tjxjnoobie.api.dependency.metadata.interfaces.IDependencyMetaData;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInterface;
@@ -27,7 +28,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaData<INTERFACE, INSTANCE> {
+/**
+ * Default metadata implementation for DI bindings registered in the API module.
+ *
+ * @param <INTERFACE> the injectable interface token type
+ * @param <INSTANCE> the injectable concrete instance type
+ */
+public class DependencyMetaData<
+        INTERFACE extends IDependencyInjectableInterface,
+        INSTANCE extends IDependencyInjectableConcrete> implements IDependencyMetaData<INTERFACE, INSTANCE> {
     private Set<INTERFACE> subDependencies = new HashSet<>();
     private int priority;
     private int depth;
@@ -69,7 +78,8 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
         if (type instanceof Class<?> rawClass) {
             return (Class<? extends T>) rawClass;
         }
-        if (type instanceof ParameterizedType parameterizedType && parameterizedType.getRawType() instanceof Class<?> rawType) {
+        if (type instanceof ParameterizedType parameterizedType
+                && parameterizedType.getRawType() instanceof Class<?> rawType) {
             return (Class<? extends T>) rawType;
         }
         return null;
@@ -81,11 +91,8 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
             Class<? extends INSTANCE> rawDependencyConcrete,
             IDependencyInterface<INTERFACE> wrappedInterface,
             IDependencyInstance<INSTANCE> wrappedInstance) {
-
-        if (rawDependencyInterface == null || rawDependencyConcrete == null) {
-            Log.error("[DependencyMetaData] dependency interface or concrete type is null on metadata population");
-            return;
-        }
+        validateInterfaceType(rawDependencyInterface);
+        validateConcreteType(rawDependencyConcrete, true);
 
         this.primaryInterfaceType = rawDependencyInterface;
         this.concreteType = rawDependencyConcrete;
@@ -104,10 +111,7 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
 
     @Override
     public void createDependencyInstance(Class<? extends INSTANCE> dependencyInstanceClass) {
-        if (dependencyInstanceClass == null) {
-            Log.error("[DependencyMetaData] dependencyInstanceClass is null during createDependencyInstance()");
-            return;
-        }
+        validateConcreteType(dependencyInstanceClass, true);
 
         this.concreteType = dependencyInstanceClass;
         setDependencySupplier(() -> instantiate(dependencyInstanceClass));
@@ -133,13 +137,46 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
         }
     }
 
+    /**
+     * Stores the supplier used to build dependency instances for this metadata.
+     *
+     * @param supplier the supplier used to create concrete instances
+     */
     public void setDependencySupplier(Supplier<INSTANCE> supplier) {
         this.dependencySupplier = supplier;
     }
 
-    public void refreshDependencyInstance(Supplier<INSTANCE> dependencySupplier) {
-        setDependencySupplier(dependencySupplier);
-        this.dependencyInstance = dependencySupplier == null ? null : dependencySupplier.get();
+    /**
+     * Replaces the concrete instance using the supplied factory.
+     *
+     * @param dependencySupplier the factory used to refresh the concrete instance
+     */
+    @Override
+    public void replaceDependencyInstance(Supplier<? extends INSTANCE> dependencySupplier) {
+        if (dependencySupplier == null) {
+            throw new IllegalArgumentException("[DependencyMetaData] replacement supplier is required");
+        }
+
+        INSTANCE replacement = dependencySupplier.get();
+        if (replacement == null) {
+            throw new IllegalStateException("Replacement supplier returned null for " + concreteType.getName());
+        }
+        if (concreteType != null && !concreteType.isInstance(replacement)) {
+            throw new IllegalArgumentException("[DependencyMetaData] replacement must match concrete token: "
+                    + concreteType.getName());
+        }
+
+        @SuppressWarnings("unchecked")
+        Supplier<INSTANCE> castSupplier = () -> (INSTANCE) replacement;
+        setDependencySupplier(castSupplier);
+        this.dependencyInstance = replacement;
+
+        if (wrappedInstance != null) {
+            wrappedInstance.setWrappedDependencyInstance(replacement);
+        }
+        if (wrappedInterface != null) {
+            wrappedInterface.setDependencyInterface(getDependencyInterface());
+        }
     }
 
     @Override
@@ -182,56 +219,22 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
             return wrappedInterface.getInterface();
         }
 
-        if (primaryInterfaceType != null) {
-            return getDependency(primaryInterfaceType);
-        }
-
         return null;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public INSTANCE getDependencyInstance() {
-        if (dependencyInstance != null) {
-            return dependencyInstance;
-        }
-
-        if (primaryInterfaceType == null) {
-            return null;
-        }
-
-        Object resolved = DependencyMap.getDependencyMap().getInstance(primaryInterfaceType);
-        if (resolved == null) {
-            return null;
-        }
-
-        if (concreteType == null || concreteType.isInstance(resolved)) {
-            return (INSTANCE) resolved;
-        }
-
-        return null;
+        return dependencyInstance;
     }
 
     @Override
-    public <T> T getDependency(Class<T> dependencyType) {
-        if (dependencyType == null) {
-            return null;
-        }
-
-        if (dependencyType.isInstance(dependencyInstance)) {
-            return dependencyType.cast(dependencyInstance);
-        }
-
-        return DependencyMap.getDependencyMap().getInstance(dependencyType);
+    public <T> T findInstance(Class<T> dependencyType) {
+        return IDependencyMetaData.super.findInstance(dependencyType);
     }
 
     @Override
-    public <T> T requireDependency(Class<T> dependencyType) {
-        T dependency = getDependency(dependencyType);
-        if (dependency != null) {
-            return dependency;
-        }
-        throw new IllegalStateException("No dependency registered for " + dependencyType.getName());
+    public <T> T requireInstance(Class<T> dependencyType) {
+        return IDependencyMetaData.super.requireInstance(dependencyType);
     }
 
     @Override
@@ -336,5 +339,52 @@ public class DependencyMetaData<INTERFACE, INSTANCE> implements IDependencyMetaD
     @Override
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    @Override
+    public Object resolveLocalInstance(Class<?> dependencyType) {
+        if (dependencyType == null) {
+            return null;
+        }
+
+        if (dependencyType.isInstance(dependencyInstance)) {
+            return dependencyInstance;
+        }
+
+        INTERFACE dependencyInterface = getDependencyInterface();
+        if (dependencyType.isInstance(dependencyInterface)) {
+            return dependencyInterface;
+        }
+
+        return null;
+    }
+
+    @Override
+    public IDependencyMetaData<?, ?> resolveLocalMetaData(Class<?> dependencyType) {
+        return resolveLocalInstance(dependencyType) == null ? null : this;
+    }
+
+    private void validateInterfaceType(Class<?> interfaceType) {
+        if (interfaceType == null) {
+            throw new IllegalArgumentException("[DependencyMetaData] interface token is required");
+        }
+        if (!interfaceType.isInterface()) {
+            throw new IllegalArgumentException("[DependencyMetaData] interface token must be an interface: "
+                    + interfaceType.getName());
+        }
+    }
+
+    private void validateConcreteType(Class<?> concreteType, boolean requireInstantiable) {
+        if (concreteType == null) {
+            throw new IllegalArgumentException("[DependencyMetaData] concrete token is required");
+        }
+        if (concreteType.isInterface()) {
+            throw new IllegalArgumentException("[DependencyMetaData] concrete token cannot be an interface: "
+                    + concreteType.getName());
+        }
+        if (requireInstantiable && java.lang.reflect.Modifier.isAbstract(concreteType.getModifiers())) {
+            throw new IllegalArgumentException("[DependencyMetaData] concrete token cannot be abstract: "
+                    + concreteType.getName());
+        }
     }
 }

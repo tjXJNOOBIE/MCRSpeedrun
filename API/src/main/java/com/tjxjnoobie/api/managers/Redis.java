@@ -1,5 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
+import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
 import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.interfaces.IRedis;
@@ -10,7 +11,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
 @DelegatesToInterface(getLinkedInterface = IRedis.class)
-public class Redis implements IRedis, IDependencyInstance<Redis> {
+public class Redis implements IRedis, IDependencyInjectableConcrete, IDependencyInstance<Redis> {
 
     public static Jedis jedis;
     public String host = Config.redis_host;

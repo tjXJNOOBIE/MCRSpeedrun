@@ -6,7 +6,7 @@ import java.util.UUID;
 /**
  * Interface for statistics management operations
  */
-public interface IStatsManager {
+public interface IStatsManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
     
     /**
      * Gets player statistics

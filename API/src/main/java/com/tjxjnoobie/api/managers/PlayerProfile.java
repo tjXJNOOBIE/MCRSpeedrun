@@ -153,9 +153,29 @@ public class PlayerProfile implements IPlayerProfile {
     @Override
     public void createProfile(UUID uuid, String name) throws SQLException {
 
-        MySQL.executePreparedStatement("INSERT IGNORE INTO player_profile (UUID, NAME, RANK, POWERLEVEL, IP) VALUES (?, ?, ?, ?, ?)", uuid.toString(), name, "Member", "100", "Test");
-        MySQL.executePreparedStatement("INSERT IGNORE INTO retention (UUID) VALUES (?)", uuid.toString());
-        MySQL.executePreparedStatement("INSERT IGNORE INTO punish (UUID) VALUES (?)", uuid.toString());
+        MySQL.executePreparedStatement(
+                "INSERT INTO player_profile (`UUID`, `NAME`, `RANK`, `POWERLEVEL`, `IP`, `PERMISSIONS`, `DEBUGGER`) " +
+                        "VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                        "ON DUPLICATE KEY UPDATE `UUID` = VALUES(`UUID`), `NAME` = VALUES(`NAME`)",
+                uuid.toString(),
+                name,
+                "Member",
+                "100",
+                "Test",
+                "[]",
+                0
+        );
+        MySQL.executePreparedStatement(
+                "INSERT INTO retention (`UUID`) VALUES (?) " +
+                        "ON DUPLICATE KEY UPDATE `UUID` = VALUES(`UUID`)",
+                uuid.toString()
+        );
+        MySQL.executePreparedStatement(
+                "INSERT INTO punish (`UUID`, `USERNAME`) VALUES (?, ?) " +
+                        "ON DUPLICATE KEY UPDATE `USERNAME` = VALUES(`USERNAME`)",
+                uuid.toString(),
+                name
+        );
 
 
     }
@@ -163,4 +183,3 @@ public class PlayerProfile implements IPlayerProfile {
 
 
 }
-
