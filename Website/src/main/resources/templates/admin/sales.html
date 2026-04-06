@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Sale Events')"></head>
+<body class="theme-admin">
+<div class="admin-shell">
+    <div th:replace="fragments/admin-shell :: sidebar(${activePage})"></div>
+    <div class="admin-main">
+        <div th:replace="fragments/admin-shell :: header(${adminPrincipal})"></div>
+        <main class="admin-content">
+            <section class="section-header admin-section-header">
+                <div>
+                    <span class="eyebrow">Sale Events</span>
+                    <h1>Promotions schedule</h1>
+                    <p>Global and targeted promotions are versioned in the store database and rendered on the storefront without client-side mocks.</p>
+                </div>
+                <button class="button button-primary" type="button" data-modal-open="promotion-modal">New Sale Event</button>
+            </section>
+
+            <section class="glass-panel">
+                <div class="stack-list">
+                    <article class="list-row expanded" th:each="promotion : ${promotions}">
+                        <div>
+                            <strong th:text="${promotion.name}">Promotion</strong>
+                            <span th:text="${promotion.slug}">slug</span>
+                        </div>
+                        <div class="list-meta">
+                            <strong th:text="${promotion.discountValue} + (${promotion.discountType.name() == 'PERCENTAGE'} ? '%' : '$')">20%</strong>
+                            <span th:text="${promotion.targetType} + ' • ' + ${promotion.status}">GLOBAL • ACTIVE</span>
+                        </div>
+                        <button class="icon-button"
+                                type="button"
+                                data-modal-open="promotion-modal"
+                                th:attr="data-promotion-id=${promotion.id},
+                                         data-promotion-name=${promotion.name},
+                                         data-promotion-slug=${promotion.slug},
+                                         data-promotion-status=${promotion.status},
+                                         data-promotion-target-type=${promotion.targetType},
+                                         data-promotion-discount-type=${promotion.discountType},
+                                         data-promotion-discount-value=${promotion.discountValue},
+                                         data-promotion-category=${promotion.categorySlug},
+                                         data-promotion-package=${promotion.packageSlug},
+                                         data-promotion-starts=${promotion.startsAt},
+                                         data-promotion-ends=${promotion.endsAt}">
+                            <i data-lucide="square-pen"></i>
+                        </button>
+                    </article>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+
+<div class="modal-shell" data-modal="promotion-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div>
+                <span class="eyebrow">Promotion Editor</span>
+                <h2 data-promotion-modal-title>New Promotion</h2>
+            </div>
+            <button class="icon-button" type="button" data-modal-close="promotion-modal"><i data-lucide="x"></i></button>
+        </div>
+        <form class="stack-form" data-promotion-form>
+            <input type="hidden" name="id">
+            <label>
+                <span>Name</span>
+                <input type="text" name="name">
+            </label>
+            <div class="two-column">
+                <label>
+                    <span>Slug</span>
+                    <input type="text" name="slug">
+                </label>
+                <label>
+                    <span>Status</span>
+                    <select name="status">
+                        <option value="DRAFT">Draft</option>
+                        <option value="SCHEDULED">Scheduled</option>
+                        <option value="ACTIVE">Active</option>
+                    </select>
+                </label>
+            </div>
+            <div class="three-column">
+                <label>
+                    <span>Target Type</span>
+                    <select name="targetType">
+                        <option value="GLOBAL">Global</option>
+                        <option value="CATEGORY">Category</option>
+                        <option value="PACKAGE">Package</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Discount Type</span>
+                    <select name="discountType">
+                        <option value="PERCENTAGE">Percentage</option>
+                        <option value="AMOUNT">Amount</option>
+                    </select>
+                </label>
+                <label>
+                    <span>Discount Value</span>
+                    <input type="number" step="0.01" name="discountValue">
+                </label>
+            </div>
+            <div class="two-column">
+                <label>
+                    <span>Category Slug</span>
+                    <input type="text" name="categorySlug" placeholder="optional">
+                </label>
+                <label>
+                    <span>Package Slug</span>
+                    <input type="text" name="packageSlug" placeholder="optional">
+                </label>
+            </div>
+            <div class="two-column">
+                <label>
+                    <span>Starts At (ISO-8601)</span>
+                    <input type="text" name="startsAt" placeholder="2026-04-03T12:00:00Z">
+                </label>
+                <label>
+                    <span>Ends At (ISO-8601)</span>
+                    <input type="text" name="endsAt" placeholder="2026-04-10T12:00:00Z">
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button class="button button-secondary" type="button" data-modal-close="promotion-modal">Cancel</button>
+                <button class="button button-primary" type="submit">Save Promotion</button>
+            </div>
+            <div class="form-status" data-promotion-status></div>
+        </form>
+    </div>
+</div>
+
+<script defer th:src="@{/js/admin.js}"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="topbar store-topbar" th:fragment="storeNav(activeCategory, categories, playerSession)">
+    <div class="container topbar-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-mark"><i data-lucide="crown"></i></span>
+            <span class="brand-text">Nexus<span>Craft</span></span>
+        </a>
+        <div class="nav-actions">
+            <a th:each="category : ${categories}"
+               th:href="@{/(category=${category.slug})}"
+               class="nav-link"
+               th:classappend="${activeCategory == category.slug} ? ' is-active'">
+                <span th:text="${category.name}">Ranks</span>
+            </a>
+            <a class="nav-link" th:href="@{/support}">Support</a>
+            <a class="nav-link" th:href="@{/account}" th:text="${playerSession != null ? playerSession.username() : 'Account'}">Account</a>
+            <button class="cart-pill" type="button" data-cart-toggle>
+                <i data-lucide="shopping-cart"></i>
+                <span>Cart</span>
+                <span class="cart-pill-count" data-cart-count>0</span>
+            </button>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

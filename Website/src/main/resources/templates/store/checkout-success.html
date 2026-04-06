@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Checkout Success')"></head>
+<body class="theme-store">
+<main class="state-page">
+    <div class="state-card">
+        <span class="state-icon success"><i data-lucide="check-circle-2"></i></span>
+        <span class="eyebrow">Payment Submitted</span>
+        <h1>Order received</h1>
+        <p>Your payment was accepted by Stripe. Final order state and entitlement activation are driven by verified webhook processing and proxy fulfillment.</p>
+        <p th:if="${orderNumber != null}" class="state-order">Order reference: <strong th:text="${orderNumber}">NOV-ORDER</strong></p>
+        <div class="state-actions">
+            <a class="button button-primary" th:href="@{/account}">Open Account</a>
+            <a class="button button-secondary" th:href="@{/}">Return to Store</a>
+        </div>
+    </div>
+</main>
+<script defer th:src="@{/js/storefront.js}"></script>
+</body>
+</html>

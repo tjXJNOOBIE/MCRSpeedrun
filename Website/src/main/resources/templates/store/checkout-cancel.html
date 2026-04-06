@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Checkout Cancelled')"></head>
+<body class="theme-store">
+<main class="state-page">
+    <div class="state-card">
+        <span class="state-icon warning"><i data-lucide="circle-alert"></i></span>
+        <span class="eyebrow">Checkout Cancelled</span>
+        <h1>No payment captured</h1>
+        <p>Your checkout session was cancelled before payment confirmation. The cart can be reopened and reused until the session expires.</p>
+        <p th:if="${orderNumber != null}" class="state-order">Pending order: <strong th:text="${orderNumber}">NOV-ORDER</strong></p>
+        <div class="state-actions">
+            <a class="button button-primary" th:href="@{/}">Return to Store</a>
+            <a class="button button-secondary" th:href="@{/account}">View Account</a>
+        </div>
+    </div>
+</main>
+<script defer th:src="@{/js/storefront.js}"></script>
+</body>
+</html>

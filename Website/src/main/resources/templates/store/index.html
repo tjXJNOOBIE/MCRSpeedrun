@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Storefront')"></head>
+<body class="theme-store">
+<div th:replace="fragments/store-nav :: storeNav(${activeCategory}, ${categories}, ${playerSession})"></div>
+
+<main class="store-main">
+    <section class="hero-panel">
+        <div class="hero-glow"></div>
+        <div class="hero-copy">
+            <span class="eyebrow">Minecraft Web Store</span>
+            <h1 th:text="${heroCategory != null ? heroCategory.heroTitle() : 'Support the Server.'}">Support the Server.</h1>
+            <p th:text="${heroCategory != null ? heroCategory.heroSubtitle() : 'Keep the network funded with ranks, keys, and cosmetics that route through our own entitlement system.'}">
+                Keep the network funded with ranks, keys, and cosmetics that route through our own entitlement system.
+            </p>
+
+            <div class="verify-card" th:if="${playerSession == null}">
+                <div class="verify-copy">
+                    <h2>Verify your in-game identity</h2>
+                    <p>Enter your Minecraft username, receive a one-time code, then run <code>/store verify &lt;code&gt;</code> in-game to unlock your purchase history and one-click gifting.</p>
+                </div>
+                <form class="inline-form" data-verification-form>
+                    <input type="text" name="username" placeholder="Enter your Minecraft IGN..." autocomplete="username">
+                    <button class="button button-primary" type="submit">Start Verification</button>
+                </form>
+                <div class="verify-status" data-verification-status></div>
+            </div>
+
+            <div class="session-card" th:if="${playerSession != null}">
+                <div>
+                    <span class="eyebrow">Verified Player</span>
+                    <h2 th:text="${playerSession.username()}">PlayerName</h2>
+                    <p>Your account session is active. Cart checkout will default to your verified identity, and your purchase history is available in the account portal.</p>
+                </div>
+                <a class="button button-secondary" th:href="@{/account}">Open Account</a>
+            </div>
+        </div>
+
+        <div class="hero-symbol">
+            <div class="hero-symbol-ring"></div>
+            <div class="hero-symbol-mark">
+                <i th:attr="data-lucide=${heroCategory != null ? heroCategory.iconKey() : 'crown'}"></i>
+            </div>
+        </div>
+    </section>
+
+    <section class="promo-strip" th:if="${!promotions.isEmpty()}">
+        <article class="promo-card" th:each="promotion : ${promotions}">
+            <div class="promo-label">
+                <i data-lucide="percent"></i>
+                <span th:text="${promotion.name}">Weekend Sale</span>
+            </div>
+            <div class="promo-meta">
+                <strong th:text="${promotion.discountValue} + (${promotion.discountType.name() == 'PERCENTAGE'} ? '%' : '$')">20%</strong>
+                <span th:text="${promotion.targetType}">GLOBAL</span>
+            </div>
+        </article>
+    </section>
+
+    <section class="section-header">
+        <div>
+            <span class="eyebrow">Catalog</span>
+            <h2 th:text="${heroCategory != null ? heroCategory.name() : 'Featured Packages'}">Featured Packages</h2>
+        </div>
+        <a class="button button-ghost" th:href="@{/account}" th:if="${playerSession != null}">
+            <i data-lucide="receipt-text"></i>
+            <span>Order History</span>
+        </a>
+    </section>
+
+    <section class="product-grid" th:if="${!packages.isEmpty()}">
+        <article class="product-card" th:each="pack : ${packages}" th:classappend="${pack.featured()} ? ' featured'">
+            <div class="product-card-top">
+                <span class="pill" th:classappend="${pack.packageType().name() == 'SUBSCRIPTION' ? ' pill-violet' : (pack.featured() ? ' pill-amber' : '')}"
+                      th:text="${pack.packageType().name() == 'SUBSCRIPTION' ? 'Monthly Sub' : 'One-Time'}">One-Time</span>
+                <span class="featured-flag" th:if="${pack.featured()}">Best Value</span>
+            </div>
+            <div class="product-card-visual">
+                <i th:attr="data-lucide=${pack.categorySlug() == 'ranks' ? 'crown' : (pack.categorySlug() == 'keys' ? 'key-round' : 'sparkles')}"></i>
+            </div>
+            <h3 th:text="${pack.name}">God Rank</h3>
+            <p th:text="${pack.shortDescription}">Permanent rank with queue priority and global perks.</p>
+            <div class="price-row">
+                <span class="price" th:text="'$' + ${#numbers.formatDecimal(pack.price(), 1, 2)}">$149.99</span>
+                <span class="price-interval" th:if="${pack.packageType().name() == 'SUBSCRIPTION'}"
+                      th:text="${pack.billingInterval().name() == 'YEARLY'} ? '/year' : '/month'">/month</span>
+            </div>
+            <button class="button" th:classappend="${pack.featured()} ? ' button-primary' : ' button-secondary'"
+                    type="button"
+                    data-add-to-cart
+                    th:attr="data-package-slug=${pack.slug},data-package-name=${pack.name},data-package-price=${pack.price},data-package-type=${pack.packageType},data-package-interval=${pack.billingInterval}">
+                <i data-lucide="shopping-cart"></i>
+                <span>Add</span>
+            </button>
+        </article>
+    </section>
+
+    <section class="empty-state" th:if="${packages.isEmpty()}">
+        <i data-lucide="package-search"></i>
+        <h3>No packages are live in this category.</h3>
+        <p>The catalog is ready, but there are no published offers in this segment yet.</p>
+    </section>
+</main>
+
+<aside class="cart-drawer" data-cart-drawer>
+    <div class="cart-drawer-header">
+        <div>
+            <span class="eyebrow">Checkout</span>
+            <h2>Secure Cart</h2>
+        </div>
+        <button class="icon-button" type="button" data-cart-close>
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+    <div class="cart-items" data-cart-items></div>
+    <form class="checkout-form" data-checkout-form>
+        <input type="hidden" name="sessionToken">
+        <label>
+            <span>Purchaser Username</span>
+            <input type="text" name="purchaserUsername" th:value="${playerSession != null ? playerSession.username() : ''}" placeholder="Purchasing account">
+        </label>
+        <label>
+            <span>Recipient Username</span>
+            <input type="text" name="recipientUsername" th:value="${playerSession != null ? playerSession.username() : ''}" placeholder="Recipient account">
+        </label>
+        <label>
+            <span>Coupon Code</span>
+            <input type="text" name="couponCode" placeholder="Optional discount code">
+        </label>
+        <div class="checkout-total">
+            <span>Total</span>
+            <strong data-cart-total>$0.00</strong>
+        </div>
+        <button class="button button-primary button-block" type="submit">Proceed to Stripe Checkout</button>
+        <p class="inline-note">Payments are finalized by webhook confirmation only. Closing the browser does not bypass reconciliation.</p>
+        <div class="form-status" data-checkout-status></div>
+    </form>
+</aside>
+<div class="page-overlay" data-cart-overlay></div>
+
+<script th:inline="javascript">
+    window.NovusStore = {
+        verifiedUsername: [[${playerSession != null ? playerSession.username() : null}]]
+    };
+</script>
+<script defer th:src="@{/js/storefront.js}"></script>
+</body>
+</html>

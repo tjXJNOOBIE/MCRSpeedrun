@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Admin Overview')"></head>
+<body class="theme-admin">
+<div class="admin-shell">
+    <div th:replace="fragments/admin-shell :: sidebar(${activePage})"></div>
+    <div class="admin-main">
+        <div th:replace="fragments/admin-shell :: header(${adminPrincipal})"></div>
+        <main class="admin-content">
+            <section class="section-header admin-section-header">
+                <div>
+                    <span class="eyebrow">Financial Overview</span>
+                    <h1>Store operations</h1>
+                </div>
+            </section>
+
+            <section class="metric-grid">
+                <article class="metric-card">
+                    <div class="metric-icon"><i data-lucide="credit-card"></i></div>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(overviewMetrics.totalRevenue(), 1, 2)}">$0.00</div>
+                    <div class="metric-label">Total Revenue</div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon violet"><i data-lucide="crown"></i></div>
+                    <div class="metric-value" th:text="${overviewMetrics.activeRankCount()}">0</div>
+                    <div class="metric-label">Active Ranks</div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon rose"><i data-lucide="shield-alert"></i></div>
+                    <div class="metric-value" th:text="'$' + ${#numbers.formatDecimal(overviewMetrics.chargebackExposure(), 1, 2)}">$0.00</div>
+                    <div class="metric-label">Chargeback Exposure</div>
+                </article>
+                <article class="metric-card">
+                    <div class="metric-icon blue"><i data-lucide="trending-up"></i></div>
+                    <div class="metric-value" th:text="${overviewMetrics.conversionRate()} + '%'">0%</div>
+                    <div class="metric-label">Conversion Rate</div>
+                </article>
+            </section>
+
+            <section class="admin-grid admin-grid-two-thirds">
+                <article class="glass-panel">
+                    <div class="panel-header">
+                        <h2>Recent Orders</h2>
+                        <a class="button button-ghost" th:href="@{/admin/customers}">Players</a>
+                    </div>
+                    <div class="data-table">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Recipient</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order : ${recentOrders}">
+                                <td th:text="${order.orderNumber}">NOV-ORDER</td>
+                                <td th:text="${order.recipientUsernameSnapshot}">Player</td>
+                                <td><span class="pill" th:text="${order.state}">PAID</span></td>
+                                <td th:text="'$' + ${#numbers.formatDecimal(order.total, 1, 2)}">$0.00</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article class="glass-panel">
+                    <div class="panel-header">
+                        <h2>Top Players</h2>
+                    </div>
+                    <div class="stack-list compact">
+                        <article class="list-row" th:each="player : ${topPlayers}">
+                            <div>
+                                <strong th:text="${player.username()}">Player</strong>
+                                <span th:text="${player.playerUuid()}">uuid</span>
+                            </div>
+                            <div class="list-meta">
+                                <strong th:text="'$' + ${#numbers.formatDecimal(player.totalSpent(), 1, 2)}">$0.00</strong>
+                                <span th:text="${player.orderCount()} + ' orders'">0 orders</span>
+                            </div>
+                        </article>
+                    </div>
+                </article>
+            </section>
+
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <h2>Fulfillment Queue</h2>
+                </div>
+                <div class="data-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Job</th>
+                            <th>Player</th>
+                            <th>Status</th>
+                            <th>Target</th>
+                            <th>Attempts</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="job : ${fulfillmentJobs}">
+                            <td th:text="${job.id}">1</td>
+                            <td th:text="${job.entitlement.playerAccount.currentUsername}">Player</td>
+                            <td><span class="pill" th:text="${job.status}">PENDING</span></td>
+                            <td th:text="${job.targetSystem} + ' • ' + ${job.entitlement.targetValue}">velocity • god</td>
+                            <td th:text="${job.retryCount}">0</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script defer th:src="@{/js/admin.js}"></script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Support')"></head>
+<body class="theme-store">
+<div th:replace="fragments/store-nav :: storeNav(${null}, ${#lists.list()}, ${playerSession})"></div>
+
+<main class="form-page">
+    <section class="section-header narrow">
+        <div>
+            <span class="eyebrow">Support</span>
+            <h1>How can we help?</h1>
+            <p>Support tickets are routed into the admin operations queue and correlated with your order and fulfillment data.</p>
+        </div>
+    </section>
+
+    <section class="glass-panel narrow">
+        <form class="stack-form" data-support-form>
+            <div class="two-column">
+                <label>
+                    <span>Full Name</span>
+                    <input type="text" name="fullName" placeholder="Jane Doe">
+                </label>
+                <label>
+                    <span>Email Address</span>
+                    <input type="email" name="email" placeholder="jane@example.com">
+                </label>
+            </div>
+            <div class="two-column">
+                <label>
+                    <span>Minecraft Username</span>
+                    <input type="text" name="username" th:value="${playerSession != null ? playerSession.username() : ''}" placeholder="Player IGN">
+                </label>
+                <label>
+                    <span>Issue Type</span>
+                    <select name="issueType">
+                        <option>Billing &amp; Orders</option>
+                        <option>Entitlement Fulfillment</option>
+                        <option>Account Verification</option>
+                        <option>Technical Support</option>
+                    </select>
+                </label>
+            </div>
+            <label>
+                <span>Subject</span>
+                <input type="text" name="subject" placeholder="What happened?">
+            </label>
+            <label>
+                <span>Description</span>
+                <textarea name="description" rows="6" placeholder="Describe the issue, affected package, and any order number you have."></textarea>
+            </label>
+            <button class="button button-primary button-block" type="submit">
+                <i data-lucide="send"></i>
+                <span>Submit Ticket</span>
+            </button>
+            <div class="form-status" data-support-status></div>
+        </form>
+    </section>
+</main>
+
+<script defer th:src="@{/js/storefront.js}"></script>
+</body>
+</html>

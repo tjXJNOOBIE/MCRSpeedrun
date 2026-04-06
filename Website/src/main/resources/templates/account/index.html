@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Account')"></head>
+<body class="theme-store">
+<div th:replace="fragments/store-nav :: storeNav(${null}, ${#lists.list()}, ${playerSession})"></div>
+
+<main class="account-page">
+    <section class="section-header">
+        <div>
+            <span class="eyebrow">Player Account</span>
+            <h1 th:text="${playerSession != null ? playerSession.username() : 'Verify Ownership'}">Verify Ownership</h1>
+            <p th:text="${playerSession != null ? 'Purchase history, entitlements, and live grant state are shown below.' : 'Use the in-game ownership challenge to unlock your order history and active entitlements.'}">
+                Use the in-game ownership challenge to unlock your order history and active entitlements.
+            </p>
+        </div>
+    </section>
+
+    <section class="glass-panel" th:if="${playerSession == null}">
+        <form class="stack-form" data-verification-form>
+            <label>
+                <span>Minecraft Username</span>
+                <input type="text" name="username" placeholder="Player IGN">
+            </label>
+            <button class="button button-primary" type="submit">Generate Verification Code</button>
+            <div class="verify-status" data-verification-status></div>
+        </form>
+    </section>
+
+    <div class="dashboard-grid" th:if="${playerSession != null}">
+        <section class="glass-panel">
+            <div class="panel-header">
+                <h2>Recent Orders</h2>
+                <span class="pill pill-emerald" th:text="${orders != null ? orders.size() : 0} + ' orders'">0 orders</span>
+            </div>
+            <div class="data-table">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th>Total</th>
+                        <th>Created</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.orderNumber()}">NOV-ORDER</td>
+                        <td><span class="pill" th:text="${order.state()}">PAID</span></td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(order.total(), 1, 2)}">$0.00</td>
+                        <td th:text="${#temporals.format(order.createdAt(), 'yyyy-MM-dd HH:mm')}">2026-04-03</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="glass-panel">
+            <div class="panel-header">
+                <h2>Active Entitlements</h2>
+                <span class="pill pill-violet" th:text="${entitlements != null ? entitlements.size() : 0} + ' active'">0 active</span>
+            </div>
+            <div class="entitlement-list">
+                <article class="entitlement-card" th:each="entitlement : ${entitlements}">
+                    <div>
+                        <h3 th:text="${entitlement.packageName()}">God Rank</h3>
+                        <p th:text="${entitlement.benefitType()} + ' • ' + ${entitlement.targetValue()}">RANK • god</p>
+                    </div>
+                    <div class="entitlement-meta">
+                        <span class="pill pill-emerald" th:text="${entitlement.state()}">ACTIVE</span>
+                        <span th:text="${entitlement.expiresAt() != null ? #temporals.format(entitlement.expiresAt(), 'yyyy-MM-dd') : 'No expiry'}">No expiry</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script defer th:src="@{/js/account.js}"></script>
+</body>
+</html>

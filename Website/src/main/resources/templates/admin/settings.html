@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head('Settings')"></head>
+<body class="theme-admin">
+<div class="admin-shell">
+    <div th:replace="fragments/admin-shell :: sidebar(${activePage})"></div>
+    <div class="admin-main">
+        <div th:replace="fragments/admin-shell :: header(${adminPrincipal})"></div>
+        <main class="admin-content">
+            <section class="section-header admin-section-header">
+                <div>
+                    <span class="eyebrow">Settings</span>
+                    <h1>Gateway and access posture</h1>
+                    <p>Secrets stay environment-backed, but the dashboard surfaces whether the critical integrations are actually configured.</p>
+                </div>
+            </section>
+
+            <section class="card-grid two">
+                <article class="glass-panel">
+                    <div class="panel-header"><h2>Stripe</h2></div>
+                    <div class="stack-list compact">
+                        <article class="list-row">
+                            <div><strong>Gateway</strong><span>Checkout Sessions + verified webhooks</span></div>
+                            <span class="pill" th:classappend="${stripeConfigured} ? ' pill-emerald' : ' pill-rose'"
+                                  th:text="${stripeConfigured} ? 'Configured' : 'Missing'}">Configured</span>
+                        </article>
+                    </div>
+                </article>
+
+                <article class="glass-panel">
+                    <div class="panel-header"><h2>OAuth Providers</h2></div>
+                    <div class="stack-list compact">
+                        <article class="list-row">
+                            <div><strong>Google</strong><span>Admin SSO</span></div>
+                            <span class="pill" th:classappend="${googleConfigured} ? ' pill-emerald' : ''" th:text="${googleConfigured} ? 'Enabled' : 'Disabled'}">Enabled</span>
+                        </article>
+                        <article class="list-row">
+                            <div><strong>Discord</strong><span>Admin SSO</span></div>
+                            <span class="pill" th:classappend="${discordConfigured} ? ' pill-emerald' : ''" th:text="${discordConfigured} ? 'Enabled' : 'Disabled'}">Enabled</span>
+                        </article>
+                    </div>
+                </article>
+
+                <article class="glass-panel">
+                    <div class="panel-header"><h2>Integration Tokens</h2></div>
+                    <div class="stack-list compact">
+                        <article class="list-row">
+                            <div><strong>Proxy token TTL</strong><span>Short-lived signed access tokens</span></div>
+                            <span class="pill pill-violet" th:text="${integrationTtlSeconds} + 's'">900s</span>
+                        </article>
+                    </div>
+                </article>
+
+                <article class="glass-panel">
+                    <div class="panel-header"><h2>Admin Roles</h2></div>
+                    <div class="stack-list compact">
+                        <article class="list-row" th:each="role : ${roles}">
+                            <div><strong th:text="${role.name}">ADMIN</strong><span>Provisioned in Postgres</span></div>
+                            <span class="pill pill-emerald">Ready</span>
+                        </article>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</div>
+<script defer th:src="@{/js/admin.js}"></script>
+</body>
+</html>
