@@ -1,7 +1,3 @@
-<!-- tavall:badges:start -->
-[![Org](https://img.shields.io/badge/org-TavallStudios-181717?logo=github)](https://github.com/TavallStudios) [![Stack](https://img.shields.io/badge/stack-Maven-0A7BBB)](https://api.github.com/repos/TavallStudios/MCRSpeedrun) ![History](https://img.shields.io/badge/history-preserved-6f42c1)
-<!-- tavall:badges:end -->
-
 ﻿**View technical assessment of this project here: [/docs/COMPREHENSIVE_TECH_ASSESSMENT.md](/docs/COMPREHENSIVE_TECH_ASSESSMENT.md)**
 
 In development **solo** project with ambitious goals.
