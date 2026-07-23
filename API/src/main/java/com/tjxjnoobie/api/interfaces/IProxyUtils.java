@@ -8,7 +8,7 @@ import java.time.Duration;
 /**
  * Interface for proxy utility operations
  */
-public interface IProxyUtils extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IProxyUtils extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     default String getDiscordString() {

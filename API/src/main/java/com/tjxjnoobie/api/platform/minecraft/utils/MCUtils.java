@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.platform.minecraft.utils;
 
-import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
-import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
+import org.tavall.dependency.IDependencyInjectableConcrete;
+import org.tavall.dependency.annotations.DelegatesToInterface;
 import com.tjxjnoobie.api.interfaces.IDebugger;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;

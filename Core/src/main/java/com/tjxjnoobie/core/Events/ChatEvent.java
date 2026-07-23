@@ -4,7 +4,7 @@ import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.IGameType;
 import com.tjxjnoobie.api.interfaces.ILobbyStatsCache;
 import com.tjxjnoobie.api.interfaces.IRankCache;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import org.tavall.dependency.annotations.PostConstruct;
 import com.tjxjnoobie.api.platform.minecraft.core.interfaces.ChatHandler;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;

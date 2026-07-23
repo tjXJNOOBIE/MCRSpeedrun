@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Interface for game management operations
  */
-public interface IGameManager extends IGameState, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IGameManager extends IGameState, org.tavall.dependency.IDependencyInjectableInterface {
 
     // Player management
     default void addPlayer(UUID uuid, String name) { }

@@ -5,7 +5,7 @@ import org.bukkit.Location;
 /**
  * Interface for location cache management
  */
-public interface ILocationCache extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface ILocationCache extends org.tavall.dependency.IDependencyInjectableInterface {
 
     default Location getSpawn(){
         return null;

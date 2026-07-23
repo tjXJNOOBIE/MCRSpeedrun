@@ -9,5 +9,5 @@
 
 package com.tjxjnoobie.api.platform.global.utils.interfaces;
 
-public interface ITimeUtils extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface ITimeUtils extends org.tavall.dependency.IDependencyInjectableInterface {
 }

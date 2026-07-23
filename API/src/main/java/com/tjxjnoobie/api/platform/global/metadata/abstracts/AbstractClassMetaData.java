@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.platform.global.metadata.abstracts;
 
-import com.tjxjnoobie.api.platform.global.annotations.ClassOptions;
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
+import org.tavall.dependency.annotations.ClassOptions;
+import org.tavall.dependency.annotations.Injectable;
 import com.tjxjnoobie.api.platform.global.metadata.enums.ClassSetting;
 import com.tjxjnoobie.api.platform.global.metadata.interfaces.IAbstractClassMetaData;
 

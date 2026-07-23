@@ -12,7 +12,7 @@ package com.tjxjnoobie.api.platform.velocity.startup.interfaces;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 
-public interface IVelocityEnabler extends IVelocityMain, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IVelocityEnabler extends IVelocityMain, org.tavall.dependency.IDependencyInjectableInterface {
 
     @Subscribe
     void onVelocityEnable(ProxyInitializeEvent e) throws Throwable;

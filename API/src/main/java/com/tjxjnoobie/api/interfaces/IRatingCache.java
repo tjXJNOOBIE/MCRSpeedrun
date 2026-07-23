@@ -6,7 +6,7 @@ import java.util.UUID;
 /**
  * Interface for rating cache management
  */
-public interface IRatingCache extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRatingCache extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
 

@@ -1,8 +1,8 @@
 package com.tjxjnoobie.proxy;
 
-import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
-import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import org.tavall.dependency.annotations.DelegatesToInterface;
+import org.tavall.dependency.injection.helpers.DependencyInjectorHelper;
+import org.tavall.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.managers.PlayerProfile;
 import com.tjxjnoobie.api.platform.cache.RankCache;
 import com.tjxjnoobie.api.platform.velocity.Rank;

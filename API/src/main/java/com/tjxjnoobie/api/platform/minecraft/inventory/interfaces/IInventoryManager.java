@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Interface for InventoryManager to provide inventory management capabilities
  */
-public interface IInventoryManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IInventoryManager extends org.tavall.dependency.IDependencyInjectableInterface {
 
     // Core inventory operations
 

@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.platform.cache;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import org.tavall.dependency.annotations.Inject;
+import org.tavall.dependency.annotations.PostConstruct;
 import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 

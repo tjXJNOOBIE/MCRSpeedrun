@@ -5,7 +5,7 @@ import java.util.UUID;
 /**
  * Interface for lobby statistics cache management
  */
-public interface ILobbyStatsCache extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface ILobbyStatsCache extends org.tavall.dependency.IDependencyInjectableInterface {
     
 
 

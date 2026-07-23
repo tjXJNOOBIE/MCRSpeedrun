@@ -9,8 +9,8 @@
 
 package com.tjxjnoobie.api.platform.global.registry;
 
-import com.tjxjnoobie.api.platform.global.console.Log;
-import com.tjxjnoobie.api.platform.global.console.style.LogColor;
+import org.tavall.logging.Log;
+import org.tavall.logging.style.LogColor;
 import com.tjxjnoobie.api.platform.global.registry.enums.RegistryType;
 import com.tjxjnoobie.api.platform.global.registry.metadata.interfaces.IRegistryData;
 

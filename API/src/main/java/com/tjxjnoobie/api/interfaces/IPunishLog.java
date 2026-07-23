@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 /**
  * Interface for punishment logging operations
  */
-public interface IPunishLog extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IPunishLog extends org.tavall.dependency.IDependencyInjectableInterface {
 
      String getPunishment();
      Timestamp getStartDate();

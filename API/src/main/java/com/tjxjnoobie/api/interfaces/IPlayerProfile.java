@@ -6,7 +6,7 @@ import java.util.UUID;
 /**
  * Interface for player profile management
  */
-public interface IPlayerProfile extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IPlayerProfile extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     default String getUUIDFromUsername(String table, String username, String redisKey, String punishment) throws SQLException {

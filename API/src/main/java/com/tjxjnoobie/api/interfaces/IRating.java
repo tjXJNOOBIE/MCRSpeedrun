@@ -3,7 +3,7 @@ package com.tjxjnoobie.api.interfaces;
 /**
  * Interface for rating calculations and management
  */
-public interface IRating extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRating extends org.tavall.dependency.IDependencyInjectableInterface {
     
     /**
      * Gets the current rating value

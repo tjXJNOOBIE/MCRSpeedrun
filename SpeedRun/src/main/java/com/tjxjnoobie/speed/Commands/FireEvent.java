@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 /**
  * Command to fire events using their interface implementations
- * Usage: /fireevent <EventClassName> [additional args]
+ * Usage: {@code /fireevent <EventClassName> [additional args]}
  */
 public class FireEvent implements CommandExecutor, IUtils {
 

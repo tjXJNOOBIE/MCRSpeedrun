@@ -1,8 +1,8 @@
 package com.tjxjnoobie.api.platform.velocity;
 
-import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
-import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.IDependencyInjectableConcrete;
+import org.tavall.dependency.annotations.DelegatesToInterface;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRank;
 import com.tjxjnoobie.api.managers.MySQL;
 import com.tjxjnoobie.api.managers.PlayerProfile;

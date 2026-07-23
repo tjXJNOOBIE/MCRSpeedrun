@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * Interface for player management operations
  */
-public interface IPlayerManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IPlayerManager extends org.tavall.dependency.IDependencyInjectableInterface {
     
     /**
      * Makes a player a spectator

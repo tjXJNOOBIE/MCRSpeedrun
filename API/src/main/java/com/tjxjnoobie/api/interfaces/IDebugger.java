@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Interface for debugging operations
  */
-public interface IDebugger extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IDebugger extends org.tavall.dependency.IDependencyInjectableInterface {
     
     /**
      * Checks if a player is a debugger

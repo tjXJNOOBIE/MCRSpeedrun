@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.global.abstracts;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 
 /**
  * Abstract base class for all managers providing common functionality

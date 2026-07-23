@@ -8,7 +8,7 @@ import com.tjxjnoobie.store.persistence.entity.PlayerAccountEntity;
 import com.tjxjnoobie.store.persistence.repository.PlayerAccountRepository;
 import com.tjxjnoobie.website.security.StoreAdminPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,9 +16,8 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -30,14 +29,17 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 
 @SpringBootTest(classes = WebsiteApplication.class)
 @AutoConfigureMockMvc
-@Testcontainers(disabledWithoutDocker = true)
+@Transactional
 abstract class WebsiteIntegrationTestSupport {
 
     protected static final String INTEGRATION_BOOTSTRAP_SECRET = "integration-bootstrap-secret";
     protected static final String INTEGRATION_TOKEN_SECRET = "integration-token-secret";
 
-    @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:16-alpine");
+
+    static {
+        POSTGRES.start();
+    }
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {

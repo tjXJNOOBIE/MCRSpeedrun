@@ -5,7 +5,7 @@ import com.tjxjnoobie.api.interfaces.IGameState;
 import com.tjxjnoobie.api.interfaces.ILocationCache;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.interfaces.IWorldManager;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import org.tavall.dependency.annotations.PostConstruct;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.Plugin;

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Interface for InventoryBuilder to provide fluent inventory building capabilities
  */
-public interface IInventoryBuilder extends IMinecraftDebuggable, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IInventoryBuilder extends IMinecraftDebuggable, org.tavall.dependency.IDependencyInjectableInterface {
     
     // Basic configuration
     IInventoryBuilder title(String title);

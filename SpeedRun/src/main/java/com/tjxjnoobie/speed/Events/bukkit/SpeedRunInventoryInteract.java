@@ -1,7 +1,7 @@
 package com.tjxjnoobie.speed.Events.bukkit;
 
 import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

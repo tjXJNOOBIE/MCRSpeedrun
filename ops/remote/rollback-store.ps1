@@ -12,17 +12,20 @@ $ssh = "C:\Windows\System32\OpenSSH\ssh.exe"
 $remote = "$RemoteUser@$RemoteHost"
 $remoteCommand = @'
 set -e
-website_backup=$(ls -1t "{0}"/target/store-web-exec.jar.bak-* 2>/dev/null | head -n1 || true)
-proxy_backup=$(ls -1t "{1}"/plugins/Speedrun.jar.bak-* 2>/dev/null | head -n1 || true)
-if [ -n "$website_backup" ]; then
-  cp "$website_backup" "{0}/target/store-web-exec.jar"
+website_backup=$(find "{0}/distribution/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | head -n1 || true)
+proxy_backup=$(find "{1}/plugins/backups" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort -r | head -n1 || true)
+if [ -n "$website_backup" ] && [ -f "$website_backup/application.jar" ]; then
+  cp "$website_backup/application.jar" "{0}/distribution/application.jar"
+  rm -rf "{0}/distribution/libs"
+  cp -a "$website_backup/libs" "{0}/distribution/libs"
   ENV_FILE="{0}/store-web.env" APP_ROOT="{0}" bash "{0}/stop-store-web.sh" || true
-  ENV_FILE="{0}/store-web.env" APP_ROOT="{0}" JAR_PATH="{0}/target/store-web-exec.jar" bash "{0}/start-store-web.sh"
+  ENV_FILE="{0}/store-web.env" APP_ROOT="{0}" bash "{0}/start-store-web.sh"
 fi
-if [ -n "$proxy_backup" ]; then
-  cp "$proxy_backup" "{1}/plugins/Speedrun.jar"
-  pkill -f 'velocity.jar' || true
-  cd "{1}" && nohup bash ./start.sh > logs/proxy-store.out.log 2> logs/proxy-store.err.log < /dev/null &
+if [ -n "$proxy_backup" ] && [ -f "$proxy_backup/Speedrun.jar" ]; then
+  cp "$proxy_backup/Speedrun.jar" "{1}/plugins/Speedrun.jar"
+  rm -rf "{1}/plugins/libs"
+  cp -a "$proxy_backup/libs" "{1}/plugins/libs"
+  PROXY_DIR="{1}" WEBSITE_ENV_FILE="{0}/store-web.env" bash "{1}/restart-proxy-with-store-env.sh"
 fi
 '@ -f $RemoteWebsiteRoot, $RemoteProxyDir
 

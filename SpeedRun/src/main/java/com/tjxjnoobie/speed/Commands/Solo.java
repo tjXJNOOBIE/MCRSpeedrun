@@ -1,7 +1,7 @@
 package com.tjxjnoobie.speed.Commands;
 
 import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.speed.managers.GameManager;
 import org.bukkit.Location;
 import org.bukkit.Sound;

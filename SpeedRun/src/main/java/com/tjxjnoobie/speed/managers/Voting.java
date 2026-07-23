@@ -4,7 +4,7 @@ import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.interfaces.IGameState;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.interfaces.IVoting;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import org.tavall.dependency.annotations.PostConstruct;
 import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;

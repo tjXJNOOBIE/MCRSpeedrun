@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.wrappers.bukkit;
 
-import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
+import org.tavall.platform.global.abstracts.AbstractEvent;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

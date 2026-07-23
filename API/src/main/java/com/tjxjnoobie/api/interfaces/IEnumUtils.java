@@ -9,7 +9,7 @@
 
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.logging.Log;
 import com.tjxjnoobie.api.exceptions.InvalidGameStateChangeException;
 
 import java.util.Arrays;
@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public interface IEnumUtils extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IEnumUtils extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     default <T extends Enum<T>> T parseOrThrow(Class<T> enumClass, String input) {

@@ -1,6 +1,16 @@
 plugins {
     id 'java'
-    id 'org.jetbrains.intellij.platform' version '2.13.1'
+    id 'org.jetbrains.intellij.platform' version '2.18.1'
+}
+
+tasks.withType(Test).configureEach {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+tasks.named('prepareTestSandbox') {
+    disabledPlugins.add('org.jetbrains.plugins.vue')
 }
 
 group = 'com.tjxjnoobie'
@@ -8,7 +18,7 @@ version = '0.1.0'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -21,7 +31,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        local 'C:/Program Files/JetBrains/IntelliJ IDEA 2025.3'
+        intellijIdea '2025.3'
         bundledPlugin 'com.intellij.java'
         testFramework org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform.INSTANCE
     }
