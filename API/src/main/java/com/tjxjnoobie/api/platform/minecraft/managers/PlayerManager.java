@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;
 import org.bukkit.GameMode;

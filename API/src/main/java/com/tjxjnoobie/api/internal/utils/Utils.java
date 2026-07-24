@@ -4,8 +4,8 @@ import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.IGameType;
 import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.dependency.annotations.Inject;
+import org.tavall.logging.Log;
 
 import java.io.File;
 import java.security.SecureRandom;

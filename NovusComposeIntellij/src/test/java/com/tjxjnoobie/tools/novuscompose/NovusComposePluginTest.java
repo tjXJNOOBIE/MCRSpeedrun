@@ -23,6 +23,7 @@ import com.tjxjnoobie.tools.novuscompose.toolwindow.NovusComposeTreeModelBuilder
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -364,8 +365,11 @@ public class NovusComposePluginTest extends BasePlatformTestCase {
     }
 
     public void testPluginDescriptorRegistersToolWindowExtension() throws Exception {
-        String pluginXml = Files.readString(Path.of(
-                "F:/workspace/MCRSpeedrun/NovusComposeIntellij/src/main/resources/META-INF/plugin.xml"));
+        String pluginXml;
+        try (InputStream resource = getClass().getClassLoader().getResourceAsStream("META-INF/plugin.xml")) {
+            assertNotNull(resource);
+            pluginXml = new String(resource.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
         assertTrue(pluginXml.contains("<toolWindow id=\"" + NovusComposeToolWindowFactory.TOOL_WINDOW_ID + "\""));
         assertTrue(pluginXml.contains("factoryClass=\"com.tjxjnoobie.tools.novuscompose.toolwindow.NovusComposeToolWindowFactory\""));
         assertTrue(pluginXml.contains("icon=\"/icons/novusComposeToolWindow.svg\""));
@@ -373,7 +377,16 @@ public class NovusComposePluginTest extends BasePlatformTestCase {
 
     private Path generatedFile(String... segments) {
         String contentRootPath = ModuleRootManager.getInstance(getModule()).getContentRoots()[0].getPath();
-        Path generatedRoot = Path.of(contentRootPath, ".novus-generated");
+        Path contentRoot = Path.of(contentRootPath);
+        Path generatedRoot;
+        if (Files.isDirectory(contentRoot) && Files.isWritable(contentRoot)) {
+            generatedRoot = contentRoot.resolve(".novus-generated");
+        } else {
+            generatedRoot = Path.of(
+                    System.getProperty("java.io.tmpdir"),
+                    "novus-compose-generated",
+                    getProject().getLocationHash());
+        }
         Path relativePath = Path.of("", segments);
         if (Files.exists(generatedRoot)) {
             try (var stream = Files.walk(generatedRoot)) {

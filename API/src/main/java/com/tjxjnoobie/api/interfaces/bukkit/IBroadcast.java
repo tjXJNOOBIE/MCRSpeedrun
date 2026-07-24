@@ -9,7 +9,7 @@
 
 package com.tjxjnoobie.api.interfaces.bukkit;
 
-public interface IBroadcast extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IBroadcast extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     void broadcast(String message);

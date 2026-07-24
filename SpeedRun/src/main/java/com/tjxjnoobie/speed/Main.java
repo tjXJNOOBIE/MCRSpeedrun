@@ -1,18 +1,18 @@
 package com.tjxjnoobie.speed;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import org.tavall.dependency.injection.helpers.DependencyInjectorHelper;
+import org.tavall.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
 import com.tjxjnoobie.api.enums.GameModeEnum;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
+import org.tavall.internal.utils.reflection.ReflectUtil;
 import com.tjxjnoobie.api.listeners.BlockPlaceListener;
 import com.tjxjnoobie.api.listeners.ChatListener;
 import com.tjxjnoobie.api.listeners.CoreJoinListener;
 import com.tjxjnoobie.api.listeners.CoreQuitListener;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.logging.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.managers.FairFight;
 import com.tjxjnoobie.speed.Commands.*;

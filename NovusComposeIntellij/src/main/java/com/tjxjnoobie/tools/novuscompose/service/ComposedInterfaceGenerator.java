@@ -129,10 +129,28 @@ final class ComposedInterfaceGenerator {
         if (module != null) {
             VirtualFile[] contentRoots = ModuleRootManager.getInstance(module).getContentRoots();
             if (contentRoots.length > 0) {
-                return Path.of(contentRoots[0].getPath(), CompositionConstants.GENERATED_ROOT_DIR, moduleName, "src", "main", "java");
+                Path contentRoot = Path.of(contentRoots[0].getPath());
+                if (Files.isDirectory(contentRoot) && Files.isWritable(contentRoot)) {
+                    return contentRoot.resolve(CompositionConstants.GENERATED_ROOT_DIR)
+                            .resolve(moduleName)
+                            .resolve(Path.of("src", "main", "java"));
+                }
             }
         }
-        return Path.of(project.getBasePath(), CompositionConstants.GENERATED_ROOT_DIR, moduleName, "src", "main", "java");
+        Path projectRoot = project.getBasePath() == null ? null : Path.of(project.getBasePath());
+        if (projectRoot != null && Files.isDirectory(projectRoot) && Files.isWritable(projectRoot)) {
+            return projectRoot.resolve(CompositionConstants.GENERATED_ROOT_DIR)
+                    .resolve(moduleName)
+                    .resolve(Path.of("src", "main", "java"));
+        }
+        return Path.of(
+                System.getProperty("java.io.tmpdir"),
+                "novus-compose-generated",
+                project.getLocationHash(),
+                moduleName,
+                "src",
+                "main",
+                "java");
     }
 
     private static Path filePath(Path root, String packageName, String simpleName) {
@@ -160,9 +178,6 @@ final class ComposedInterfaceGenerator {
                         matchingEntry = contentEntry;
                         break;
                     }
-                }
-                if (matchingEntry == null && model.getContentEntries().length > 0) {
-                    matchingEntry = model.getContentEntries()[0];
                 }
                 if (matchingEntry == null) {
                     return;

@@ -182,7 +182,8 @@ class StoreIdempotencyPersistenceTest extends StorePersistenceIntegrationTestSup
     private PlayerAccountEntity savePlayer(String suffix) {
         PlayerAccountEntity entity = new PlayerAccountEntity();
         entity.setMinecraftUuid(UUID.randomUUID().toString());
-        entity.setCurrentUsername(("player_" + suffix).substring(0, Math.min(16, ("player_" + suffix).length())));
+        entity.setCurrentUsername(("player_" + suffix.substring(0, Math.min(2, suffix.length()))
+                + UUID.randomUUID().toString().replace("-", "")).substring(0, 16));
         entity.setAccountState(AccountState.ACTIVE);
         entity.setLinkedIdentitiesJson("{}");
         return playerAccountRepository.saveAndFlush(entity);

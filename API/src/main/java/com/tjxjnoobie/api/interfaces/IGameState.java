@@ -1,7 +1,7 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.platform.global.annotations.Injectable;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.dependency.annotations.Injectable;
+import org.tavall.logging.Log;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.managers.MySQL;
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
  * Interface for game state management
  */
 @Injectable("Manages game state transitions and persistence")
-public interface IGameState extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IGameState extends org.tavall.dependency.IDependencyInjectableInterface {
 
     // Backing fields
     HashMap<String, Boolean> gamestate = new HashMap<>();

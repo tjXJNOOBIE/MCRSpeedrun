@@ -3,7 +3,7 @@ package com.tjxjnoobie.speed.Events.bukkit;
 import com.tjxjnoobie.api.enums.GameStateEnum;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.interfaces.*;
-import com.tjxjnoobie.api.platform.global.annotations.PostConstruct;
+import org.tavall.dependency.annotations.PostConstruct;
 import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
 import com.tjxjnoobie.api.platform.minecraft.speedrun.ISpeedrunStatsCache;
 import com.tjxjnoobie.api.platform.minecraft.utils.interfaces.IMCUtils;

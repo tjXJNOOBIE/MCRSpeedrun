@@ -26,7 +26,7 @@ class AccountApiControllerTest extends WebsiteIntegrationTestSupport {
                                 {"username":"StoreBot01"}
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.readyForGameVerification").value(true))
+                .andExpect(jsonPath("$.requiresInGameConfirmation").value(true))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -63,6 +63,6 @@ class AccountApiControllerTest extends WebsiteIntegrationTestSupport {
         mockMvc.perform(get("/api/v1/account/orders"))
                 .andExpect(status().isUnauthorized());
 
-        assertEquals("storebot01", findPlayerByUsername("storebot01").getCurrentUsername());
+        assertEquals("StoreBot01", findPlayerByUsername("storebot01").getCurrentUsername());
     }
 }

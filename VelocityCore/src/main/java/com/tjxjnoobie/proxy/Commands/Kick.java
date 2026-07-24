@@ -1,6 +1,6 @@
 package com.tjxjnoobie.proxy.commands;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IProxyUtils;
 import com.tjxjnoobie.api.interfaces.IPunishManager;
 import com.tjxjnoobie.api.interfaces.IRankCache;

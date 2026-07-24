@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft.managers;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.inventory.interfaces.IInventoryManager;
 import com.tjxjnoobie.api.platform.minecraft.inventory.builders.InventoryBuilder;
 import com.tjxjnoobie.api.enums.InventoryType;

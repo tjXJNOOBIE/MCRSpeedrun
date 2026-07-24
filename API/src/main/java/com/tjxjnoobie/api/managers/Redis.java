@@ -1,10 +1,10 @@
 package com.tjxjnoobie.api.managers;
 
-import com.tjxjnoobie.api.dependency.IDependencyInjectableConcrete;
-import com.tjxjnoobie.api.dependency.annotations.DelegatesToInterface;
-import com.tjxjnoobie.api.dependency.metadata.wrappers.interfaces.IDependencyInstance;
+import org.tavall.dependency.IDependencyInjectableConcrete;
+import org.tavall.dependency.annotations.DelegatesToInterface;
+import org.tavall.dependency.metadata.wrappers.interfaces.IDependencyInstance;
 import com.tjxjnoobie.api.interfaces.IRedis;
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.logging.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.minecraft.HandleBlocks;
 import redis.clients.jedis.Jedis;

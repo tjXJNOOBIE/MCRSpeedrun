@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.managers;
 
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.logging.Log;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 
 import java.sql.*;

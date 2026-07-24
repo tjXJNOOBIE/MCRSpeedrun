@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.cache;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRatingAPI;
 import com.tjxjnoobie.api.interfaces.IRatingCache;
 

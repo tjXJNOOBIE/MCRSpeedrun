@@ -1,7 +1,6 @@
 package com.tjxjnoobie.api.interfaces;
 
-import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
-import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
+import org.tavall.dependency.composition.domains.InfrastructureDomain;
 
 import java.sql.SQLException;
 import java.util.Collections;
@@ -12,8 +11,7 @@ import java.util.UUID;
 /**
  * Interface for rank management operations
  */
-@ComposesToInterface(IInfrastructureDomain.class)
-public interface IRank extends IRankCache, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRank extends IRankCache, InfrastructureDomain {
 
     default String getRank(UUID uuid) throws SQLException {
         return null;

@@ -9,13 +9,15 @@
 
 package com.tjxjnoobie.api.platform.velocity.startup;
 
-import com.tjxjnoobie.api.dependency.injection.helpers.DependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
-import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
-import com.tjxjnoobie.api.internal.utils.reflection.ReflectUtil;
+import org.tavall.dependency.injection.helpers.DependencyInjectorHelper;
+import org.tavall.dependency.injection.helpers.interfaces.IDependencyInjectorHelper;
+import org.tavall.dependency.composition.domains.InfrastructureDomain;
+import org.tavall.internal.utils.reflection.ReflectUtil;
+import com.tjxjnoobie.api.interfaces.IRank;
+import com.tjxjnoobie.api.interfaces.IRedis;
 import com.tjxjnoobie.api.managers.MySQL;
-import com.tjxjnoobie.api.platform.global.console.Log;
-import com.tjxjnoobie.api.platform.global.utils.CustomRunnable;
+import org.tavall.logging.Log;
+import org.tavall.scheduler.CustomRunnable;
 import com.tjxjnoobie.api.platform.minecraft.Config;
 import com.tjxjnoobie.api.platform.velocity.startup.interfaces.IVelocityEnabler;
 import com.velocitypowered.api.command.Command;
@@ -33,7 +35,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
         name = "VelocityCore",
         version = "1.0"
 )
-public class VelocityEnabler implements IVelocityEnabler, IInfrastructureDomain {
+public class VelocityEnabler implements IVelocityEnabler, InfrastructureDomain, IRedis, IRank {
 
     IDependencyInjectorHelper<?, ?> injectorHelper = new DependencyInjectorHelper<>();
 

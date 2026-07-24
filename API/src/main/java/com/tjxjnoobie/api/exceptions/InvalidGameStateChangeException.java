@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.exceptions;
 
-import com.tjxjnoobie.api.platform.global.console.Log;
+import org.tavall.logging.Log;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

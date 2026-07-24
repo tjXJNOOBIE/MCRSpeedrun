@@ -1,6 +1,6 @@
 package com.tjxjnoobie.speed.Commands;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

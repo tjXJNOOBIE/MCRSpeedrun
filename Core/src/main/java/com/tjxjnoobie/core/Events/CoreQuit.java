@@ -1,6 +1,6 @@
 package com.tjxjnoobie.core.Events;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.platform.minecraft.core.interfaces.CoreQuitHandler;
 import com.tjxjnoobie.api.interfaces.IRankCache;
 import com.tjxjnoobie.api.interfaces.IRetentionManager;

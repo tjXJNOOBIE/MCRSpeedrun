@@ -33,7 +33,7 @@ public class Ban implements SimpleCommand, IUtils, IRankCache, IPlayerProfile, I
      * include a duration and a reason. If the source is a player, they must have
      * staff status or the "network.ban" permission to execute the command.
      *
-     * Usage: /ban <player> [duration] [reason]
+     * Usage: {@code /ban <player> [duration] [reason]}
      */
     @Override
     public void execute(Invocation invocation)  {

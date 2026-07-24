@@ -9,7 +9,7 @@
 
 package com.tjxjnoobie.api.machine.data.interfaces;
 
-public interface ILocalServerMetaData extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface ILocalServerMetaData extends org.tavall.dependency.IDependencyInjectableInterface {
 
     /**
      * Retrieves the unique identifier for the current server instance.

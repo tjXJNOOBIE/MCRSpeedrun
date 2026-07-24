@@ -1,9 +1,9 @@
 package com.tjxjnoobie.api.platform.velocity.wrappers;
 
-import com.tjxjnoobie.api.platform.global.abstracts.AbstractEvent;
-import com.tjxjnoobie.api.platform.global.console.Log;
-import com.tjxjnoobie.api.internal.event.EventBus;
-import com.tjxjnoobie.api.internal.event.tags.interfaces.CancellableEvent;
+import org.tavall.platform.global.abstracts.AbstractEvent;
+import org.tavall.logging.Log;
+import org.tavall.internal.event.EventBus;
+import org.tavall.internal.event.tags.interfaces.CancellableEvent;
 import com.velocitypowered.api.event.EventHandler;
 import com.velocitypowered.api.event.EventManager;
 import com.velocitypowered.api.proxy.ProxyServer;

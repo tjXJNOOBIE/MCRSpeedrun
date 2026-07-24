@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * The interface Rank cache.
  */
-public interface IRankCache extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRankCache extends org.tavall.dependency.IDependencyInjectableInterface {
 
     default void addRankCache(UUID uuid) throws SQLException {
     }

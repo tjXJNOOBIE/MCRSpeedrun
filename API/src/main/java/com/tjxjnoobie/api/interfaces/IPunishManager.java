@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Interface for punishment management operations
  */
-public interface IPunishManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IPunishManager extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     default void setTimedPunishment(UUID targetUUID, String targetName, String punishmentTypeBans,

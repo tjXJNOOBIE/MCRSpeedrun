@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 /**
  * Interface for sound management operations
  */
-public interface ISoundManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface ISoundManager extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     default void playVictoryJingle(Player player){

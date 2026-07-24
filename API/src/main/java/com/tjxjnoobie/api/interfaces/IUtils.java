@@ -1,8 +1,7 @@
 package com.tjxjnoobie.api.interfaces;
 
 
-import com.tjxjnoobie.api.dependency.annotations.ComposesToInterface;
-import com.tjxjnoobie.api.dependency.composition.domains.IInfrastructureDomain;
+import org.tavall.dependency.composition.domains.InfrastructureDomain;
 import com.tjxjnoobie.api.enums.GameTypeEnum;
 import com.tjxjnoobie.api.machine.data.interfaces.ILocalServerMetaData;
 
@@ -17,8 +16,7 @@ import java.util.Map;
  * time formatting, and configuration handling.
  * 
  */
-@ComposesToInterface(IInfrastructureDomain.class)
-public interface IUtils extends ILocalServerMetaData, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IUtils extends ILocalServerMetaData, InfrastructureDomain {
 
 
 
@@ -150,7 +148,6 @@ public interface IUtils extends ILocalServerMetaData, com.tjxjnoobie.api.depende
      * Sets a configuration value
      * @param key The configuration key
      * @param value The value to set
-     * @param globalContext The global context
      */
     default void setConfigValue(String key, Object value){
         // Default empty implementation - override in concrete class

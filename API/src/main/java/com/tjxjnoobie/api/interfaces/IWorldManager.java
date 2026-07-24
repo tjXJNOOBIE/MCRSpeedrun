@@ -15,7 +15,7 @@ import org.bukkit.World;
 import java.io.File;
 import java.sql.SQLException;
 
-public interface IWorldManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IWorldManager extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
 

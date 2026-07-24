@@ -1,6 +1,6 @@
 package com.tjxjnoobie.api.platform.minecraft;
 
-import com.tjxjnoobie.api.platform.global.annotations.Inject;
+import org.tavall.dependency.annotations.Inject;
 import com.tjxjnoobie.api.interfaces.IRankMC;
 import com.tjxjnoobie.api.platform.cache.RankCache;
 import com.tjxjnoobie.api.platform.velocity.Rank;

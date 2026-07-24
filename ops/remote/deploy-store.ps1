@@ -18,7 +18,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-$maven = "C:\Tools\apache-maven-3.9.9\bin\mvn.cmd"
+$gradle = Join-Path $repoRoot "gradlew.bat"
 $ssh = "C:\Windows\System32\OpenSSH\ssh.exe"
 $scp = "C:\Windows\System32\OpenSSH\scp.exe"
 $remote = "$RemoteUser@$RemoteHost"
@@ -32,37 +32,56 @@ function Invoke-Remote([string]$Command) {
 }
 
 if (-not $SkipBuild) {
-    $env:MAVEN_OPTS = "-Xmx768m -Xms128m"
-    & $maven -pl Website,VelocityCore -am -DskipTests package
+    & $gradle --no-daemon clean check stageDistribution
     if ($LASTEXITCODE -ne 0) {
-        throw "Maven package failed."
+        throw "Gradle build failed."
     }
 }
 
-$websiteJar = Get-ChildItem -Path (Join-Path $repoRoot "Website\target\*exec.jar") | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-$proxyJar = Get-ChildItem -Path (Join-Path $repoRoot "VelocityCore\target\velocitycore-*.jar") |
-    Where-Object { $_.Name -notlike "*.original*" } |
-    Sort-Object LastWriteTime -Descending |
-    Select-Object -First 1
+$websiteJar = Get-Item -Path (Join-Path $repoRoot "distribution\website\application.jar")
+$websiteLibDir = Get-Item -Path (Join-Path $repoRoot "distribution\website\libs")
+$proxyJar = Get-Item -Path (Join-Path $repoRoot "distribution\plugins\velocitycore.jar")
+$proxyLibDir = Get-Item -Path (Join-Path $repoRoot "distribution\plugins\libs")
 $remoteStartScript = Join-Path $repoRoot "ops\remote\start-store-web-remote.sh"
 $remoteStopScript = Join-Path $repoRoot "ops\remote\stop-store-web-remote.sh"
+$remoteProxyRestartScript = Join-Path $repoRoot "ops\remote\restart-proxy-with-store-env.sh"
 $headlessScript = Join-Path $repoRoot "ops\headless\store-e2e.ts"
 $proxySchemaSql = Join-Path $repoRoot "ops\remote\bootstrap-proxy-rank-schema.sql"
 $proxySchemaBootstrapScript = Join-Path $repoRoot "ops\remote\bootstrap-proxy-rank-schema.ps1"
 $velocityLobbyFixScript = Join-Path $repoRoot "ops\remote\fix_velocity_lobby.py"
 
-if (-not $websiteJar) { throw "Website executable jar not found. Run package first." }
-if (-not $proxyJar) { throw "VelocityCore jar not found. Run package first." }
+if (-not $websiteJar -or -not $websiteLibDir) { throw "Website distribution not found. Run stageDistribution first." }
+if (-not $proxyJar -or -not $proxyLibDir) { throw "VelocityCore distribution not found. Run stageDistribution first." }
 
 Write-Host "Deploying website jar: $($websiteJar.FullName)"
 Write-Host "Deploying proxy jar: $($proxyJar.FullName)"
 
-Invoke-Remote "mkdir -p '$RemoteWebsiteRoot/target' '$RemoteWebsiteRoot/logs' '$RemoteProxyDir/plugins' '$RemoteHeadlessSourceDir'"
+Invoke-Remote @"
+set -e
+mkdir -p '$RemoteWebsiteRoot/distribution/backups/$timestamp' '$RemoteWebsiteRoot/logs' \
+  '$RemoteProxyDir/plugins/backups/$timestamp' '$RemoteHeadlessSourceDir'
+if [ -f '$RemoteWebsiteRoot/distribution/application.jar' ]; then
+  cp '$RemoteWebsiteRoot/distribution/application.jar' '$RemoteWebsiteRoot/distribution/backups/$timestamp/application.jar'
+fi
+if [ -d '$RemoteWebsiteRoot/distribution/libs' ]; then
+  cp -a '$RemoteWebsiteRoot/distribution/libs' '$RemoteWebsiteRoot/distribution/backups/$timestamp/libs'
+fi
+if [ -f '$RemoteProxyDir/plugins/Speedrun.jar' ]; then
+  cp '$RemoteProxyDir/plugins/Speedrun.jar' '$RemoteProxyDir/plugins/backups/$timestamp/Speedrun.jar'
+fi
+if [ -d '$RemoteProxyDir/plugins/libs' ]; then
+  cp -a '$RemoteProxyDir/plugins/libs' '$RemoteProxyDir/plugins/backups/$timestamp/libs'
+fi
+rm -rf '$RemoteWebsiteRoot/distribution/libs.new' '$RemoteProxyDir/plugins/libs.new'
+"@
 
-& $scp -i $SshKey -o StrictHostKeyChecking=accept-new $websiteJar.FullName "${remote}:$RemoteWebsiteRoot/target/store-web-exec.jar"
+& $scp -i $SshKey -o StrictHostKeyChecking=accept-new $websiteJar.FullName "${remote}:$RemoteWebsiteRoot/distribution/application.jar.new"
+& $scp -r -i $SshKey -o StrictHostKeyChecking=accept-new $websiteLibDir.FullName "${remote}:$RemoteWebsiteRoot/distribution/libs.new"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $proxyJar.FullName "${remote}:$RemoteProxyDir/plugins/Speedrun.jar.new"
+& $scp -r -i $SshKey -o StrictHostKeyChecking=accept-new $proxyLibDir.FullName "${remote}:$RemoteProxyDir/plugins/libs.new"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $remoteStartScript "${remote}:$RemoteWebsiteRoot/start-store-web.sh"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $remoteStopScript "${remote}:$RemoteWebsiteRoot/stop-store-web.sh"
+& $scp -i $SshKey -o StrictHostKeyChecking=accept-new $remoteProxyRestartScript "${remote}:$RemoteProxyDir/restart-proxy-with-store-env.sh"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $headlessScript "${remote}:$RemoteHeadlessSourceDir/store-e2e.ts"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $proxySchemaSql "${remote}:$RemoteProxyDir/bootstrap-proxy-rank-schema.sql"
 & $scp -i $SshKey -o StrictHostKeyChecking=accept-new $velocityLobbyFixScript "${remote}:$RemoteProxyDir/fix_velocity_lobby.py"
@@ -72,14 +91,13 @@ if ($LASTEXITCODE -ne 0) {
 
 Invoke-Remote @"
 set -e
-if [ -f '$RemoteWebsiteRoot/target/store-web-exec.jar' ]; then
-  cp '$RemoteWebsiteRoot/target/store-web-exec.jar' '$RemoteWebsiteRoot/target/store-web-exec.jar.bak-$timestamp' || true
-fi
-if [ -f '$RemoteProxyDir/plugins/Speedrun.jar' ]; then
-  cp '$RemoteProxyDir/plugins/Speedrun.jar' '$RemoteProxyDir/plugins/Speedrun.jar.bak-$timestamp'
-fi
+mv '$RemoteWebsiteRoot/distribution/application.jar.new' '$RemoteWebsiteRoot/distribution/application.jar'
+rm -rf '$RemoteWebsiteRoot/distribution/libs'
+mv '$RemoteWebsiteRoot/distribution/libs.new' '$RemoteWebsiteRoot/distribution/libs'
 mv '$RemoteProxyDir/plugins/Speedrun.jar.new' '$RemoteProxyDir/plugins/Speedrun.jar'
-chmod +x '$RemoteWebsiteRoot/start-store-web.sh' '$RemoteWebsiteRoot/stop-store-web.sh'
+rm -rf '$RemoteProxyDir/plugins/libs'
+mv '$RemoteProxyDir/plugins/libs.new' '$RemoteProxyDir/plugins/libs'
+chmod +x '$RemoteWebsiteRoot/start-store-web.sh' '$RemoteWebsiteRoot/stop-store-web.sh' '$RemoteProxyDir/restart-proxy-with-store-env.sh'
 python3 '$RemoteProxyDir/fix_velocity_lobby.py' '$RemoteProxyDir/velocity.toml' '$LobbyAddress'
 "@
 
@@ -89,24 +107,24 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 if (-not $SkipWebsiteStart) {
-    Invoke-Remote "ENV_FILE='$RemoteWebsiteRoot/store-web.env' APP_ROOT='$RemoteWebsiteRoot' JAR_PATH='$RemoteWebsiteRoot/target/store-web-exec.jar' bash '$RemoteWebsiteRoot/start-store-web.sh'"
+    Invoke-Remote "ENV_FILE='$RemoteWebsiteRoot/store-web.env' APP_ROOT='$RemoteWebsiteRoot' bash '$RemoteWebsiteRoot/start-store-web.sh'"
 }
 
 if (-not $SkipProxyRestart) {
     $proxyEnvPrefix = ""
     if (-not [string]::IsNullOrWhiteSpace($StoreBaseUrl)) {
-        $proxyEnvPrefix += "NOVUS_STORE_BASE_URL='$StoreBaseUrl' "
+        $proxyEnvPrefix += "STORE_BASE_URL='$StoreBaseUrl' "
     }
     if (-not [string]::IsNullOrWhiteSpace($StoreBootstrapSecret)) {
-        $proxyEnvPrefix += "NOVUS_STORE_BOOTSTRAP_SECRET='$StoreBootstrapSecret' "
+        $proxyEnvPrefix += "STORE_BOOTSTRAP_SECRET='$StoreBootstrapSecret' "
     }
     if (-not [string]::IsNullOrWhiteSpace($StoreNodeId)) {
-        $proxyEnvPrefix += "NOVUS_STORE_NODE_ID='$StoreNodeId' "
+        $proxyEnvPrefix += "STORE_NODE_ID='$StoreNodeId' "
     }
     if (-not [string]::IsNullOrWhiteSpace($StoreFallbackRank)) {
-        $proxyEnvPrefix += "NOVUS_STORE_FALLBACK_RANK='$StoreFallbackRank' "
+        $proxyEnvPrefix += "STORE_FALLBACK_RANK='$StoreFallbackRank' "
     }
-    Invoke-Remote "pkill -f '[v]elocity.jar' || true; cd '$RemoteProxyDir' && nohup env ${proxyEnvPrefix}bash ./start.sh > logs/proxy-store.out.log 2> logs/proxy-store.err.log < /dev/null &"
+    Invoke-Remote "cd '$RemoteProxyDir' && env ${proxyEnvPrefix}PROXY_DIR='$RemoteProxyDir' WEBSITE_ENV_FILE='$RemoteWebsiteRoot/store-web.env' bash ./restart-proxy-with-store-env.sh"
 }
 
 Write-Host "Deployment complete."

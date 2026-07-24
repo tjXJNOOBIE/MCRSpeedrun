@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 /**
  * Interface for Minecraft rank management
  */
-public interface IRankMC extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRankMC extends org.tavall.dependency.IDependencyInjectableInterface {
     
 
 

@@ -3,7 +3,7 @@ package com.tjxjnoobie.api.interfaces;
 /**
  * Interface for debug command operations
  */
-public interface IDebug extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IDebug extends org.tavall.dependency.IDependencyInjectableInterface {
     
 
 }

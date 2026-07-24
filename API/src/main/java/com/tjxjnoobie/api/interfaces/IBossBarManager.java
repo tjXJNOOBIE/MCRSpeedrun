@@ -13,7 +13,7 @@ import java.util.stream.StreamSupport;
 /**
  * Interface for boss bar management operations
  */
-public interface IBossBarManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IBossBarManager extends org.tavall.dependency.IDependencyInjectableInterface {
     
     default BossBar createBossBar(String title, BarColor barColor, BarStyle barStyle) {
         return Bukkit.createBossBar(title, barColor, barStyle);

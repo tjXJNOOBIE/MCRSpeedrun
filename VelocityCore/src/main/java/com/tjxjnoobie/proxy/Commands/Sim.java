@@ -4,8 +4,8 @@ import com.tjxjnoobie.api.interfaces.IUtils;
 import com.tjxjnoobie.api.internal.utils.glickov2.Rating;
 import com.tjxjnoobie.api.internal.utils.glickov2.RatingCalculator;
 import com.tjxjnoobie.api.internal.utils.glickov2.RatingPeriodResults;
-import com.tjxjnoobie.api.platform.global.console.Log;
-import com.tjxjnoobie.api.platform.global.console.style.LogColors;
+import org.tavall.logging.Log;
+import org.tavall.logging.style.LogColors;
 import com.tjxjnoobie.api.platform.velocity.commands.interfaces.ISim;
 import com.velocitypowered.api.command.SimpleCommand;
 

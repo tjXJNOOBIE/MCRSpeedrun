@@ -12,7 +12,7 @@ import java.util.UUID;
 /**
  * Interface for fair fight system
  */
-public interface IFairFight extends Listener, com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IFairFight extends Listener, org.tavall.dependency.IDependencyInjectableInterface {
 
     @EventHandler
     void onPlayerDamagePlayer(EntityDamageByEntityEvent event);

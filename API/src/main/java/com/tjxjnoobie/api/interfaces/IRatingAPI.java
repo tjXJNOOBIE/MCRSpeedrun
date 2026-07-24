@@ -5,7 +5,7 @@ import java.sql.SQLException;
 /**
  * Interface for rating API operations
  */
-public interface IRatingAPI extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRatingAPI extends org.tavall.dependency.IDependencyInjectableInterface {
     
 
 

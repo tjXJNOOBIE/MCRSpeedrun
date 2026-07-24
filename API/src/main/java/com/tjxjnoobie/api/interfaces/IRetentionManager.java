@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public interface IRetentionManager extends com.tjxjnoobie.api.dependency.IDependencyInjectableInterface {
+public interface IRetentionManager extends org.tavall.dependency.IDependencyInjectableInterface {
 
 
     void setSpent(UUID uuid, double spent) throws SQLException;
