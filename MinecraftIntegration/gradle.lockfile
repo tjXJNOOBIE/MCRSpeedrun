@@ -2,9 +2,9 @@
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
 # To regenerate this file, run: ./gradlew :minecraft-integration:dependencies --write-locks
-com.fasterxml.jackson.core:jackson-annotations:2.21=compileClasspath
-com.fasterxml.jackson.core:jackson-core:2.21.4=compileClasspath
-com.fasterxml.jackson.core:jackson-databind:2.21.4=compileClasspath
-com.fasterxml.jackson:jackson-bom:2.21.4=compileClasspath
-org.springframework.boot:spring-boot-dependencies:4.1.0=compileClasspath
-empty=annotationProcessor
+com.fasterxml.jackson.core:jackson-annotations:2.21=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-core:2.21.4=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson.core:jackson-databind:2.21.4=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+com.fasterxml.jackson:jackson-bom:2.21.4=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+org.springframework.boot:spring-boot-dependencies:4.1.0=compileClasspath,runtimeClasspath,testCompileClasspath,testRuntimeClasspath
+empty=annotationProcessor,testAnnotationProcessor

@@ -110,6 +110,7 @@ subprojects {
 
 project(":api") {
     dependencies {
+        "api"("com.tjxjnoobie:tavall-rating-glicko2:1.0.0")
         "api"("org.tavall:tavall-di:1.0.0")
         "annotationProcessor"("org.tavall:tavall-di:1.0.0")
         "api"("org.tavall:tavall-eventbus:1.0.0")
@@ -182,7 +183,6 @@ project(":velocitycore") {
         "implementation"("org.yaml:snakeyaml:2.2")
         "runtimeOnly"("com.mysql:mysql-connector-j:9.3.0")
         "api"(project(":api"))
-        "implementation"("com.tjxjnoobie:tavall-rating-glicko2:1.0.0")
         "implementation"(project(":minecraft-integration"))
         "runtimeOnly"("redis.clients:jedis:5.2.0")
         "testImplementation"(junit)
