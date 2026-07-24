@@ -19,10 +19,29 @@ jobs:
           distribution: temurin
           java-version: "25"
       - uses: gradle/actions/setup-gradle@v4
+      - name: Bootstrap canonical Tavall dependencies
+        run: |
+          for repository in \
+            tavall-logging \
+            tavall-concurrency \
+            tavall-reflection \
+            tavall-di \
+            tavall-eventbus \
+            tavall-scheduler \
+            tavall-rating-glicko2
+          do
+            git clone --depth 1 "https://github.com/TavallStudios/${repository}.git" "/tmp/${repository}"
+            "/tmp/${repository}/gradlew" -p "/tmp/${repository}" \
+              --no-daemon --max-workers=1 \
+              -I "$GITHUB_WORKSPACE/gradle/bootstrap-version.init.gradle" \
+              -x test publishToMavenLocal
+          done
       - run: >-
-          ./gradlew --no-daemon clean check
+          ./gradlew --no-daemon --max-workers=1 clean check
           :store-persistence:integrationTest
           :website:integrationTest
           :velocitycore:integrationTest
           publishToMavenLocal stageDistribution
-      - run: ./NovusComposeIntellij/gradlew --no-daemon -p NovusComposeIntellij clean check
+      - run: >-
+          ./NovusComposeIntellij/gradlew --no-daemon --max-workers=1
+          -p NovusComposeIntellij clean check
